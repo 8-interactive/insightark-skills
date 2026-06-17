@@ -16,6 +16,23 @@ check() {
   fi
 }
 
+extract_first_field() {
+  local field="$1" file="$2"
+  grep -m1 "^$field:" "$file" | sed "s/$field:[[:space:]]*//" || true
+}
+
+frontmatter_has() {
+  local key="$1" file="$2"
+  awk -v key="$key" '
+    BEGIN { closed = 0; found = 0 }
+    NR == 1 && $0 != "---" { exit 1 }
+    NR == 1 { next }
+    $0 == "---" { closed = 1; exit(found ? 0 : 1) }
+    index($0, key) == 1 { found = 1 }
+    END { if (!closed) exit 1 }
+  ' "$file"
+}
+
 # ── Plugin structure ──────────────────────────────────────────────────────────
 printf '\n[Plugin structure]\n'
 
@@ -27,20 +44,27 @@ if [ -f "$plugin_json" ]; then
     p_name=$(python3 -c "import json; d=json.load(open('$plugin_json')); print(d.get('name',''))")
     p_ver=$(python3 -c "import json; d=json.load(open('$plugin_json')); print(d.get('version',''))")
     p_skills=$(python3 -c "import json; d=json.load(open('$plugin_json')); print(d.get('skills',''))")
-    check "plugin.json has name" "$([ -n "$p_name" ] && echo pass || echo fail)"
-    check "plugin.json has version" "$([ -n "$p_ver" ] && echo pass || echo fail)"
-    check "plugin.json has skills" "$([ -n "$p_skills" ] && echo pass || echo fail)"
-    if [ -n "$p_skills" ]; then
-      skills_abs=$(cd "$repo_root/.codex-plugin" && cd "$p_skills" 2>/dev/null && pwd || echo "")
-      check "plugin.json skills path resolves" "$([ -d "$skills_abs" ] && echo pass || echo fail)"
-    fi
   else
     check ".codex-plugin/plugin.json is valid JSON" fail
+    p_name=""
+    p_ver=""
+    p_skills=""
   fi
 else
   check ".codex-plugin/plugin.json exists" fail
-  errors=$((errors + 4))
+  check ".codex-plugin/plugin.json is valid JSON" fail
+  p_name=""
+  p_ver=""
+  p_skills=""
 fi
+check "plugin.json has name" "$([ -n "$p_name" ] && echo pass || echo fail)"
+check "plugin.json has version" "$([ -n "$p_ver" ] && echo pass || echo fail)"
+check "plugin.json has skills" "$([ -n "$p_skills" ] && echo pass || echo fail)"
+skills_abs=""
+if [ -n "$p_skills" ]; then
+  skills_abs=$(cd "$repo_root/.codex-plugin" && cd "$p_skills" 2>/dev/null && pwd || echo "")
+fi
+check "plugin.json skills path resolves" "$([ -d "$skills_abs" ] && echo pass || echo fail)"
 
 mkt_json="$repo_root/.agents/plugins/marketplace.json"
 if [ -f "$mkt_json" ]; then
@@ -52,7 +76,7 @@ if [ -f "$mkt_json" ]; then
   fi
 else
   check ".agents/plugins/marketplace.json exists" fail
-  errors=$((errors + 1))
+  check ".agents/plugins/marketplace.json is valid JSON" fail
 fi
 
 check "LICENSE exists" "$([ -f "$repo_root/LICENSE" ] && echo pass || echo fail)"
@@ -74,19 +98,19 @@ for skill_dir in "$bundle_dir"/*/; do
   fi
   check "$skill_name/SKILL.md exists" pass
 
-  name_in_md=$(grep -m1 '^name:' "$skill_md" | sed 's/name:[[:space:]]*//')
+  name_in_md=$(extract_first_field name "$skill_md")
   check "$skill_name: name matches folder" \
     "$([ "$name_in_md" = "$skill_name" ] && echo pass || echo fail)"
 
-  desc=$(grep -m1 '^description:' "$skill_md" | sed 's/description:[[:space:]]*//')
+  desc=$(extract_first_field description "$skill_md")
   check "$skill_name: description length > 20 chars" \
     "$([ ${#desc} -gt 20 ] && echo pass || echo fail)"
 
   check "$skill_name: license in frontmatter" \
-    "$(grep -q '^license:' "$skill_md" && echo pass || echo fail)"
+    "$(frontmatter_has "license:" "$skill_md" && echo pass || echo fail)"
 
   check "$skill_name: metadata block in frontmatter" \
-    "$(grep -q '^metadata:' "$skill_md" && echo pass || echo fail)"
+    "$(frontmatter_has "metadata:" "$skill_md" && echo pass || echo fail)"
 
   for section in "${required_sections[@]}"; do
     label_safe="${section//\#\# /}"
