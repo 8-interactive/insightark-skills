@@ -3,6 +3,12 @@ name: super8-studio-customer-manager
 description: Investigate and operate on customers through the Super 8 Studio Developer API using session validation, org scoping, customer lookup, profile update, and tag mutation skills.
 when_to_use: When a user wants one customer-oriented workflow that can validate API readiness, resolve organization scope, search customers, inspect one customer, update supported public fields, or add and remove customer tags.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: agent-orchestrator
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-customer-manager
@@ -44,3 +50,29 @@ This skill operates on the Super 8 Studio Developer API.
 - Treat update and tag operations as explicit write actions.
 - Do not perform a write unless the target customer id and intended field or tag changes are explicit.
 - Stay within the published public customer schema and developer API routes.
+
+## When not to use
+
+- A single leaf skill directly satisfies the request.
+- Required identifiers, target customer, audience, or message content are ambiguous.
+- The user asks for an operation outside this orchestrator's domain.
+
+## Inputs
+
+- Natural-language user intent.
+- Valid `S8_API_URL`, `S8_SESSION_TOKEN`, and org context where required.
+- Explicit identifiers and payload details before any write operation.
+
+## Outputs
+
+- The selected composed skill output, returned without fabricating or transforming API results.
+
+## Failure handling
+
+- Validate session and org context before operational paths.
+- Surface sub-skill errors directly and stop when prerequisites fail.
+- Require explicit confirmation before write actions and never retry writes silently.
+
+## Observability
+
+- Record selected sub-skill, user intent, target identifiers, and HTTP status while avoiding PII and full message bodies.

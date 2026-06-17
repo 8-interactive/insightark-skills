@@ -3,6 +3,12 @@ name: super8-studio-customer-update
 description: Operate on the Super 8 Studio Developer API to update supported public customer profile fields for one organization-scoped customer.
 when_to_use: When a user explicitly asks to change supported customer profile fields such as display name, email, language, or other documented public customer attributes.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: customer-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-customer-update
@@ -42,3 +48,28 @@ Supply at least one field flag. Each flag mutates that single public field; only
 - Treat this as a write operation.
 - Do not use internal mutation operators or undocumented customer fields.
 - Do not perform the write unless the target customer id and updated values are explicit.
+
+## When not to use
+
+- The task is conversation browsing or broadcast management rather than customer operations.
+- Required customer id, filter, field value, tag, or message content is ambiguous.
+- The requested field is outside the supported public customer schema.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Customer ids, search filters, supported profile fields, tags, or message content flags required by the referenced script.
+
+## Outputs
+
+- Customer search results, customer detail payloads, updated customer records, updated tag lists, or message-dispatch confirmations.
+
+## Failure handling
+
+- Do not call write APIs until customer id and intended changes are explicit.
+- Surface HTTP 400 or 404 errors with the API message and stop.
+- Never infer corrected PII values, tags, or outbound message content.
+
+## Observability
+
+- Record customer id, filter names, mutated field or tag names, content type, and HTTP status. Do not log PII values or full message bodies.

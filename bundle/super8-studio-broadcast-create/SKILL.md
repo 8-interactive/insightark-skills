@@ -3,6 +3,12 @@ name: super8-studio-broadcast-create
 description: Operate on the Super 8 Studio Developer API to create an asynchronous broadcast that dispatches a message batch to many customers selected by either an explicit id list or a customer-search filter.
 when_to_use: When a user explicitly asks to launch a broadcast with explicit recipient selection and explicit message content.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: broadcast-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-broadcast-create
@@ -50,3 +56,28 @@ This skill operates on the Super 8 Studio Developer API.
 - If any required field had to be inferred, confirm with the user before dispatching.
 - Do not infer `--message-tag` or `--wa-template-id` from localized labels, UI copy, or natural-language descriptions. The API enforces the canonical English enum / id form; localized strings are rejected with `400 error/invalid-message-tag` or `400 error/invalid-wa-template-id`. If the user gave a localized label such as `活動更新`, confirm which of the four English enum values they intended before dispatching.
 - Return the API response as-is instead of re-rendering or summarizing the dispatched batch.
+
+## When not to use
+
+- The task belongs to one-customer messaging or read-only customer/conversation investigation.
+- Required org, platform, recipients, task id, or message content is missing.
+- A requested audience spans multiple platforms; split per platform first.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Broadcast task id for lookup, or platform, recipient source, content flags, schedule, and platform policy fields for creation.
+
+## Outputs
+
+- Broadcast creation task id and initial status, broadcast progress details, or paginated broadcast lists.
+
+## Failure handling
+
+- Ask for explicit required fields before creation; never infer platform, recipients, or content.
+- Surface HTTP 400 or 404 errors and do not retry with guessed corrections.
+- Treat create as high-impact because it can send real platform messages at scale.
+
+## Observability
+
+- Record platform, task id, recipient source, applied filters, and HTTP status. Do not log full recipient lists or message bodies.

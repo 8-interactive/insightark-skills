@@ -3,6 +3,12 @@ name: super8-studio-customer-send-message
 description: Operate on the Super 8 Studio Developer API to send outbound text, image, or video messages to one organization-scoped customer.
 when_to_use: When a user explicitly asks to send a message with explicit content to a specific customer in a specific organization context.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: customer-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-customer-send-message
@@ -43,3 +49,28 @@ The dispatched batch preserves the order in which `--text`, `--image`, and `--vi
 - If any required field had to be inferred from non-explicit user phrasing, confirm with the user before dispatching.
 - Do not infer `--message-tag` or `--wa-template-id` from localized labels, UI copy, or natural-language descriptions. The API enforces the canonical English enum / id form; localized strings are rejected with `400 error/invalid-message-tag` or `400 error/invalid-wa-template-id`. If the user gave a localized label such as `活動更新`, confirm which of the four English enum values they intended before dispatching.
 - Return the API response as-is instead of re-rendering or summarizing the dispatched messages.
+
+## When not to use
+
+- The task is conversation browsing or broadcast management rather than customer operations.
+- Required customer id, filter, field value, tag, or message content is ambiguous.
+- The requested field is outside the supported public customer schema.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Customer ids, search filters, supported profile fields, tags, or message content flags required by the referenced script.
+
+## Outputs
+
+- Customer search results, customer detail payloads, updated customer records, updated tag lists, or message-dispatch confirmations.
+
+## Failure handling
+
+- Do not call write APIs until customer id and intended changes are explicit.
+- Surface HTTP 400 or 404 errors with the API message and stop.
+- Never infer corrected PII values, tags, or outbound message content.
+
+## Observability
+
+- Record customer id, filter names, mutated field or tag names, content type, and HTTP status. Do not log PII values or full message bodies.

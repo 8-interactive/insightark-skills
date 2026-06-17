@@ -3,6 +3,12 @@ name: super8-studio-messaging
 description: Investigate and operate on messaging through the Super 8 Studio Developer API using session validation, org scoping, conversation listing, conversation inspection, message search, and outbound message dispatch.
 when_to_use: When a user wants a single messaging-oriented workflow that can validate API readiness, resolve organization scope, browse conversations, inspect one conversation, search messages, or dispatch outbound messages to a customer.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: agent-orchestrator
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-messaging
@@ -44,3 +50,29 @@ This skill operates on the Super 8 Studio Developer API.
 - Do not infer customer ids or message content from ambiguous user input; confirm before dispatching if any field had to be inferred.
 - Stay within the published public messaging schema and developer API routes.
 - For read operations (list, inspect, search), use the underlying skills' published filters and response shapes without inventing fields.
+
+## When not to use
+
+- A single leaf skill directly satisfies the request.
+- Required identifiers, target customer, audience, or message content are ambiguous.
+- The user asks for an operation outside this orchestrator's domain.
+
+## Inputs
+
+- Natural-language user intent.
+- Valid `S8_API_URL`, `S8_SESSION_TOKEN`, and org context where required.
+- Explicit identifiers and payload details before any write operation.
+
+## Outputs
+
+- The selected composed skill output, returned without fabricating or transforming API results.
+
+## Failure handling
+
+- Validate session and org context before operational paths.
+- Surface sub-skill errors directly and stop when prerequisites fail.
+- Require explicit confirmation before write actions and never retry writes silently.
+
+## Observability
+
+- Record selected sub-skill, user intent, target identifiers, and HTTP status while avoiding PII and full message bodies.

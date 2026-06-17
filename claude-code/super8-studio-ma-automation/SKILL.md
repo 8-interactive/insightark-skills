@@ -3,6 +3,12 @@ name: super8-studio-ma-automation
 description: Create, publish, pause, inspect, and manually trigger Marketing Automation procedures on the Super 8 Studio Developer API (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON.
 when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via the Developer API.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: marketing-automation-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-ma-automation
@@ -186,3 +192,29 @@ The block below illustrates **structure only**. **Do not** copy `orgId`, root `t
 - Routes require organization owner/admin; **business fields in the body must come from explicit customer input**, not silent presets.
 - Preflight requires `--confirmation-file`; if you change the payload after customer sign-off, you must refresh `matchTopLevel` (and get renewed approval when business meaning changes).
 - Do not paste internal Mongo procedure documents; use only the public Developer request shape.
+
+## When not to use
+
+- The user needs conversation, customer, or broadcast operations outside Marketing Automation.
+- Required business fields, journey name, `procedureId`, confirmation, or payload file has not been explicitly provided.
+- MA is not provisioned for the target org.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Journey name for locate workflows; `--procedure-id` for lifecycle workflows.
+- `--json-file`, `--confirmation-file`, customer id, and action flags required by MA scripts.
+
+## Outputs
+
+- Procedure lists, resolved `procedureId`, validation results, created procedure status, publish/pause/trigger confirmations, or current procedure status.
+
+## Failure handling
+
+- If validation returns errors, explain each path and message; do not autocorrect business-meaning fields.
+- If multiple journeys match, ask the user to choose before proceeding.
+- If trigger is not allowed or MA is not provisioned, report the API reason and stop.
+
+## Observability
+
+- Record script invoked, filter used, pages fetched, `procedureId` when available, HTTP status, and validation status. Do not log full graph data.

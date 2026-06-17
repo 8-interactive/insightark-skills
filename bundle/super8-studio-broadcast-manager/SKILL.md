@@ -3,6 +3,12 @@ name: super8-studio-broadcast-manager
 description: Investigate and operate on broadcast tasks through the Super 8 Studio Developer API using session validation, org scoping, broadcast creation, broadcast inspection, and broadcast listing.
 when_to_use: When a user wants a single broadcast-oriented workflow that can validate API readiness, resolve organization scope, launch a broadcast, inspect one broadcast's progress, or browse recent broadcasts.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: agent-orchestrator
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-broadcast-manager
@@ -44,3 +50,29 @@ This skill operates on the Super 8 Studio Developer API.
 - Do not infer the platform from ambiguous user input; confirm when the recipient list could plausibly span more than one channel.
 - Do not infer customer ids or message content from ambiguous user input; confirm before dispatching if any field had to be inferred.
 - Read operations (list, get) must stay within the published developer broadcast schema and only forward explicit user inputs.
+
+## When not to use
+
+- A single leaf skill directly satisfies the request.
+- Required identifiers, target customer, audience, or message content are ambiguous.
+- The user asks for an operation outside this orchestrator's domain.
+
+## Inputs
+
+- Natural-language user intent.
+- Valid `S8_API_URL`, `S8_SESSION_TOKEN`, and org context where required.
+- Explicit identifiers and payload details before any write operation.
+
+## Outputs
+
+- The selected composed skill output, returned without fabricating or transforming API results.
+
+## Failure handling
+
+- Validate session and org context before operational paths.
+- Surface sub-skill errors directly and stop when prerequisites fail.
+- Require explicit confirmation before write actions and never retry writes silently.
+
+## Observability
+
+- Record selected sub-skill, user intent, target identifiers, and HTTP status while avoiding PII and full message bodies.

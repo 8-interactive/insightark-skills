@@ -3,6 +3,12 @@ name: super8-studio-customer-search
 description: Operate on the Super 8 Studio Developer API to search organization-scoped customers with supported public filters.
 when_to_use: When a user wants to find customers by customer id, display name, platform, tags, contact fields, or supported activity time windows.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: customer-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-customer-search
@@ -53,3 +59,28 @@ Cap analysis at roughly **20 customers** and **10 messages per customer** unless
 
 - Stay within the published public customer search contract.
 - Do not invent internal query structures, Mongo operators, or hidden fields.
+
+## When not to use
+
+- The task is conversation browsing or broadcast management rather than customer operations.
+- Required customer id, filter, field value, tag, or message content is ambiguous.
+- The requested field is outside the supported public customer schema.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Customer ids, search filters, supported profile fields, tags, or message content flags required by the referenced script.
+
+## Outputs
+
+- Customer search results, customer detail payloads, updated customer records, updated tag lists, or message-dispatch confirmations.
+
+## Failure handling
+
+- Do not call write APIs until customer id and intended changes are explicit.
+- Surface HTTP 400 or 404 errors with the API message and stop.
+- Never infer corrected PII values, tags, or outbound message content.
+
+## Observability
+
+- Record customer id, filter names, mutated field or tag names, content type, and HTTP status. Do not log PII values or full message bodies.

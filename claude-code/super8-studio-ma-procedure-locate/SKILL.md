@@ -3,6 +3,12 @@ name: super8-studio-ma-procedure-locate
 description: List Marketing Automation journeys in an org by optional journey name substring, resolve procedureId from the customer's spoken/written MA name, then drive status/start/pause/trigger APIs. Developer session, org owner/admin. Never invent journey names — always ask the customer, then narrow the list.
 when_to_use: When the user asks to query MA journey status, start (publish draft), pause, resume, or trigger by journey name rather than procedure id — or before any id-scoped MA call where only the journey title is known.
 allowed-mcp: false
+license: MIT
+metadata:
+  owner: platform
+  version: "1.0.0"
+  category: marketing-automation-api
+  domain: super8-studio
 ---
 
 # Skill: super8-studio-ma-procedure-locate
@@ -47,3 +53,29 @@ allowed-mcp: false
 ## Related skill
 
 Creation and validation of new journeys stay in **`super8-studio-ma-automation`**; this skill focuses on **discover → confirm id → lifecycle / trigger**.
+
+## When not to use
+
+- The user needs conversation, customer, or broadcast operations outside Marketing Automation.
+- Required business fields, journey name, `procedureId`, confirmation, or payload file has not been explicitly provided.
+- MA is not provisioned for the target org.
+
+## Inputs
+
+- `--org-id` or `S8_ORG_ID` (required).
+- Journey name for locate workflows; `--procedure-id` for lifecycle workflows.
+- `--json-file`, `--confirmation-file`, customer id, and action flags required by MA scripts.
+
+## Outputs
+
+- Procedure lists, resolved `procedureId`, validation results, created procedure status, publish/pause/trigger confirmations, or current procedure status.
+
+## Failure handling
+
+- If validation returns errors, explain each path and message; do not autocorrect business-meaning fields.
+- If multiple journeys match, ask the user to choose before proceeding.
+- If trigger is not allowed or MA is not provisioned, report the API reason and stop.
+
+## Observability
+
+- Record script invoked, filter used, pages fetched, `procedureId` when available, HTTP status, and validation status. Do not log full graph data.
