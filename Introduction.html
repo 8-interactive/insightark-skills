@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super 8 Studio API Skills — Setup Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #5B4CF5;
+      --accent-dark: #4338ca;
+      --success: #22c55e;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --warn-bg: #fef3c7;
+      --warn-border: #f59e0b;
+      --tip-bg: #eff6ff;
+      --tip-border: #3b82f6;
+      --danger-bg: #fee2e2;
+      --danger-border: #ef4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .site-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .site-title { font-size: 1.125rem; font-weight: 700; color: var(--accent); }
+    .site-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 2px; }
+
+    .lang-toggle { display: flex; gap: 4px; }
+    .lang-btn {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .lang-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .main { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* Steps progress bar */
+    .steps-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0 8px;
+    }
+    .step-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .step-item.active    .step-circle { border-color: var(--accent);  background: var(--accent);  color: white; }
+    .step-item.completed .step-circle { border-color: var(--success); background: var(--success); color: white; }
+    .step-label { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+    .step-item.active    .step-label { color: var(--accent);  font-weight: 600; }
+    .step-item.completed .step-label { color: var(--success); }
+    .step-connector {
+      flex: 1; height: 2px; background: var(--border);
+      margin-bottom: 22px; min-width: 24px; max-width: 60px;
+      transition: background 0.2s;
+    }
+    .step-connector.completed { background: var(--success); }
+
+    /* Step panels */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .step-heading { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .step-description { color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; }
+
+    /* Code blocks */
+    .code-wrap { position: relative; margin: 12px 0; }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px 52px 16px 16px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Consolas, 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.65);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover  { background: rgba(255,255,255,0.22); color: white; }
+    .copy-btn.copied { background: rgba(34,197,94,0.25); color: #86efac; border-color: rgba(34,197,94,0.4); }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 8px; padding: 12px 16px; margin: 16px 0;
+      font-size: 0.875rem; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.1em; flex-shrink: 0; line-height: 1.6; }
+    .callout.tip    { background: var(--tip-bg);    border-left: 3px solid var(--tip-border); }
+    .callout.warn   { background: var(--warn-bg);   border-left: 3px solid var(--warn-border); }
+    .callout.danger { background: var(--danger-bg); border-left: 3px solid var(--danger-border); }
+
+    /* OS / env tabs */
+    .tab-group { display: flex; gap: 4px; margin-bottom: 0; }
+    .tab-btn {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 6px 6px 0 0;
+      border-bottom: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .tab-btn.active { background: var(--code-bg); color: white; border-color: var(--code-bg); }
+
+    /* Navigation buttons */
+    .nav-buttons { display: flex; justify-content: space-between; margin-top: 24px; }
+    .nav-btn {
+      padding: 10px 20px; border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.15s;
+    }
+    .nav-btn.primary   { background: var(--accent); color: white; border-color: var(--accent); }
+    .nav-btn.primary:hover { background: var(--accent-dark); }
+    .nav-btn.secondary { background: var(--card); color: var(--text); }
+    .nav-btn.secondary:hover { background: var(--bg); }
+    .nav-btn:disabled  { opacity: 0.4; cursor: not-allowed; }
+
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* Agent path table */
+    .agent-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 12px 0; }
+    .agent-table th {
+      text-align: left; padding: 8px 12px; background: var(--bg);
+      color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    .agent-table td {
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', Consolas, monospace; font-size: 0.8rem;
+    }
+    .agent-table tr:last-child td { border-bottom: none; }
+
+    /* Numbered wizard steps list */
+    .steps-list { list-style: none; padding: 0; }
+    .steps-list li {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+    }
+    .steps-list li:last-child { border-bottom: none; }
+    .steps-list .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--accent); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+
+    .sub-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px;
+    }
+
+    /* Env pill selector */
+    .env-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+    .env-btn {
+      padding: 5px 16px; border: 1px solid var(--border); border-radius: 20px;
+      background: none; cursor: pointer; font-size: 0.8rem; color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .env-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Source card selector */
+    .source-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+    .source-btn {
+      flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+      background: var(--card); cursor: pointer; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-muted); text-align: center; transition: all 0.15s;
+    }
+    .source-btn.active { border-color: var(--accent); color: var(--accent); background: #f5f3ff; }
+
+    /* Doctor output terminal */
+    .terminal {
+      background: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 8px;
+      font-family: 'SF Mono', Consolas, monospace; font-size: 0.85rem; line-height: 2;
+    }
+    .terminal .ok    { color: #86efac; }
+    .terminal .label { color: #94a3b8; }
+
+    @media (max-width: 600px) {
+      .step-label { display: none; }
+      .main { padding: 20px 16px 60px; }
+      .step-card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div>
+    <div class="site-title">Super 8 Studio API Skills</div>
+    <div class="site-subtitle" id="header-subtitle">安裝設定指南</div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('zh')" id="lang-zh">繁中</button>
+    <button class="lang-btn"        onclick="setLang('en')" id="lang-en">English</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ① Progress indicator -->
+  <nav class="steps-nav" aria-label="Setup steps">
+    <button class="step-item active" onclick="goToStep(0)" id="step-nav-0" aria-current="step">
+      <div class="step-circle">1</div>
+      <div class="step-label" id="step-nav-label-0">下載</div>
+    </button>
+    <div class="step-connector" id="connector-0"></div>
+    <button class="step-item" onclick="goToStep(1)" id="step-nav-1">
+      <div class="step-circle">2</div>
+      <div class="step-label" id="step-nav-label-1">安裝</div>
+    </button>
+    <div class="step-connector" id="connector-1"></div>
+    <button class="step-item" onclick="goToStep(2)" id="step-nav-2">
+      <div class="step-circle">3</div>
+      <div class="step-label" id="step-nav-label-2">設定憑證</div>
+    </button>
+    <div class="step-connector" id="connector-2"></div>
+    <button class="step-item" onclick="goToStep(3)" id="step-nav-3">
+      <div class="step-circle">4</div>
+      <div class="step-label" id="step-nav-label-3">驗證</div>
+    </button>
+  </nav>
+
+  <!-- ② Step panels -->
+
+  <!-- Step 1: Download -->
+  <div class="step-panel active" id="panel-0">
+    <div class="step-card">
+      <h2 class="step-heading" id="s1-title">下載 Skills 套件</h2>
+      <p class="step-description" id="s1-desc">選擇發布版本和環境，下載 Skills 套件到你的電腦。</p>
+
+      <div class="sub-label" id="s1-source-label">來源</div>
+      <div class="source-selector">
+        <button class="source-btn active" onclick="setSource('tarball')" id="src-tarball">📦 發布套件（推薦）</button>
+        <button class="source-btn"        onclick="setSource('git')"     id="src-git">🔧 Git Clone</button>
+      </div>
+
+      <div id="section-tarball">
+        <div class="sub-label" id="s1-env-label">環境</div>
+        <div class="env-selector">
+          <button class="env-btn active" onclick="setEnv('staging')"   id="env-staging">Staging</button>
+          <button class="env-btn"        onclick="setEnv('production')" id="env-production">Production</button>
+        </div>
+
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="setOS('mac')" id="os-tab-mac-s1">macOS / Linux</button>
+          <button class="tab-btn"        onclick="setOS('win')" id="os-tab-win-s1">Windows</button>
+        </div>
+        <div class="code-wrap" id="tarball-mac-wrap">
+          <pre id="tarball-mac-code">curl -LO https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz
+tar -xzf super8-studio-api-skills-latest.tar.gz
+cd super8-studio-api-skills</pre>
+          <button class="copy-btn" onclick="copyCode(this)">複製</button>
+        </div>
+        <div class="code-wrap" id="tarball-win-wrap" style="display:none">
+          <pre id="tarball-win-code">Invoke-WebRequest -Uri "https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz" -OutFile "super8-studio-api-skills-latest.tar.gz"
+tar -xzf super8-studio-api-skills-latest.tar.gz
+cd super8-studio-api-skills</pre>
+          <button class="copy-btn" onclick="copyCode(this)">複製</button>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <span id="s1-tip-tarball">下載的套件包含 <code>RELEASE</code> 檔，安裝後的設定步驟會自動偵測 API 環境，不需手動選擇。</span>
+        </div>
+      </div>
+
+      <div id="section-git" style="display:none">
+        <div class="code-wrap">
+          <pre id="git-clone-code">git clone https://github.com/no8io/super8-studio-api-skills.git
+cd super8-studio-api-skills</pre>
+          <button class="copy-btn" onclick="copyCode(this)">複製</button>
+        </div>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <span id="s1-warn-git">Git checkout 沒有 RELEASE 檔，設定步驟時需手動選擇 API 環境。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Install -->
+  <div class="step-panel" id="panel-1">
+    <div class="step-card">
+      <h2 class="step-heading" id="s2-title">安裝 Skills</h2>
+      <p class="step-description" id="s2-desc">執行安裝腳本，將 Skills 複製到你的 AI Agent 目錄。</p>
+
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="setOS('mac')" id="os-tab-mac-s2">macOS / Linux</button>
+        <button class="tab-btn"        onclick="setOS('win')" id="os-tab-win-s2">Windows (Git Bash / WSL)</button>
+      </div>
+      <div class="code-wrap">
+        <pre>./install.sh</pre>
+        <button class="copy-btn" onclick="copyCode(this)">複製</button>
+      </div>
+
+      <div class="callout warn" id="s2-win-note" style="display:none">
+        <span class="callout-icon">⚠️</span>
+        <span id="s2-win-text">Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準 PowerShell。</span>
+      </div>
+
+      <hr class="section-divider">
+      <div class="sub-label" id="s2-prompts-label">安裝精靈步驟</div>
+      <ol class="steps-list">
+        <li><span class="step-num">1</span><span id="s2-step1">選擇安裝模式：<strong>Per-agent</strong>（各 Agent 獨立目錄）或 <strong>共用資料夾</strong></span></li>
+        <li><span class="step-num">2</span><span id="s2-step2">選擇要安裝的 AI Agent（可多選）：Claude Code、Cursor、Codex、OpenCode、GitHub Copilot</span></li>
+        <li><span class="step-num">3</span><span id="s2-step3">選擇安裝位置：<code>~</code>（使用者 Home 目錄）或自訂路徑</span></li>
+        <li><span class="step-num">4</span><span id="s2-step4">確認安裝計畫後執行</span></li>
+      </ol>
+
+      <hr class="section-divider">
+      <div class="sub-label" id="s2-table-label">安裝路徑對照表</div>
+      <table class="agent-table">
+        <thead>
+          <tr><th id="th-agent">Agent</th><th id="th-path">Skills 路徑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Claude Code</td><td>~/.claude/skills</td></tr>
+          <tr><td>Cursor</td><td>~/.cursor/skills</td></tr>
+          <tr><td>Codex</td><td>~/.codex/skills</td></tr>
+          <tr><td>OpenCode</td><td>~/.opencode/skills</td></tr>
+          <tr><td>GitHub Copilot</td><td>~/.copilot/skills</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 3: Configure -->
+  <div class="step-panel" id="panel-2">
+    <div class="step-card">
+      <h2 class="step-heading" id="s3-title">設定 API 憑證</h2>
+      <p class="step-description" id="s3-desc">執行憑證設定精靈，取得 Developer API Token 並選擇組織。</p>
+
+      <div class="code-wrap">
+        <pre>./setup-env.sh</pre>
+        <button class="copy-btn" onclick="copyCode(this)">複製</button>
+      </div>
+
+      <div class="sub-label" id="s3-wizard-label">精靈執行流程</div>
+      <ol class="steps-list">
+        <li><span class="step-num">1</span><span id="s3-step1">自動從 <code>RELEASE</code> 檔偵測 API 環境（Staging 或 Production）</span></li>
+        <li><span class="step-num">2</span><span id="s3-step2">自動開啟 Super 8 Console → <strong>Account Settings → Developer API</strong>，建立 Token</span></li>
+        <li><span class="step-num">3</span><span id="s3-step3">貼上 Token（僅顯示一次，輸入時遮蔽）</span></li>
+        <li><span class="step-num">4</span><span id="s3-step4">精靈列出已啟用 Developer API 的組織，選擇一個</span></li>
+        <li><span class="step-num">5</span><span id="s3-step5">完成後將憑證寫入 <code>~/.super8-studio.env</code>（權限 600）</span></li>
+      </ol>
+
+      <div class="callout danger">
+        <span class="callout-icon">🔒</span>
+        <div>
+          <strong id="s3-sec-title">安全注意事項</strong>
+          <ul style="margin-top:6px;padding-left:16px;font-size:0.875rem" id="s3-sec-list">
+            <li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li>
+            <li>請勿在聊天或 Email 中分享 Token</li>
+            <li>Token 有效期 6 個月，過期請重新執行 <code>./setup-env.sh</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Verify -->
+  <div class="step-panel" id="panel-3">
+    <div class="step-card">
+      <h2 class="step-heading" id="s4-title">驗證設定</h2>
+      <p class="step-description" id="s4-desc">確認憑證正確且 API 可連通。</p>
+
+      <div class="code-wrap">
+        <pre>./setup-env.sh --check</pre>
+        <button class="copy-btn" onclick="copyCode(this)">複製</button>
+      </div>
+
+      <div class="sub-label" id="s4-success-label">成功輸出範例</div>
+      <div class="terminal">
+        <div><span class="ok">✓</span> <span class="label">S8_API_URL        </span>https://api-next.no8.io</div>
+        <div><span class="ok">✓</span> <span class="label">S8_SESSION_TOKEN  </span>set (r:...)</div>
+        <div><span class="ok">✓</span> <span class="label">S8_ORG_ID         </span>org_xxx</div>
+        <div><span class="ok">✓</span> <span class="label">API reachable      </span></div>
+        <div><span class="ok">✓</span> <span class="label">Auth valid         </span></div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="sub-label" id="s4-fail-label">常見問題排除</div>
+
+      <div class="callout warn">
+        <span class="callout-icon">🔑</span>
+        <div>
+          <strong id="s4-err1-title">Auth valid 失敗</strong>
+          <p id="s4-err1-desc" style="margin-top:4px;font-size:0.875rem">Token 已過期，重新執行設定精靈：</p>
+          <div class="code-wrap" style="margin-top:8px">
+            <pre>./setup-env.sh</pre>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">🌐</span>
+        <div>
+          <strong id="s4-err2-title">API reachable 失敗</strong>
+          <p id="s4-err2-desc" style="margin-top:4px;font-size:0.875rem">確認 API URL 是否對應正確環境：</p>
+          <div class="code-wrap" style="margin-top:8px">
+            <pre>./setup-env.sh --api-url https://api-next.no8.io</pre>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">🎉</span>
+        <span id="s4-success-msg">設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills 了。</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ Navigation buttons -->
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" id="btn-prev" onclick="navigate(-1)" disabled>
+      ← <span id="btn-prev-label">上一步</span>
+    </button>
+    <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">
+      <span id="btn-next-label">下一步</span> →
+    </button>
+  </div>
+
+</main>
+
+<script>
+  // ─── Constants ───────────────────────────────────────────────────────────
+  const TOTAL_STEPS = 4;
+  const URLS = {
+    staging:    'https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz',
+    production: 'https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz',
+  };
+
+  // ─── State ───────────────────────────────────────────────────────────────
+  let currentStep = 0;
+  let currentLang = localStorage.getItem('s8-lang') || 'zh';
+  let currentOS   = localStorage.getItem('s8-os')   || 'mac';
+  let currentEnv  = 'staging';
+  let currentSrc  = 'tarball';
+
+  // ─── i18n strings ────────────────────────────────────────────────────────
+  const S = {
+    zh: {
+      headerSubtitle: '安裝設定指南',
+      steps: ['下載', '安裝', '設定憑證', '驗證'],
+      btnPrev: '上一步', btnNext: '下一步', btnDone: '完成 🎉',
+      s1Title: '下載 Skills 套件',
+      s1Desc: '選擇發布版本和環境，下載 Skills 套件到你的電腦。',
+      s1SourceLabel: '來源',
+      s1SrcTarball: '📦 發布套件（推薦）', s1SrcGit: '🔧 Git Clone',
+      s1EnvLabel: '環境',
+      s1TipTarball: '下載的套件包含 <code>RELEASE</code> 檔，安裝後的設定步驟會自動偵測 API 環境，不需手動選擇。',
+      s1WarnGit: 'Git checkout 沒有 RELEASE 檔，設定步驟時需手動選擇 API 環境。',
+      s2Title: '安裝 Skills',
+      s2Desc: '執行安裝腳本，將 Skills 複製到你的 AI Agent 目錄。',
+      s2PromptsLabel: '安裝精靈步驟',
+      s2Step1: '選擇安裝模式：<strong>Per-agent</strong>（各 Agent 獨立目錄）或 <strong>共用資料夾</strong>',
+      s2Step2: '選擇要安裝的 AI Agent（可多選）：Claude Code、Cursor、Codex、OpenCode、GitHub Copilot',
+      s2Step3: '選擇安裝位置：<code>~</code>（使用者 Home 目錄）或自訂路徑',
+      s2Step4: '確認安裝計畫後執行',
+      s2TableLabel: '安裝路徑對照表', s2ThAgent: 'Agent', s2ThPath: 'Skills 路徑',
+      s2WinText: 'Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準 PowerShell。',
+      s3Title: '設定 API 憑證',
+      s3Desc: '執行憑證設定精靈，取得 Developer API Token 並選擇組織。',
+      s3WizardLabel: '精靈執行流程',
+      s3Step1: '自動從 <code>RELEASE</code> 檔偵測 API 環境（Staging 或 Production）',
+      s3Step2: '自動開啟 Super 8 Console → <strong>Account Settings → Developer API</strong>，建立 Token',
+      s3Step3: '貼上 Token（僅顯示一次，輸入時遮蔽）',
+      s3Step4: '精靈列出已啟用 Developer API 的組織，選擇一個',
+      s3Step5: '完成後將憑證寫入 <code>~/.super8-studio.env</code>（權限 600）',
+      s3SecTitle: '安全注意事項',
+      s3SecList: '<li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li><li>請勿在聊天或 Email 中分享 Token</li><li>Token 有效期 6 個月，過期請重新執行 <code>./setup-env.sh</code></li>',
+      s4Title: '驗證設定',
+      s4Desc: '確認憑證正確且 API 可連通。',
+      s4SuccessLabel: '成功輸出範例', s4FailLabel: '常見問題排除',
+      s4Err1Title: 'Auth valid 失敗', s4Err1Desc: 'Token 已過期，重新執行設定精靈：',
+      s4Err2Title: 'API reachable 失敗', s4Err2Desc: '確認 API URL 是否對應正確環境：',
+      s4SuccessMsg: '設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills 了。',
+      copy: '複製', copied: '已複製！',
+    },
+    en: {
+      headerSubtitle: 'Setup Guide',
+      steps: ['Download', 'Install', 'Configure', 'Verify'],
+      btnPrev: 'Previous', btnNext: 'Next', btnDone: 'Done 🎉',
+      s1Title: 'Download Skills Bundle',
+      s1Desc: 'Choose your source and environment to download the Skills bundle.',
+      s1SourceLabel: 'Source',
+      s1SrcTarball: '📦 Published Package (Recommended)', s1SrcGit: '🔧 Git Clone',
+      s1EnvLabel: 'Environment',
+      s1TipTarball: 'The downloaded bundle includes a <code>RELEASE</code> file — the configure step will automatically detect the correct API URL, no manual selection needed.',
+      s1WarnGit: 'Git checkout has no RELEASE file. You will need to manually select the API environment during the configure step.',
+      s2Title: 'Install Skills',
+      s2Desc: 'Run the install script to copy Skills into your AI agent directories.',
+      s2PromptsLabel: 'Installer prompts',
+      s2Step1: 'Choose install mode: <strong>Per-agent</strong> (separate directory per agent) or <strong>Shared folder</strong>',
+      s2Step2: 'Select AI agents to install for (multi-select): Claude Code, Cursor, Codex, OpenCode, GitHub Copilot',
+      s2Step3: 'Choose install base: <code>~</code> (user home) or a custom path',
+      s2Step4: 'Review the install plan and confirm',
+      s2TableLabel: 'Install path reference', s2ThAgent: 'Agent', s2ThPath: 'Skills path',
+      s2WinText: 'Windows users must run in Git Bash or WSL — CMD and standard PowerShell are not supported.',
+      s3Title: 'Configure API Credentials',
+      s3Desc: 'Run the credential wizard to get a Developer API Token and select your organization.',
+      s3WizardLabel: 'Wizard steps',
+      s3Step1: 'Detects API environment from the <code>RELEASE</code> file (staging or production)',
+      s3Step2: 'Opens Super 8 Console → <strong>Account Settings → Developer API</strong> to create a token',
+      s3Step3: 'Paste the token (shown once, input is masked)',
+      s3Step4: 'Lists organizations with Developer API enabled — select one',
+      s3Step5: 'Writes credentials to <code>~/.super8-studio.env</code> with permissions 600',
+      s3SecTitle: 'Security',
+      s3SecList: '<li>Never commit <code>.super8-studio.env</code> to version control</li><li>Never share tokens in chat or email</li><li>Tokens expire after 6 months — re-run <code>./setup-env.sh</code> when expired</li>',
+      s4Title: 'Verify Setup',
+      s4Desc: 'Confirm credentials are valid and the API is reachable.',
+      s4SuccessLabel: 'Expected successful output', s4FailLabel: 'Troubleshooting',
+      s4Err1Title: 'Auth valid fails', s4Err1Desc: 'Token has expired. Re-run the setup wizard:',
+      s4Err2Title: 'API reachable fails', s4Err2Desc: 'Check that the API URL matches the correct environment:',
+      s4SuccessMsg: 'Setup complete! You can now use Super 8 Studio Skills in your AI agent.',
+      copy: 'Copy', copied: 'Copied!',
+    },
+  };
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+  function t(key) { return S[currentLang][key] !== undefined ? S[currentLang][key] : S.en[key]; }
+  function setText(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+  // ─── Language ─────────────────────────────────────────────────────────────
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('s8-lang', lang);
+    document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+    document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+    renderStrings();
+  }
+
+  function renderStrings() {
+    setText('header-subtitle',   t('headerSubtitle'));
+    t('steps').forEach((label, i) => setText('step-nav-label-' + i, label));
+    setText('btn-prev-label', t('btnPrev'));
+    setText('btn-next-label', currentStep === TOTAL_STEPS - 1 ? t('btnDone') : t('btnNext'));
+
+    setText('s1-title',         t('s1Title'));       setText('s1-desc',          t('s1Desc'));
+    setText('s1-source-label',  t('s1SourceLabel')); setText('src-tarball',       t('s1SrcTarball'));
+    setText('src-git',          t('s1SrcGit'));       setText('s1-env-label',      t('s1EnvLabel'));
+    setText('s1-tip-tarball',   t('s1TipTarball'));   setText('s1-warn-git',       t('s1WarnGit'));
+
+    setText('s2-title',         t('s2Title'));        setText('s2-desc',           t('s2Desc'));
+    setText('s2-prompts-label', t('s2PromptsLabel')); setText('s2-step1',          t('s2Step1'));
+    setText('s2-step2',         t('s2Step2'));        setText('s2-step3',          t('s2Step3'));
+    setText('s2-step4',         t('s2Step4'));        setText('s2-table-label',    t('s2TableLabel'));
+    setText('th-agent',         t('s2ThAgent'));      setText('th-path',           t('s2ThPath'));
+    setText('s2-win-text',      t('s2WinText'));
+
+    setText('s3-title',         t('s3Title'));        setText('s3-desc',           t('s3Desc'));
+    setText('s3-wizard-label',  t('s3WizardLabel')); setText('s3-step1',          t('s3Step1'));
+    setText('s3-step2',         t('s3Step2'));        setText('s3-step3',          t('s3Step3'));
+    setText('s3-step4',         t('s3Step4'));        setText('s3-step5',          t('s3Step5'));
+    setText('s3-sec-title',     t('s3SecTitle'));     setText('s3-sec-list',       t('s3SecList'));
+
+    setText('s4-title',         t('s4Title'));        setText('s4-desc',           t('s4Desc'));
+    setText('s4-success-label', t('s4SuccessLabel')); setText('s4-fail-label',     t('s4FailLabel'));
+    setText('s4-err1-title',    t('s4Err1Title'));    setText('s4-err1-desc',      t('s4Err1Desc'));
+    setText('s4-err2-title',    t('s4Err2Title'));    setText('s4-err2-desc',      t('s4Err2Desc'));
+    setText('s4-success-msg',   t('s4SuccessMsg'));
+
+    document.querySelectorAll('.copy-btn:not(.copied)').forEach(btn => { btn.textContent = t('copy'); });
+  }
+
+  // ─── Step navigation ──────────────────────────────────────────────────────
+  function goToStep(n) {
+    if (n < 0 || n >= TOTAL_STEPS || n > currentStep + 1) return;
+    document.getElementById('panel-' + currentStep).classList.remove('active');
+    currentStep = n;
+
+    for (let i = 0; i < TOTAL_STEPS; i++) {
+      const item   = document.getElementById('step-nav-' + i);
+      const conn   = document.getElementById('connector-' + i);
+      const circle = item.querySelector('.step-circle');
+      item.classList.remove('active', 'completed');
+      item.removeAttribute('aria-current');
+      if (i < n) {
+        item.classList.add('completed');
+        circle.textContent = '✓';
+        if (conn) conn.classList.add('completed');
+      } else if (i === n) {
+        item.classList.add('active');
+        circle.textContent = String(i + 1);
+        item.setAttribute('aria-current', 'step');
+        if (conn) conn.classList.remove('completed');
+      } else {
+        circle.textContent = String(i + 1);
+        if (conn) conn.classList.remove('completed');
+      }
+    }
+
+    document.getElementById('panel-' + n).classList.add('active');
+    document.getElementById('btn-prev').disabled = n === 0;
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.disabled = n === TOTAL_STEPS - 1;
+    setText('btn-next-label', n === TOTAL_STEPS - 1 ? t('btnDone') : t('btnNext'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function navigate(dir) {
+    const next = currentStep + dir;
+    if (next >= 0 && next < TOTAL_STEPS) goToStep(next);
+  }
+
+  // ─── OS tab ───────────────────────────────────────────────────────────────
+  function setOS(os) {
+    currentOS = os;
+    localStorage.setItem('s8-os', os);
+    ['s1', 's2'].forEach(p => {
+      const mac = document.getElementById('os-tab-mac-' + p);
+      const win = document.getElementById('os-tab-win-' + p);
+      if (mac) mac.classList.toggle('active', os === 'mac');
+      if (win) win.classList.toggle('active', os === 'win');
+    });
+    const macWrap = document.getElementById('tarball-mac-wrap');
+    const winWrap = document.getElementById('tarball-win-wrap');
+    if (macWrap) macWrap.style.display = os === 'mac' ? 'block' : 'none';
+    if (winWrap) winWrap.style.display = os === 'win' ? 'block' : 'none';
+    const winNote = document.getElementById('s2-win-note');
+    if (winNote) winNote.style.display = os === 'win' ? 'flex' : 'none';
+  }
+
+  // ─── Env selector ─────────────────────────────────────────────────────────
+  function setEnv(env) {
+    currentEnv = env;
+    document.getElementById('env-staging').classList.toggle('active', env === 'staging');
+    document.getElementById('env-production').classList.toggle('active', env === 'production');
+    const url = URLS[env];
+    document.getElementById('tarball-mac-code').textContent =
+      'curl -LO ' + url + '\ntar -xzf super8-studio-api-skills-latest.tar.gz\ncd super8-studio-api-skills';
+    document.getElementById('tarball-win-code').textContent =
+      'Invoke-WebRequest -Uri "' + url + '" -OutFile "super8-studio-api-skills-latest.tar.gz"\ntar -xzf super8-studio-api-skills-latest.tar.gz\ncd super8-studio-api-skills';
+  }
+
+  // ─── Source selector ──────────────────────────────────────────────────────
+  function setSource(src) {
+    currentSrc = src;
+    document.getElementById('src-tarball').classList.toggle('active', src === 'tarball');
+    document.getElementById('src-git').classList.toggle('active', src === 'git');
+    document.getElementById('section-tarball').style.display = src === 'tarball' ? 'block' : 'none';
+    document.getElementById('section-git').style.display     = src === 'git'     ? 'block' : 'none';
+  }
+
+  // ─── Copy button ──────────────────────────────────────────────────────────
+  function copyCode(btn) {
+    const text = btn.closest('.code-wrap').querySelector('pre').textContent;
+    const done = () => {
+      btn.classList.add('copied');
+      btn.textContent = t('copied');
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = t('copy'); }, 2000);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, cb) {
+    const ta = Object.assign(document.createElement('textarea'), { value: text });
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); cb(); } catch (e) { /* silent */ }
+    document.body.removeChild(ta);
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  setLang(currentLang);
+  setOS(currentOS);
+  setEnv(currentEnv);
+  goToStep(0);
+</script>
+</body>
+</html>
