@@ -12,6 +12,7 @@
   },
   "files": [
     ".codex-plugin/",
+    ".claude-plugin/",
     "bundle/",
     "docs/",
     "installer/",

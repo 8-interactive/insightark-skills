@@ -41,11 +41,15 @@ validate_json() {
 }
 
 validate_versions() {
-  local bundle_version plugin_version package_version
+  local bundle_version codex_plugin_version claude_plugin_version package_version
 
   bundle_version="$(tr -d '[:space:]' <"$repo_dir/bundle/_super8-studio-api-shared/VERSION")"
-  plugin_version="$(json_value ".codex-plugin/plugin.json" "data => data.version")" || {
+  codex_plugin_version="$(json_value ".codex-plugin/plugin.json" "data => data.version")" || {
     fail ".codex-plugin/plugin.json version is missing"
+    return
+  }
+  claude_plugin_version="$(json_value ".claude-plugin/plugin.json" "data => data.version")" || {
+    fail ".claude-plugin/plugin.json version is missing"
     return
   }
   package_version="$(json_value "package.json" "data => data.version")" || {
@@ -53,14 +57,14 @@ validate_versions() {
     return
   }
 
-  if [ "$bundle_version" = "$plugin_version" ] && [ "$bundle_version" = "$package_version" ]; then
+  if [ "$bundle_version" = "$codex_plugin_version" ] && [ "$bundle_version" = "$claude_plugin_version" ] && [ "$bundle_version" = "$package_version" ]; then
     pass "versions are synchronized ($bundle_version)"
   else
-    fail "versions differ: bundle=$bundle_version plugin=$plugin_version package=$package_version"
+    fail "versions differ: bundle=$bundle_version codex=$codex_plugin_version claude=$claude_plugin_version package=$package_version"
   fi
 }
 
-validate_plugin_manifest() {
+validate_codex_plugin_manifest() {
   local skills_path resolved_skills marketplace_path
 
   skills_path="$(json_value ".codex-plugin/plugin.json" "data => data.skills")" || {
@@ -85,6 +89,34 @@ validate_plugin_manifest() {
     pass "marketplace source.path points to repository root"
   else
     fail "marketplace source.path should be ./ but is $marketplace_path"
+  fi
+}
+
+validate_claude_plugin_manifest() {
+  local skills_path resolved_skills marketplace_source
+
+  skills_path="$(json_value ".claude-plugin/plugin.json" "data => data.skills")" || {
+    fail ".claude-plugin/plugin.json skills is missing"
+    return
+  }
+  resolved_skills="$(CDPATH= cd -- "$repo_dir/.claude-plugin" && CDPATH= cd -- "$skills_path" && pwd)" || {
+    fail ".claude-plugin/plugin.json skills path does not resolve: $skills_path"
+    return
+  }
+  if [ "$resolved_skills" = "$repo_dir/bundle" ]; then
+    pass "Claude plugin skills path resolves to bundle/"
+  else
+    fail "Claude plugin skills path resolves to unexpected path: $resolved_skills"
+  fi
+
+  marketplace_source="$(json_value ".claude-plugin/marketplace.json" "data => data.plugins && data.plugins[0] && data.plugins[0].source")" || {
+    fail ".claude-plugin/marketplace.json plugin source is missing"
+    return
+  }
+  if [ "$marketplace_source" = "./" ]; then
+    pass "Claude marketplace source points to repository root"
+  else
+    fail "Claude marketplace source should be ./ but is $marketplace_source"
   fi
 }
 
@@ -175,21 +207,28 @@ validate_install_contract() {
 
 require_file ".codex-plugin/plugin.json"
 require_file ".agents/plugins/marketplace.json"
+require_file ".claude-plugin/plugin.json"
+require_file ".claude-plugin/marketplace.json"
 require_file "package.json"
 require_file "LICENSE"
 require_file "SECURITY.md"
 require_file "CHANGELOG.md"
 require_file "CONTRIBUTING.md"
 require_file "docs/install-flow-contract.md"
+require_file "docs/distribution-implementation-guide.md"
 require_file "docs/plugin-release-process.md"
 require_file "docs/skill-authoring-guide.md"
+require_file "docs/vercel-skills-add.md"
 require_file "scripts/register-install.sh"
 
 validate_json ".codex-plugin/plugin.json"
 validate_json ".agents/plugins/marketplace.json"
+validate_json ".claude-plugin/plugin.json"
+validate_json ".claude-plugin/marketplace.json"
 validate_json "package.json"
 validate_versions
-validate_plugin_manifest
+validate_codex_plugin_manifest
+validate_claude_plugin_manifest
 validate_package_manifest
 validate_skills
 validate_install_contract

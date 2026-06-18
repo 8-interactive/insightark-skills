@@ -66,8 +66,9 @@ Supported entry points:
 | Entry point | Expected behavior |
 | --- | --- |
 | curl / tarball | Download package, extract, run `./install.sh`, then run `./setup-env.sh`. |
-| add marketplace | Install plugin metadata from `.codex-plugin/plugin.json`; delegate setup to `./install.sh` or `scripts/register-install.sh` when a managed skills directory already exists. |
-| npx adapter | Run `npx @super8/studio-api-skills install ...`; the package binary delegates to `install.sh`. |
+| Codex marketplace | Install plugin metadata from `.codex-plugin/plugin.json`; follow setup docs because marketplace install is not assumed to run shell hooks. |
+| Claude marketplace | Install plugin metadata from `.claude-plugin/plugin.json`; follow setup docs because marketplace install is not assumed to run shell hooks. |
+| Vercel skills add | Use `npx skills add --...` when the external CLI contract is confirmed; registry setup is optional unless the CLI exposes a target path follow-up. |
 
 For the detailed flow and registry contract, see
 `docs/install-flow-contract.md`.
@@ -130,41 +131,51 @@ Shared skills folder (no per-agent subpaths):
 
 Legacy `--host` is deprecated; use `--agents` instead.
 
-### Marketplace install
+### Codex marketplace install
 
-This branch includes repository marketplace metadata:
+This branch includes Codex repository marketplace metadata:
 
 - `.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json`
 
-Marketplace installation should still call the same installer flow. If the
-platform provides a managed skills directory, use:
+Codex marketplace installation makes the plugin available to Codex. Do not
+assume it runs `install.sh` or writes `~/.super8-studio.config`.
+
+For local direct-skill testing outside the plugin install flow, use:
 
 ```bash
-./install.sh --target <marketplace-managed-skills-dir>
+./install.sh --target ~/.agents/skills
 ./setup-env.sh
 ```
 
-If the platform has already copied `bundle/` into a managed skills directory and
-only needs the registry for `setup-env.sh` / `uninstall.sh`, use:
+If another installer has already copied `bundle/` into a known skills directory
+and only needs the registry for `setup-env.sh` / `uninstall.sh`, use:
 
 ```bash
-scripts/register-install.sh --target <marketplace-managed-skills-dir>
+scripts/register-install.sh --target <skills-dir>
 ./setup-env.sh
 ```
 
-### npx adapter
+### Claude marketplace install
 
-The npm package metadata exposes a thin CLI adapter:
+This branch includes Claude plugin metadata:
+
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json`
+
+Claude marketplace installation uses Claude Code's plugin cache. Do not assume
+it runs `install.sh` or writes `~/.super8-studio.config`.
+
+### Vercel skills add
+
+The Vercel-style skills installer path is:
 
 ```bash
-npx @super8/studio-api-skills install --base-dir ~ --agents codex
-npx @super8/studio-api-skills setup
-npx @super8/studio-api-skills doctor
+npx skills add --...
 ```
 
-The adapter calls the root scripts instead of reimplementing install logic, so
-`~/.super8-studio.config` has the same format as curl / tarball installs.
+The exact flags and lifecycle behavior must be verified against the current
+`skills` CLI before public release. See `docs/vercel-skills-add.md`.
 
 ## Setup-env
 
