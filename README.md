@@ -52,6 +52,26 @@ cd super8-studio-api-skills && ./install.sh && ./setup-env.sh
 
 **Local git checkout** has no `RELEASE` file — `setup-env.sh` prompts for API environment. Override anytime with `./setup-env.sh --api-url URL`.
 
+### Multi-channel install contract
+
+All install channels use the same canonical payload in `bundle/`.
+
+`install.sh` is the source of truth for copying skills and writing the install
+registry at `~/.super8-studio.config`. `setup-env.sh` is the source of truth for
+Developer API credentials. Installing skills does not mean credentials are
+configured.
+
+Supported entry points:
+
+| Entry point | Expected behavior |
+| --- | --- |
+| curl / tarball | Download package, extract, run `./install.sh`, then run `./setup-env.sh`. |
+| add marketplace | Install plugin metadata from `.codex-plugin/plugin.json`; delegate setup to `./install.sh` or `scripts/register-install.sh` when a managed skills directory already exists. |
+| npx adapter | Run `npx @super8/studio-api-skills install ...`; the package binary delegates to `install.sh`. |
+
+For the detailed flow and registry contract, see
+`docs/install-flow-contract.md`.
+
 ### Session token workflow
 
 `./setup-env.sh` can open Super 8 Console, create a Developer API token via deep link, and list organizations with Developer API enabled for org selection.
@@ -110,6 +130,42 @@ Shared skills folder (no per-agent subpaths):
 
 Legacy `--host` is deprecated; use `--agents` instead.
 
+### Marketplace install
+
+This branch includes repository marketplace metadata:
+
+- `.codex-plugin/plugin.json`
+- `.agents/plugins/marketplace.json`
+
+Marketplace installation should still call the same installer flow. If the
+platform provides a managed skills directory, use:
+
+```bash
+./install.sh --target <marketplace-managed-skills-dir>
+./setup-env.sh
+```
+
+If the platform has already copied `bundle/` into a managed skills directory and
+only needs the registry for `setup-env.sh` / `uninstall.sh`, use:
+
+```bash
+scripts/register-install.sh --target <marketplace-managed-skills-dir>
+./setup-env.sh
+```
+
+### npx adapter
+
+The npm package metadata exposes a thin CLI adapter:
+
+```bash
+npx @super8/studio-api-skills install --base-dir ~ --agents codex
+npx @super8/studio-api-skills setup
+npx @super8/studio-api-skills doctor
+```
+
+The adapter calls the root scripts instead of reimplementing install logic, so
+`~/.super8-studio.config` has the same format as curl / tarball installs.
+
 ## Setup-env
 
 ```bash
@@ -131,6 +187,12 @@ Or:
 
 ```bash
 bash <skills-target>/_super8-studio-api-shared/scripts/doctor.sh
+```
+
+Repository/package validation:
+
+```bash
+bash scripts/validate-skills.sh
 ```
 
 ## Update model

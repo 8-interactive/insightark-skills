@@ -1,0 +1,35 @@
+{
+  "name": "@super8/studio-api-skills",
+  "version": "1.0.0",
+  "description": "Super 8 Studio Developer API skills bundle and installer metadata.",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/8-interactive/super8-studio-api-skills.git"
+  },
+  "bin": {
+    "super8-studio-api-skills": "./scripts/super8-skills-cli.js"
+  },
+  "files": [
+    ".codex-plugin/",
+    "bundle/",
+    "docs/",
+    "installer/",
+    "scripts/",
+    "install.sh",
+    "setup-env.sh",
+    "uninstall.sh",
+    "README.md",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "validate": "bash scripts/validate-skills.sh"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

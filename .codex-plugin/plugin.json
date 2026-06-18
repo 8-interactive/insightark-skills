@@ -1,0 +1,43 @@
+{
+  "name": "super8-studio-api-skills",
+  "version": "1.0.0",
+  "description": "Reusable Super 8 Studio Developer API skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "author": {
+    "name": "Super8",
+    "url": "https://www.no8.io"
+  },
+  "homepage": "https://www.no8.io",
+  "repository": "https://github.com/8-interactive/super8-studio-api-skills",
+  "license": "UNLICENSED",
+  "keywords": [
+    "super8",
+    "studio",
+    "api",
+    "crm",
+    "conversations",
+    "customers",
+    "broadcast",
+    "marketing-automation",
+    "skills"
+  ],
+  "skills": "../bundle/",
+  "interface": {
+    "displayName": "Super 8 Studio API Skills",
+    "shortDescription": "Developer API skills for Super 8 Studio CRM workflows.",
+    "longDescription": "A curated set of skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the Super 8 Studio Developer API.",
+    "developerName": "Super8",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://www.no8.io",
+    "brandColor": "#2F6FED",
+    "defaultPrompt": [
+      "Use super8-studio-session to validate my Super 8 Studio API setup.",
+      "Use super8-studio-investigator to investigate recent conversations.",
+      "Use super8-studio-customer-manager to search and update customers.",
+      "Use super8-studio-broadcast-manager to create and monitor a broadcast."
+    ]
+  }
+}
