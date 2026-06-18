@@ -554,9 +554,11 @@
               id="tarball-mac-wrap"
               aria-label="Download command for macOS/Linux"
             >
-              <pre id="tarball-mac-code">curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
+              <pre id="tarball-mac-code">
+curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
 tar -xzf super8-studio-api-skills-latest.tar.gz
-cd super8-studio-api-skills</pre>
+cd super8-studio-api-skills</pre
+              >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
             </div>
             <div
@@ -565,9 +567,11 @@ cd super8-studio-api-skills</pre>
               aria-label="Download command for Windows"
               style="display: none"
             >
-              <pre id="tarball-win-code">Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz" -OutFile "super8-studio-api-skills-latest.tar.gz"
+              <pre id="tarball-win-code">
+Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz" -OutFile "super8-studio-api-skills-latest.tar.gz"
 tar -xzf super8-studio-api-skills-latest.tar.gz
-cd super8-studio-api-skills</pre>
+cd super8-studio-api-skills</pre
+              >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
             </div>
 
@@ -583,8 +587,10 @@ cd super8-studio-api-skills</pre>
 
           <div id="section-git" style="display: none">
             <div class="code-wrap" aria-label="Git clone command">
-              <pre id="git-clone-code">git clone https://github.com/no8io/super8-studio-api-skills.git
-cd super8-studio-api-skills</pre>
+              <pre id="git-clone-code">
+git clone https://github.com/no8io/super8-studio-api-skills.git
+cd super8-studio-api-skills</pre
+              >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
             </div>
             <div class="callout warn">
@@ -705,15 +711,33 @@ cd super8-studio-api-skills</pre>
       <!-- Step 3: Configure (Optional) -->
       <div class="step-panel" id="panel-2">
         <div class="step-card">
-          <h2 class="step-heading" id="s3-title">設定 API 憑證</h2>
-          <p class="step-description" id="s3-desc">
-            此步驟通常由 install.sh 自動完成，無需手動操作。以下說明供參考或重新設定時使用。
-          </p>
+          <h2 class="step-heading" id="s3-title">
+            設定 API 憑證（通常由 install.sh 自動完成）
+          </h2>
+
+          <div class="callout danger">
+            <span class="callout-icon">🔒</span>
+            <div>
+              <strong id="s3-sec-title">安全注意事項</strong>
+              <ul
+                style="margin-top: 6px; padding-left: 16px; font-size: 0.875rem"
+                id="s3-sec-list"
+              >
+                <li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li>
+                <li>請勿在聊天或 Email 中分享 Token</li>
+                <li>
+                  Token 有效期 6 個月，過期請重新執行
+                  <code>./setup-env.sh</code>
+                </li>
+              </ul>
+            </div>
+          </div>
 
           <div class="callout tip">
             <span class="callout-icon">✅</span>
             <span id="s3-auto-note"
-              >install.sh 安裝時會自動執行憑證設定精靈，通常不需要額外操作。若需重新設定，請執行以下指令。</span
+              >install.sh
+              安裝時會自動執行憑證設定精靈，通常不需要額外操作。若需重新設定，請執行以下指令。</span
             >
           </div>
 
@@ -756,24 +780,6 @@ cd super8-studio-api-skills</pre>
               >
             </li>
           </ol>
-
-          <div class="callout danger">
-            <span class="callout-icon">🔒</span>
-            <div>
-              <strong id="s3-sec-title">安全注意事項</strong>
-              <ul
-                style="margin-top: 6px; padding-left: 16px; font-size: 0.875rem"
-                id="s3-sec-list"
-              >
-                <li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li>
-                <li>請勿在聊天或 Email 中分享 Token</li>
-                <li>
-                  Token 有效期 6 個月，過期請重新執行
-                  <code>./setup-env.sh</code>
-                </li>
-              </ul>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1009,8 +1015,7 @@ cd super8-studio-api-skills</pre>
           s3AutoNote:
             "install.sh 安裝時會自動執行憑證設定精靈，通常不需要額外操作。若需重新設定，請執行以下指令。",
           s3WizardLabel: "精靈執行流程",
-          s3Step1:
-            "自動從 <code>RELEASE</code> 檔偵測 API 環境（Production）",
+          s3Step1: "自動從 <code>RELEASE</code> 檔偵測 API 環境（Production）",
           s3Step2:
             "自動開啟 Super 8 Console → <strong>Account Settings → Developer API</strong>，建立 Token",
           s3Step3: "貼上 Token（僅顯示一次，輸入時遮蔽）",
@@ -1045,7 +1050,13 @@ cd super8-studio-api-skills</pre>
         },
         en: {
           headerSubtitle: "Setup Guide",
-          steps: ["Download", "Install", "Configure (Optional)", "Verify", "Uninstall"],
+          steps: [
+            "Download",
+            "Install",
+            "Configure (Optional)",
+            "Verify",
+            "Uninstall",
+          ],
           btnPrev: "Previous",
           btnNext: "Next →",
           btnDone: "Done 🎉",
@@ -1285,8 +1296,10 @@ cd super8-studio-api-skills</pre>
         if (s5WinNote) s5WinNote.style.display = os === "win" ? "flex" : "none";
         const s5MacWrap = document.getElementById("s5-mac-wrap");
         const s5WinWrap = document.getElementById("s5-win-wrap");
-        if (s5MacWrap) s5MacWrap.style.display = os === "mac" ? "block" : "none";
-        if (s5WinWrap) s5WinWrap.style.display = os === "win" ? "block" : "none";
+        if (s5MacWrap)
+          s5MacWrap.style.display = os === "mac" ? "block" : "none";
+        if (s5WinWrap)
+          s5WinWrap.style.display = os === "win" ? "block" : "none";
       }
 
       // ─── Source selector ──────────────────────────────────────────────────────
