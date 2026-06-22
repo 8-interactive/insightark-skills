@@ -81,6 +81,38 @@ Install target: `{base_dir}/{agent-subpath}`
 | Custom folder | Enter path | One directory, e.g. `~/.agents/skills` |
 | Per-agent auto | Pick agents → user/project space | Only selected agents, e.g. `~/.cursor/skills` |
 
+## Plugin install (recommended)
+
+### Claude Code
+
+```bash
+# Add the marketplace and install the plugin
+claude plugin marketplace add 8-interactive/super8-studio-api-skills
+claude plugin install super8-studio-api-skills@super8-studio-api-skills
+```
+
+Claude Code will prompt for `S8_API_URL` and `S8_SESSION_TOKEN` during
+installation. The session token is stored in the system keychain — no
+`.env` file required. A `SessionStart` hook runs `doctor.sh` automatically
+so credential issues surface at the start of every session.
+
+To enable the plugin (installed disabled by default — it connects to an external API):
+
+```bash
+claude plugin enable super8-studio-api-skills@super8-studio-api-skills
+```
+
+For private-repo auto-updates, set `GITHUB_TOKEN` in your shell profile.
+
+### Codex
+
+```bash
+# Add the marketplace
+# Then install from the marketplace UI or via codex plugin install
+```
+
+### Manual (shell-based) install
+
 ## Install
 
 Interactive (default):

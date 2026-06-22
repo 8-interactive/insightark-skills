@@ -21,5 +21,22 @@
     "marketing-automation",
     "skills"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "defaultEnabled": false,
+  "userConfig": {
+    "S8_API_URL": {
+      "type": "string",
+      "title": "API base URL",
+      "description": "Super 8 Studio Developer API base URL (e.g. https://api-next.no8.io)",
+      "required": true,
+      "default": "https://api-next.no8.io"
+    },
+    "S8_SESSION_TOKEN": {
+      "type": "string",
+      "title": "Session token",
+      "description": "Super 8 Studio Developer API session token (starts with r:)",
+      "sensitive": true,
+      "required": true
+    }
+  }
 }

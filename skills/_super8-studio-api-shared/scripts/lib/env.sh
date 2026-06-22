@@ -41,6 +41,16 @@ s8_load_env_files() {
   user_path="$(s8_user_env_path)"
   repo_path="$(s8_repo_env_path)"
 
+  # When installed as a Claude Code plugin, userConfig values are exported as
+  # CLAUDE_PLUGIN_OPTION_<KEY>. Map them to S8_* if not already set in the
+  # process environment so they take the highest priority after restoration.
+  if [ -z "${S8_API_URL:-}" ] && [ -n "${CLAUDE_PLUGIN_OPTION_S8_API_URL:-}" ]; then
+    S8_API_URL="${CLAUDE_PLUGIN_OPTION_S8_API_URL}"
+  fi
+  if [ -z "${S8_SESSION_TOKEN:-}" ] && [ -n "${CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN:-}" ]; then
+    S8_SESSION_TOKEN="${CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN}"
+  fi
+
   if [ -n "${S8_API_URL:-}" ]; then
     preserve_api=1
     saved_api="$S8_API_URL"
@@ -97,7 +107,7 @@ s8_print_missing_credentials_help() {
   repo_path="$(s8_repo_env_path)"
 
   printf 'Missing Super 8 Studio API credentials.\n\n' >&2
-  printf 'Priority (highest first): process environment > %s > skills install dir > %s\n\n' "$repo_path" "$user_path" >&2
+  printf 'Priority (highest first): CLAUDE_PLUGIN_OPTION_* / process environment > %s > skills install dir > %s\n\n' "$repo_path" "$user_path" >&2
   printf 'Checked:\n' >&2
   if [ "${S8_ENV_SKILLS_FOUND:-0}" = 1 ]; then
     printf '  - {skills-target}/%s from %s (loaded)\n' "$S8_ENV_FILENAME" "$(s8_install_config_path)" >&2

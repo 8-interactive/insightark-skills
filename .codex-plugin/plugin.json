@@ -27,11 +27,10 @@
     "longDescription": "A curated set of skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the Super 8 Studio Developer API.",
     "developerName": "Super8",
     "category": "Productivity",
-    "capabilities": [
-      "Read",
-      "Write"
-    ],
+    "capabilities": ["Read", "Write"],
     "websiteURL": "https://www.no8.io",
+    "privacyPolicyURL": "https://www.no8.io/privacy",
+    "termsOfServiceURL": "https://www.no8.io/terms",
     "brandColor": "#2F6FED",
     "defaultPrompt": [
       "Use super8-studio-session to validate my Super 8 Studio API setup.",
