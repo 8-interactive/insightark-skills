@@ -1,207 +1,255 @@
 # Super 8 Studio API Skills
 
-Standalone skill bundle for the Super 8 Studio Developer API.
+[English](#english) | [中文](#中文)
 
-## Environment
+---
 
-Scripts load credentials automatically before each API call.
+<a name="english"></a>
 
-### Config files
+Reusable Developer API skills for Super 8 Studio CRM workflows — conversations, customers, broadcasts, and marketing automation.
 
-| Location | Path | Typical contents |
-| --- | --- | --- |
-| Install registry | `~/.super8-studio.config` | Skills install paths (written by `install.sh`) |
-| Skills dir | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`, `S8_API_URL`, `S8_ORG_ID` (written by `setup-env.sh` after install) |
-| User (legacy) | `~/.super8-studio.env` | Fallback if install registry is missing |
-| Project | `{project}/.super8-studio.env` | Optional `S8_ORG_ID` / stage `S8_API_URL` override (no token) |
+## Plugin Install (Claude Code)
 
-**Load order** (later overrides earlier): user file → skills install dir → project file → process environment wins over all.
-
-Variables:
-
-- `S8_API_URL` — API base URL (required), e.g. `https://api-next.no8.io`
-- `S8_SESSION_TOKEN` — Developer `_SessionToken` (required)
-- `S8_ORG_ID` — Default organization id for org-scoped routes (optional)
-
-### Quick setup
-
-Install skills first, then configure credentials (setup runs doctor when finished):
+### 1. Add marketplace and install
 
 ```bash
-./install.sh
-./setup-env.sh
-./setup-env.sh --check
-```
-
-On **Windows**, run scripts in **Git Bash** or **WSL** (`~` expands via `$HOME`).
-
-### Download (published package)
-
-Each tarball includes `bundle/_super8-studio-api-shared/RELEASE` so `setup-env.sh` automatically detects the correct API environment — no manual selection needed.
-
-```bash
-curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
-tar -xzf super8-studio-api-skills-latest.tar.gz
-cd super8-studio-api-skills && ./install.sh && ./setup-env.sh
-```
-
-**Local git checkout** has no `RELEASE` file — `setup-env.sh` prompts for API environment. Override anytime with `./setup-env.sh --api-url URL`.
-
-### Session token workflow
-
-`./setup-env.sh` can open Super 8 Console, create a Developer API token via deep link, and list organizations with Developer API enabled for org selection.
-
-Manual path:
-
-1. Console → **Account Settings → Developer API**
-2. Create a token (shown **once**)
-3. Run `./setup-env.sh` or edit `~/.super8-studio.env`
-
-**Security notes**
-
-- Never commit `.super8-studio.env` or share tokens in chat.
-- Tokens expire after six months; create a new token when expired.
-
-## Supported agents
-
-Install target: `{base_dir}/{agent-subpath}`
-
-| Agent | Subpath |
-| --- | --- |
-| `claude-code` | `.claude/skills` |
-| `opencode` | `.opencode/skills` |
-| `cursor` | `.cursor/skills` |
-| `github-copilot` | `.copilot/skills` |
-| `codex` | `.codex/skills` |
-
-**Install layouts** (interactive Step 1)
-
-| Choice | Flow | Result |
-| --- | --- | --- |
-| Custom folder | Enter path | One directory, e.g. `~/.agents/skills` |
-| Per-agent auto | Pick agents → user/project space | Only selected agents, e.g. `~/.cursor/skills` |
-
-## Plugin install (recommended)
-
-### Claude Code
-
-```bash
-# Add the marketplace and install the plugin
 claude plugin marketplace add 8-interactive/super8-studio-api-skills
 claude plugin install super8-studio-api-skills@super8-studio-api-skills
 ```
 
-Claude Code will prompt for `S8_API_URL` and `S8_SESSION_TOKEN` during
-installation. The session token is stored in the system keychain — no
-`.env` file required. A `SessionStart` hook runs `doctor.sh` automatically
-so credential issues surface at the start of every session.
+During installation, Claude Code will prompt for:
 
-To enable the plugin (installed disabled by default — it connects to an external API):
+| Variable | Description |
+| --- | --- |
+| `S8_API_URL` | API base URL, e.g. `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
+
+### 2. Enable the plugin
+
+Installed disabled by default (connects to an external API):
 
 ```bash
 claude plugin enable super8-studio-api-skills@super8-studio-api-skills
 ```
 
-For private-repo auto-updates, set `GITHUB_TOKEN` in your shell profile.
+A `SessionStart` hook runs `doctor.sh` automatically so credential issues surface at the start of every session.
 
-### Codex
+### Session token
 
-```bash
-# Add the marketplace
-# Then install from the marketplace UI or via codex plugin install
-```
+1. Console → **Account Settings → Developer API**
+2. Create a token (shown **once**)
 
-### Manual (shell-based) install
+Tokens expire after six months. Never commit tokens or share them in chat.
 
-## Install
+---
 
-Interactive (default):
+## Plugin Install (Codex)
 
-```bash
-./install.sh
-```
-
-CLI:
+### 1. Add marketplace and install
 
 ```bash
-./install.sh --base-dir ~ --agents claude-code,cursor,codex
-./install.sh --base-dir /path/to/project --agents cursor
-./install.sh --agents opencode
+codex plugin marketplace add 8-interactive/super8-studio-api-skills
+codex plugin install super8-studio-api-skills@super8-studio-api-skills
 ```
 
-Shared skills folder (no per-agent subpaths):
+### 2. Configure credentials
 
-```bash
-./install.sh --target ~/.agents/skills
-```
-
-Legacy `--host` is deprecated; use `--agents` instead.
-
-## Setup-env
+Codex does not use a system keychain. Run `setup-env.sh` to write credentials to `~/.super8-studio.env`:
 
 ```bash
 ./setup-env.sh
+```
+
+| Variable | Description |
+| --- | --- |
+| `S8_API_URL` | API base URL, e.g. `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken` |
+
+### Session token
+
+1. Console → **Account Settings → Developer API**
+2. Create a token (shown **once**)
+
+Tokens expire after six months. Never commit tokens or share them in chat.
+
+---
+
+## Manual Install
+
+```bash
+./install.sh
+./setup-env.sh
 ./setup-env.sh --check
-./setup-env.sh --env-hints
-./setup-env.sh --api-url https://api-next.no8.io   # override API base URL
-./setup-env.sh --repo-only --project-path /path/to/project
-./setup-env.sh --no-open-browser
 ```
 
-## Validate
+### Config files
+
+| Location | Path | Contents |
+| --- | --- | --- |
+| Install registry | `~/.super8-studio.config` | Skills install paths |
+| Skills dir | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`, `S8_API_URL`, `S8_ORG_ID` |
+| User (fallback) | `~/.super8-studio.env` | Fallback if install registry is missing |
+| Project override | `{project}/.super8-studio.env` | Optional `S8_ORG_ID` / stage URL override |
+
+**Load order:** user file → skills install dir → project file → process environment.
+
+### CLI options
 
 ```bash
-./setup-env.sh --check
-```
-
-Or:
-
-```bash
-bash <skills-target>/_super8-studio-api-shared/scripts/doctor.sh
-```
-
-## Update model
-
-Re-run `install.sh` to replace the installed bundle in place. Config files outside skills directories are preserved.
-
-## Uninstall
-
-```bash
-./uninstall.sh
+./install.sh --base-dir ~ --agents claude-code,cursor,codex
+./install.sh --target ~/.agents/skills   # shared folder, no per-agent subpaths
 ./uninstall.sh --base-dir ~ --agents claude-code,codex
-./uninstall.sh --target /custom/skills/path
 ```
 
-## Conversation analysis leaves
+---
 
-Read-only skills for agent-driven conversation investigation (no composer skill required):
+## Skills
 
 | Skill | Purpose |
 | --- | --- |
 | `super8-studio-conversations` | List conversations by platform, inbox state, customer, or activity time |
 | `super8-studio-conversation-detail` | Conversation summary and message timeline |
 | `super8-studio-message-search` | Keyword search across the org or within one conversation |
-| `super8-studio-customer-search` | Find customer segments by tag or activity, then loop into conversations |
+| `super8-studio-customer-search` | Find customer segments by tag or activity |
+| `super8-studio-customer-detail` | Customer profile and activity |
+| `super8-studio-customer-manager` | Manage customer records |
+| `super8-studio-customer-update` | Update customer fields |
+| `super8-studio-customer-tag-add` | Add tags to a customer |
+| `super8-studio-customer-tag-remove` | Remove tags from a customer |
+| `super8-studio-customer-send-message` | Send a message to a customer |
+| `super8-studio-broadcast-create` | Create a broadcast |
+| `super8-studio-broadcast-get` | Get broadcast details |
+| `super8-studio-broadcast-list` | List broadcasts |
+| `super8-studio-broadcast-manager` | Manage broadcast lifecycle |
+| `super8-studio-messaging` | Compose and send messages |
+| `super8-studio-investigator` | Deep investigation across conversations and customers |
+| `super8-studio-session` | Session and auth utilities |
+| `super8-studio-org-scope` | Org-scoped API utilities |
 
-Typical flow: `customer-search` or `conversations` → `message-search` (keyword evidence) → `conversation-detail` (timeline context).
+**Typical flow:** `customer-search` or `conversations` → `message-search` → `conversation-detail`
 
-## Included skills
+---
 
-- `super8-studio-session`
-- `super8-studio-org-scope`
-- `super8-studio-conversations`
-- `super8-studio-conversation-detail`
-- `super8-studio-message-search`
-- `super8-studio-investigator`
-- `super8-studio-messaging`
-- `super8-studio-customer-manager`
-- `super8-studio-customer-detail`
-- `super8-studio-customer-search`
-- `super8-studio-customer-update`
-- `super8-studio-customer-tag-add`
-- `super8-studio-customer-tag-remove`
-- `super8-studio-customer-send-message`
-- `super8-studio-broadcast-create`
-- `super8-studio-broadcast-get`
-- `super8-studio-broadcast-list`
-- `super8-studio-broadcast-manager`
+<a name="中文"></a>
+
+Super 8 Studio CRM 工作流程的 Developer API Skills，涵蓋對話、客戶、廣播與行銷自動化。
+
+## Plugin 安裝（Claude Code）
+
+### 1. 加入 Marketplace 並安裝
+
+```bash
+claude plugin marketplace add 8-interactive/super8-studio-api-skills
+claude plugin install super8-studio-api-skills@super8-studio-api-skills
+```
+
+安裝過程中，Claude Code 會提示輸入以下資訊：
+
+| 變數 | 說明 |
+| --- | --- |
+| `S8_API_URL` | API 基礎網址，例如 `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
+
+### 2. 啟用 Plugin
+
+預設為停用狀態（因需連線至外部 API）：
+
+```bash
+claude plugin enable super8-studio-api-skills@super8-studio-api-skills
+```
+
+`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.sh`，讓憑證問題提早浮現。
+
+### Session Token 取得方式
+
+1. Console → **Account Settings → Developer API**
+2. 建立 Token（**僅顯示一次**）
+
+Token 有效期六個月，請勿提交至版本控制或在對話中分享。
+
+---
+
+## Plugin 安裝（Codex）
+
+### 1. 加入 Marketplace 並安裝
+
+```bash
+codex plugin marketplace add 8-interactive/super8-studio-api-skills
+codex plugin install super8-studio-api-skills@super8-studio-api-skills
+```
+
+### 2. 設定憑證
+
+Codex 不使用系統鑰匙圈，請執行 `setup-env.sh` 將憑證寫入 `~/.super8-studio.env`：
+
+```bash
+./setup-env.sh
+```
+
+| 變數 | 說明 |
+| --- | --- |
+| `S8_API_URL` | API 基礎網址，例如 `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken` |
+
+### Session Token 取得方式
+
+1. Console → **Account Settings → Developer API**
+2. 建立 Token（**僅顯示一次**）
+
+Token 有效期六個月，請勿提交至版本控制或在對話中分享。
+
+---
+
+## 手動安裝
+
+```bash
+./install.sh
+./setup-env.sh
+./setup-env.sh --check
+```
+
+### 設定檔說明
+
+| 位置 | 路徑 | 內容 |
+| --- | --- | --- |
+| 安裝登錄檔 | `~/.super8-studio.config` | Skills 安裝路徑 |
+| Skills 目錄 | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`、`S8_API_URL`、`S8_ORG_ID` |
+| 使用者（備援） | `~/.super8-studio.env` | 找不到安裝登錄檔時的備援 |
+| 專案覆蓋 | `{project}/.super8-studio.env` | 可選的 `S8_ORG_ID` 或測試環境 URL |
+
+**載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
+
+### CLI 選項
+
+```bash
+./install.sh --base-dir ~ --agents claude-code,cursor,codex
+./install.sh --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
+./uninstall.sh --base-dir ~ --agents claude-code,codex
+```
+
+---
+
+## Skills 列表
+
+| Skill | 用途 |
+| --- | --- |
+| `super8-studio-conversations` | 依平台、收件匣狀態、客戶或活動時間列出對話 |
+| `super8-studio-conversation-detail` | 對話摘要與訊息時間軸 |
+| `super8-studio-message-search` | 跨全組織或在單一對話中搜尋關鍵字 |
+| `super8-studio-customer-search` | 依標籤或活動搜尋客戶族群 |
+| `super8-studio-customer-detail` | 客戶個人資料與活動紀錄 |
+| `super8-studio-customer-manager` | 管理客戶資料 |
+| `super8-studio-customer-update` | 更新客戶欄位 |
+| `super8-studio-customer-tag-add` | 為客戶新增標籤 |
+| `super8-studio-customer-tag-remove` | 移除客戶標籤 |
+| `super8-studio-customer-send-message` | 傳送訊息給客戶 |
+| `super8-studio-broadcast-create` | 建立廣播 |
+| `super8-studio-broadcast-get` | 取得廣播詳情 |
+| `super8-studio-broadcast-list` | 列出廣播 |
+| `super8-studio-broadcast-manager` | 管理廣播生命週期 |
+| `super8-studio-messaging` | 撰寫與發送訊息 |
+| `super8-studio-investigator` | 跨對話與客戶的深度調查 |
+| `super8-studio-session` | Session 與驗證工具 |
+| `super8-studio-org-scope` | 組織範圍 API 工具 |
+
+**典型流程：** `customer-search` 或 `conversations` → `message-search` → `conversation-detail`
