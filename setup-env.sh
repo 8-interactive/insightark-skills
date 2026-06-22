@@ -129,14 +129,12 @@ super8_prompt_api_url() {
   local choice api_url
   printf 'Select API environment (local / git checkout):\n' >&2
   printf '  1) Production  https://api-next.no8.io\n' >&2
-  printf '  2) Staging     https://stage-api-next.no8.io\n' >&2
-  printf '  3) Custom URL\n' >&2
+  printf '  2) Custom URL\n' >&2
   printf 'Choice [1]: ' >&2
   read -r choice
   case "${choice:-1}" in
     1 | prod | production) api_url='https://api-next.no8.io' ;;
-    2 | stag | stage | staging) api_url='https://stage-api-next.no8.io' ;;
-    3 | custom)
+    2 | custom)
       printf 'API base URL: ' >&2
       read -r api_url
       ;;
@@ -154,7 +152,7 @@ super8_prompt_api_url() {
 
 super8_prompt_session_token() {
   local api_url="$1"
-  local console_base token_url
+  local console_base token_url token
 
   console_base="$(super8_resolve_console_url "$api_url")"
 
@@ -370,7 +368,14 @@ if [ "$mode" = "user" ]; then
 
   api_url="$(super8_resolve_api_url)"
   session_token="$(super8_prompt_session_token "$api_url")"
-  org_id="$(super8_prompt_org_id_from_api "$api_url" "$session_token")"
+  org_id=""
+  if org_id="$(super8_prompt_org_id_from_api "$api_url" "$session_token")"; then
+    :
+  else
+    printf 'Warning: could not select organization. Credentials will be saved without S8_ORG_ID.\n' >&2
+    printf 'Set S8_ORG_ID later or re-run ./setup-env.sh.\n' >&2
+    org_id=""
+  fi
   printf '\n' >&2
   super8_write_env_to_targets "$api_url" "$session_token" "$org_id"
 elif [ "$mode" = "repo" ]; then
@@ -404,7 +409,6 @@ fi
 
 if [ -f "$doctor_script" ]; then
   printf '\nRunning doctor...\n'
-  export S8_API_URL="${S8_API_URL:-}"
   if bash "$doctor_script"; then
     printf 'Setup complete.\n'
   else

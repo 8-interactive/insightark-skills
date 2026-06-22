@@ -1,3 +1,8 @@
-# General
-.DS_Store
-/docs
+# macOS
+**/.DS_Store
+
+# Credentials — never commit
+.super8-studio.env
+
+# CI-generated — injected at pack time, not committed
+bundle/_super8-studio-api-shared/RELEASE

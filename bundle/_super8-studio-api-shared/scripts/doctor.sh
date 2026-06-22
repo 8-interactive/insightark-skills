@@ -18,7 +18,8 @@ done
 fail() {
   printf '%s\n' "$1" >&2
   if [ "$soft_fail" = "true" ]; then
-    return 0
+    printf 'Doctor status: failed (soft)\n'
+    exit 0
   fi
   exit 1
 }
@@ -42,7 +43,6 @@ bundle_version_file="$script_dir/../VERSION"
 installed_version="$(cat "$bundle_version_file" 2>/dev/null || printf 'unknown')"
 latest_skill_version="$(jq -r '.data.latestSkillVersion // empty' "$response_file")"
 
-printf 'Doctor status: ok\n'
 printf 'API URL: %s\n' "$S8_API_ROOT"
 printf 'Session token: present\n'
 jq -r '"User: " + (.data.user.email // "unknown")' "$response_file"
@@ -56,7 +56,11 @@ fi
 
 s8_api_request GET "/developer/v1/auth/organizations" "" "$orgs_file" "$orgs_status_file" || fail 'Failed to reach auth/organizations endpoint'
 if s8_expect_success "$(<"$orgs_status_file")" "$orgs_file"; then
-  jq -r '"Manageable orgs: " + ((.data.organizations // []) | length | tostring)' "$orgs_file"
+  jq -r '
+    (.data.organizations // []) as $orgs
+    | "Organizations in account: " + ($orgs | length | tostring)
+    , "Developer API enabled: " + ([$orgs[] | select(.developerApiEnabled == true)] | length | tostring)
+  ' "$orgs_file"
 fi
 
 if [ -n "${S8_ORG_ID:-}" ]; then
@@ -64,3 +68,5 @@ if [ -n "${S8_ORG_ID:-}" ]; then
 else
   printf 'Default org: not set\n'
 fi
+
+printf 'Doctor status: ok\n'

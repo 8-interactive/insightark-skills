@@ -24,8 +24,12 @@ s8_read_install_config_value() {
 
 s8_install_skills_targets() {
   local csv target
+  local -a targets=()
 
   csv="$(s8_read_install_config_value skills_targets)" || return 1
+  csv="$(printf '%s' "$csv" | tr -d '[:space:]')"
+  [ -n "$csv" ] || return 0
+
   IFS=',' read -r -a targets <<<"$csv"
   for target in "${targets[@]}"; do
     target="$(printf '%s' "$target" | tr -d '[:space:]')"

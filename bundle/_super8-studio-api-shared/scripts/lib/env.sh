@@ -41,15 +41,15 @@ s8_load_env_files() {
   user_path="$(s8_user_env_path)"
   repo_path="$(s8_repo_env_path)"
 
-  if [ -n "${S8_API_URL+x}" ]; then
+  if [ -n "${S8_API_URL:-}" ]; then
     preserve_api=1
     saved_api="$S8_API_URL"
   fi
-  if [ -n "${S8_SESSION_TOKEN+x}" ]; then
+  if [ -n "${S8_SESSION_TOKEN:-}" ]; then
     preserve_token=1
     saved_token="$S8_SESSION_TOKEN"
   fi
-  if [ -n "${S8_ORG_ID+x}" ]; then
+  if [ -n "${S8_ORG_ID:-}" ]; then
     preserve_org=1
     saved_org="$S8_ORG_ID"
   fi

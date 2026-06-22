@@ -35,43 +35,17 @@ Install skills first, then configure credentials (setup runs doctor when finishe
 
 On **Windows**, run scripts in **Git Bash** or **WSL** (`~` expands via `$HOME`).
 
-### Download (published packages)
+### Download (published package)
 
-CI publishes on push to `staging` / `main`. Each tarball includes `bundle/_super8-studio-api-shared/RELEASE` so `setup-env.sh` **does not ask** prod vs staging — the API URL matches the package:
-
-| Package | Download |
-| --- | --- |
-| Staging | https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz |
-| Production | https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz |
+Each tarball includes `bundle/_super8-studio-api-shared/RELEASE` so `setup-env.sh` automatically detects the correct API environment — no manual selection needed.
 
 ```bash
-curl -LO https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz
+curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
 tar -xzf super8-studio-api-skills-latest.tar.gz
 cd super8-studio-api-skills && ./install.sh && ./setup-env.sh
 ```
 
 **Local git checkout** has no `RELEASE` file — `setup-env.sh` prompts for API environment. Override anytime with `./setup-env.sh --api-url URL`.
-
-### Multi-channel install contract
-
-All install channels use the same canonical payload in `bundle/`.
-
-`install.sh` is the source of truth for copying skills and writing the install
-registry at `~/.super8-studio.config`. `setup-env.sh` is the source of truth for
-Developer API credentials. Installing skills does not mean credentials are
-configured.
-
-Supported entry points:
-
-| Entry point | Expected behavior |
-| --- | --- |
-| curl / tarball | Download package, extract, run `./install.sh`, then run `./setup-env.sh`. |
-| Codex marketplace | Install plugin metadata from `.codex-plugin/plugin.json`; follow setup docs because marketplace install is not assumed to run shell hooks. |
-| Claude marketplace | Install plugin metadata from `.claude-plugin/plugin.json`; follow setup docs because marketplace install is not assumed to run shell hooks. |
-| Vercel skills add | Use `npx skills add --...` when the external CLI contract is confirmed; registry setup is optional unless the CLI exposes a target path follow-up. |
-
-For the detailed flow and registry contract, see
-`docs/install-flow-contract.md`.
 
 ### Session token workflow
 
@@ -131,59 +105,13 @@ Shared skills folder (no per-agent subpaths):
 
 Legacy `--host` is deprecated; use `--agents` instead.
 
-### Codex marketplace install
-
-This branch includes Codex repository marketplace metadata:
-
-- `.codex-plugin/plugin.json`
-- `.agents/plugins/marketplace.json`
-
-Codex marketplace installation makes the plugin available to Codex. Do not
-assume it runs `install.sh` or writes `~/.super8-studio.config`.
-
-For local direct-skill testing outside the plugin install flow, use:
-
-```bash
-./install.sh --target ~/.agents/skills
-./setup-env.sh
-```
-
-If another installer has already copied `bundle/` into a known skills directory
-and only needs the registry for `setup-env.sh` / `uninstall.sh`, use:
-
-```bash
-scripts/register-install.sh --target <skills-dir>
-./setup-env.sh
-```
-
-### Claude marketplace install
-
-This branch includes Claude plugin metadata:
-
-- `.claude-plugin/plugin.json`
-- `.claude-plugin/marketplace.json`
-
-Claude marketplace installation uses Claude Code's plugin cache. Do not assume
-it runs `install.sh` or writes `~/.super8-studio.config`.
-
-### Vercel skills add
-
-The Vercel-style skills installer path is:
-
-```bash
-npx skills add --...
-```
-
-The exact flags and lifecycle behavior must be verified against the current
-`skills` CLI before public release. See `docs/vercel-skills-add.md`.
-
 ## Setup-env
 
 ```bash
 ./setup-env.sh
 ./setup-env.sh --check
 ./setup-env.sh --env-hints
-./setup-env.sh --api-url https://stage-api-next.no8.io   # local / cross-env override
+./setup-env.sh --api-url https://api-next.no8.io   # override API base URL
 ./setup-env.sh --repo-only --project-path /path/to/project
 ./setup-env.sh --no-open-browser
 ```
@@ -198,12 +126,6 @@ Or:
 
 ```bash
 bash <skills-target>/_super8-studio-api-shared/scripts/doctor.sh
-```
-
-Repository/package validation:
-
-```bash
-bash scripts/validate-skills.sh
 ```
 
 ## Update model

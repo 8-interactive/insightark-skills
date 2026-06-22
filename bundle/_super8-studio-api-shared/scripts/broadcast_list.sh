@@ -27,21 +27,17 @@ s8_require_command jq
 s8_load_runtime_env
 org_id="$(s8_resolve_org_id "$org_id")"
 
-url="/developer/v1/broadcasts?orgId=${org_id}"
-if [ -n "$limit" ]; then
-  url="${url}&limit=${limit}"
-fi
-if [ -n "$cursor" ]; then
-  url="${url}&cursor=${cursor}"
-fi
-if [ -n "$status_filter" ]; then
-  url="${url}&status=${status_filter}"
-fi
+query_parts=("$(s8_query_pair orgId "$org_id")")
+[ -n "$limit" ] && query_parts+=("$(s8_query_pair limit "$limit")")
+[ -n "$cursor" ] && query_parts+=("$(s8_query_pair cursor "$cursor")")
+[ -n "$status_filter" ] && query_parts+=("$(s8_query_pair status "$status_filter")")
+
+query_string="?$(IFS='&'; printf '%s' "${query_parts[*]}")"
 
 response_file="$(mktemp)"
 status_file="$(mktemp)"
 trap 'rm -f "$response_file" "$status_file"' EXIT
 
-s8_api_request GET "$url" "" "$response_file" "$status_file"
+s8_api_request GET "/developer/v1/broadcasts${query_string}" "" "$response_file" "$status_file"
 s8_expect_success "$(<"$status_file")" "$response_file"
 s8_print_json_file "$response_file"

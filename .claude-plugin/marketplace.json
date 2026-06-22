@@ -2,7 +2,7 @@
   "name": "super8-studio",
   "owner": {
     "name": "Super8",
-    "email": "platform@no8.io"
+    "email": "sales@no8.io"
   },
   "description": "Super 8 Studio Developer API plugins for agent workflows.",
   "version": "1.0.0",
@@ -21,13 +21,7 @@
       "repository": "https://github.com/8-interactive/super8-studio-api-skills",
       "license": "UNLICENSED",
       "category": "Productivity",
-      "keywords": [
-        "super8",
-        "studio",
-        "api",
-        "crm",
-        "skills"
-      ]
+      "keywords": ["super8", "studio", "api", "crm", "skills"]
     }
   ]
 }

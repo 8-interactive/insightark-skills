@@ -14,7 +14,6 @@ while [ "$#" -gt 0 ]; do
     --json-file) json_file="${2:-}"; shift 2 ;;
     *) printf 'Unknown option: %s\n' "$1" >&2; exit 1 ;;
   esac
-
 done
 
 if [ -z "$json_file" ] || [ ! -f "$json_file" ]; then

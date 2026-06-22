@@ -28,10 +28,12 @@ s8_require_command jq
 s8_load_runtime_env
 org_id="$(s8_resolve_org_id "$org_id")"
 
+query_string="?$(s8_query_pair orgId "$org_id")"
+
 response_file="$(mktemp)"
 status_file="$(mktemp)"
 trap 'rm -f "$response_file" "$status_file"' EXIT
 
-s8_api_request GET "/developer/v1/broadcasts/${broadcast_id}?orgId=${org_id}" "" "$response_file" "$status_file"
+s8_api_request GET "/developer/v1/broadcasts/${broadcast_id}${query_string}" "" "$response_file" "$status_file"
 s8_expect_success "$(<"$status_file")" "$response_file"
 s8_print_json_file "$response_file"
