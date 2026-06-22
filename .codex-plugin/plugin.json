@@ -20,7 +20,7 @@
     "marketing-automation",
     "skills"
   ],
-  "skills": "../bundle/",
+  "skills": "./skills/",
   "interface": {
     "displayName": "Super 8 Studio API Skills",
     "shortDescription": "Developer API skills for Super 8 Studio CRM workflows.",

@@ -43,7 +43,7 @@ validate_json() {
 validate_versions() {
   local bundle_version codex_plugin_version claude_plugin_version package_version
 
-  bundle_version="$(tr -d '[:space:]' <"$repo_dir/bundle/_super8-studio-api-shared/VERSION")"
+  bundle_version="$(tr -d '[:space:]' <"$repo_dir/skills/_super8-studio-api-shared/VERSION")"
   codex_plugin_version="$(json_value ".codex-plugin/plugin.json" "data => data.version")" || {
     fail ".codex-plugin/plugin.json version is missing"
     return
@@ -71,12 +71,12 @@ validate_codex_plugin_manifest() {
     fail ".codex-plugin/plugin.json skills is missing"
     return
   }
-  resolved_skills="$(CDPATH= cd -- "$repo_dir/.codex-plugin" && CDPATH= cd -- "$skills_path" && pwd)" || {
+  resolved_skills="$(CDPATH= cd -- "$repo_dir" && CDPATH= cd -- "$skills_path" && pwd)" || {
     fail ".codex-plugin/plugin.json skills path does not resolve: $skills_path"
     return
   }
-  if [ "$resolved_skills" = "$repo_dir/bundle" ]; then
-    pass "plugin skills path resolves to bundle/"
+  if [ "$resolved_skills" = "$repo_dir/skills" ]; then
+    pass "plugin skills path resolves to skills/"
   else
     fail "plugin skills path resolves to unexpected path: $resolved_skills"
   fi
@@ -99,12 +99,12 @@ validate_claude_plugin_manifest() {
     fail ".claude-plugin/plugin.json skills is missing"
     return
   }
-  resolved_skills="$(CDPATH= cd -- "$repo_dir/.claude-plugin" && CDPATH= cd -- "$skills_path" && pwd)" || {
+  resolved_skills="$(CDPATH= cd -- "$repo_dir" && CDPATH= cd -- "$skills_path" && pwd)" || {
     fail ".claude-plugin/plugin.json skills path does not resolve: $skills_path"
     return
   }
-  if [ "$resolved_skills" = "$repo_dir/bundle" ]; then
-    pass "Claude plugin skills path resolves to bundle/"
+  if [ "$resolved_skills" = "$repo_dir/skills" ]; then
+    pass "Claude plugin skills path resolves to skills/"
   else
     fail "Claude plugin skills path resolves to unexpected path: $resolved_skills"
   fi
@@ -176,12 +176,12 @@ validate_skills() {
     else
       fail "$folder_name description is missing or too short"
     fi
-  done < <(find "$repo_dir/bundle" -mindepth 1 -maxdepth 1 -type d -name 'super8-studio-*' | sort)
+  done < <(find "$repo_dir/skills" -mindepth 1 -maxdepth 1 -type d -name 'super8-studio-*' | sort)
 
   if [ "$count" -gt 0 ]; then
     pass "found $count skill directories"
   else
-    fail "no skill directories found under bundle/"
+    fail "no skill directories found under skills/"
   fi
 }
 
