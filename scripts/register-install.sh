@@ -6,7 +6,7 @@ script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 repo_dir="$(CDPATH= cd -- "$script_dir/.." && pwd)"
 
 source "$repo_dir/installer/common.sh"
-source "$repo_dir/bundle/_super8-studio-api-shared/scripts/lib/install-config.sh"
+source "$repo_dir/skills/_super8-studio-api-shared/scripts/lib/install-config.sh"
 
 base_dir=""
 agents_csv=""
@@ -18,7 +18,7 @@ print_usage() {
 Usage: scripts/register-install.sh [options]
 
 Records installed Super 8 Studio skills paths in ~/.super8-studio.config.
-This helper is for package managers that already copied bundle/ themselves.
+This helper is for package managers that already copied skills/ themselves.
 Prefer ./install.sh when the install flow can copy files directly.
 
 Options:

@@ -3,10 +3,10 @@
 set -euo pipefail
 
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-bundle_dir="$script_dir/bundle"
+bundle_dir="$script_dir/skills"
 
 source "$script_dir/installer/common.sh"
-source "$script_dir/bundle/_super8-studio-api-shared/scripts/lib/install-config.sh"
+source "$script_dir/skills/_super8-studio-api-shared/scripts/lib/install-config.sh"
 
 base_dir=""
 agents_csv=""

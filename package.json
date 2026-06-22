@@ -13,7 +13,7 @@
   "files": [
     ".codex-plugin/",
     ".claude-plugin/",
-    "bundle/",
+    "skills/",
     "docs/",
     "installer/",
     "scripts/",

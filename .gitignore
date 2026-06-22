@@ -5,4 +5,4 @@
 .super8-studio.env
 
 # CI-generated — injected at pack time, not committed
-bundle/_super8-studio-api-shared/RELEASE
+skills/_super8-studio-api-shared/RELEASE

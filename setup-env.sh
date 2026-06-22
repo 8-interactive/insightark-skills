@@ -3,10 +3,10 @@
 set -euo pipefail
 
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-env_lib="$script_dir/bundle/_super8-studio-api-shared/scripts/lib/env.sh"
-install_config_lib="$script_dir/bundle/_super8-studio-api-shared/scripts/lib/install-config.sh"
-release_lib="$script_dir/bundle/_super8-studio-api-shared/scripts/lib/release.sh"
-doctor_script="$script_dir/bundle/_super8-studio-api-shared/scripts/doctor.sh"
+env_lib="$script_dir/skills/_super8-studio-api-shared/scripts/lib/env.sh"
+install_config_lib="$script_dir/skills/_super8-studio-api-shared/scripts/lib/install-config.sh"
+release_lib="$script_dir/skills/_super8-studio-api-shared/scripts/lib/release.sh"
+doctor_script="$script_dir/skills/_super8-studio-api-shared/scripts/doctor.sh"
 example_file="$script_dir/.super8-studio.env.example"
 
 source "$script_dir/installer/common.sh"
@@ -325,7 +325,7 @@ if [ ! -f "$env_lib" ]; then
   exit 1
 fi
 
-# shellcheck source=bundle/_super8-studio-api-shared/scripts/lib/env.sh
+# shellcheck source=skills/_super8-studio-api-shared/scripts/lib/env.sh
 source "$env_lib"
 
 if [ "$env_hints_only" = "true" ]; then

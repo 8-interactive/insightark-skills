@@ -3,7 +3,7 @@
 set -euo pipefail
 
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-release_file="$script_dir/../bundle/_super8-studio-api-shared/RELEASE"
+release_file="$script_dir/../skills/_super8-studio-api-shared/RELEASE"
 branch="${DRONE_BRANCH:-}"
 
 case "$branch" in
