@@ -6,7 +6,11 @@
 
 <a name="english"></a>
 
-Reusable Developer API skills for Super 8 Studio CRM workflows — conversations, customers, broadcasts, and marketing automation.
+**Super 8 Studio API Skills** is a plugin for Claude Code and Codex that brings the [Super 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
+
+It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
+
+Credentials are managed securely through the platform's native keychain on Claude Code, or via an environment config file on Codex. A built-in health check runs automatically at session start to surface credential issues early.
 
 ## Plugin Install (Claude Code)
 
@@ -132,7 +136,11 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 <a name="中文"></a>
 
-Super 8 Studio CRM 工作流程的 Developer API Skills，涵蓋對話、客戶、廣播與行銷自動化。
+**Super 8 Studio API Skills** 是適用於 Claude Code 與 Codex 的 Plugin，將 [Super 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
+
+內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
+
+憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex 則透過環境設定檔管理。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
 
 ## Plugin 安裝（Claude Code）
 
