@@ -207,6 +207,160 @@ function promptHidden(question) {
   });
 }
 
+// ---- agent detection (for multi-select pre-checking) ----
+
+function dirExists(p) {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch (_err) {
+    return false;
+  }
+}
+
+// Install context: agents the user appears to use — their config dir (the
+// parent of the skills subpath, e.g. ".claude") exists under `base`.
+function detectAgentsAtBase(base) {
+  return AGENTS.filter((a) => dirExists(path.join(base, path.dirname(a.subpath)))).map(
+    (a) => a.id
+  );
+}
+
+// Uninstall context: agents that actually have the bundle installed under `base`.
+function detectAgentsWithBundle(base) {
+  return AGENTS.filter((a) =>
+    dirExists(path.join(base, a.subpath, "_super8-studio-api-shared"))
+  ).map((a) => a.id);
+}
+
+// ---- multi-select picker (checkbox on a TTY, typed list otherwise) ----
+
+const ARROW_UP = "\x1b[A";
+const ARROW_DOWN = "\x1b[B";
+
+// Typed fallback used when stdin is not a TTY (CI, pipes, smoke). Prints the
+// numbered list once, then reads a comma-separated answer (numbers / ids /
+// "all"), rejecting unknown agents and requiring at least one.
+async function multiSelectTyped(title, items, output) {
+  const w = (s) => output && output.write && output.write(s);
+  w(title + "\n");
+  items.forEach((it, i) => w(`  ${i + 1}) ${it.label} (${it.id})\n`));
+  const ask = async () => {
+    const choice = (await prompt('Selection [e.g. 1,3,5 or "all"]: ')).trim();
+    if (!choice) {
+      w("At least one agent is required.\n");
+      return ask();
+    }
+    if (choice === "all") return items.map((it) => it.id);
+    const out = [];
+    for (const raw of choice.split(",")) {
+      const item = raw.replace(/\s+/g, "");
+      if (!item) continue;
+      if (/^[0-9]+$/.test(item)) {
+        const idx = Number(item);
+        if (idx < 1 || idx > items.length) {
+          w(`Invalid selection: ${item}\n`);
+          return ask();
+        }
+        out.push(items[idx - 1].id);
+      } else if (items.some((it) => it.id === item)) {
+        out.push(item);
+      } else {
+        w(`Invalid selection: ${item}\n`);
+        return ask();
+      }
+    }
+    if (out.length === 0) {
+      w("At least one agent is required.\n");
+      return ask();
+    }
+    return Array.from(new Set(out));
+  };
+  return ask();
+}
+
+// Interactive checkbox picker. Returns the selected ids (>=1).
+function multiSelectInteractive(title, items, input, output, preselected) {
+  closeRl(); // raw mode needs exclusive stdin; release the shared line reader
+  const checked = new Set(preselected);
+  let cursor = 0;
+  let rendered = 0;
+  const hint = "↑/↓ (j/k) move · space toggle · a all · enter confirm";
+  const w = (s) => output && output.write && output.write(s);
+
+  function render(status) {
+    if (rendered > 0) w(`\x1b[${rendered}A`);
+    const lines = [title, hint];
+    items.forEach((it, i) => {
+      const cur = i === cursor ? "❯" : " ";
+      const box = checked.has(it.id) ? "[x]" : "[ ]";
+      lines.push(`${cur} ${box} ${it.label} (${it.id})`);
+    });
+    lines.push(status || `selected: ${[...checked].join(", ") || "(none)"}`);
+    w(lines.map((l) => `\x1b[2K${l}`).join("\n") + "\n");
+    rendered = lines.length;
+  }
+
+  return new Promise((resolve) => {
+    if (input.setRawMode) input.setRawMode(true);
+    if (input.resume) input.resume();
+    if (input.setEncoding) input.setEncoding("utf8");
+    w("\x1b[?25l"); // hide cursor
+    render();
+
+    const cleanup = () => {
+      input.removeListener("data", onData);
+      if (input.setRawMode) input.setRawMode(false);
+      if (input.pause) input.pause();
+      w("\x1b[?25h"); // restore cursor
+    };
+
+    const onData = (data) => {
+      const key = data.toString();
+      if (key === ARROW_UP || key === "k") {
+        cursor = (cursor - 1 + items.length) % items.length;
+        render();
+      } else if (key === ARROW_DOWN || key === "j") {
+        cursor = (cursor + 1) % items.length;
+        render();
+      } else if (key === " ") {
+        const id = items[cursor].id;
+        if (checked.has(id)) checked.delete(id);
+        else checked.add(id);
+        render();
+      } else if (key === "a") {
+        if (checked.size === items.length) checked.clear();
+        else items.forEach((it) => checked.add(it.id));
+        render();
+      } else if (key === "\r" || key === "\n") {
+        if (checked.size === 0) {
+          render("At least one agent is required.");
+          return;
+        }
+        cleanup();
+        resolve(items.filter((it) => checked.has(it.id)).map((it) => it.id));
+      } else if (key === "\x03") {
+        // Ctrl-C
+        cleanup();
+        w("\n");
+        process.exit(1);
+      }
+    };
+
+    input.on("data", onData);
+  });
+}
+
+// title: header line; items: [{id,label}]; opts: { input, output, isTTY, preselected }
+function multiSelect(title, items, opts = {}) {
+  const input = opts.input || process.stdin;
+  const output = opts.output || process.stderr;
+  const isTTY = opts.isTTY !== undefined ? opts.isTTY : Boolean(input.isTTY);
+  const preselected =
+    opts.preselected instanceof Set ? opts.preselected : new Set(opts.preselected || []);
+  if (!isTTY) return multiSelectTyped(title, items, output);
+  return multiSelectInteractive(title, items, input, output, preselected);
+}
+
 function openUrl(url) {
   let cmd;
   let args;
@@ -278,6 +432,9 @@ module.exports = {
   copyBundle,
   prompt,
   promptHidden,
+  multiSelect,
+  detectAgentsAtBase,
+  detectAgentsWithBundle,
   closeRl,
   openUrl,
   PRODUCTION_API_URL,

@@ -61,45 +61,16 @@ async function promptLocation() {
   }
 }
 
-async function promptAgents() {
+async function promptAgents(base) {
   err("------------------------------------------------------------");
   err("Step 2 of 3 — Which coding agents do you use?");
   err("------------------------------------------------------------");
-  err("");
-  err("Skills will be installed only for the agents you pick.");
-  err('Enter comma-separated numbers, agent ids, or "all":');
-  err("");
-  common.AGENTS.forEach((a, i) => {
-    err(`  ${i + 1}) ${a.label} (${a.id})`);
+  const items = common.AGENTS.map((a) => ({ id: a.id, label: a.label }));
+  // Pre-check agents the user appears to use (their config dir exists under base).
+  const preselected = common.detectAgentsAtBase(base);
+  return common.multiSelect("Skills will be installed for the agents you pick:", items, {
+    preselected,
   });
-  err("");
-  const choice = (await common.prompt("Selection [e.g. 3 for Cursor, or 1,3,5]: ")).trim();
-  if (!choice) {
-    err("At least one agent is required.");
-    return promptAgents();
-  }
-  if (choice === "all") return common.AGENTS.map((a) => a.id);
-
-  const selected = [];
-  for (const raw of choice.split(",")) {
-    const item = raw.replace(/\s+/g, "");
-    if (!item) continue;
-    if (/^[0-9]+$/.test(item)) {
-      const idx = Number(item);
-      if (idx < 1 || idx > common.AGENTS.length) {
-        err(`Invalid selection: ${item}`);
-        return promptAgents();
-      }
-      selected.push(common.AGENTS[idx - 1].id);
-    } else if (common.isSupportedAgent(item)) {
-      selected.push(item);
-    } else {
-      err(`Invalid selection: ${item}`);
-      return promptAgents();
-    }
-  }
-  // De-duplicate while preserving order.
-  return Array.from(new Set(selected));
 }
 
 function printPlan(layout, location, agents) {
@@ -208,7 +179,7 @@ async function run(argv) {
     err("");
 
     expandedBase = await promptLocation();
-    selectedAgents = await promptAgents();
+    selectedAgents = await promptAgents(expandedBase);
     if (selectedAgents.length === 0) {
       err("No agents selected.");
       return 1;
