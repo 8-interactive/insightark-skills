@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 "use strict";
 
-// Records installed Super 8 Studio skills paths in ~/.super8-studio.config.
+// Records installed SUPER 8 Studio skills paths in ~/.super8-studio.config.
 // For package managers that already copied skills/ themselves. Prefer
-// `super8-studio-api-skills install` when the flow can copy files directly.
+// `insightark-skills install` when the flow can copy files directly.
 
 const path = require("path");
 const common = require(path.join(__dirname, "..", "installer", "common.js"));
@@ -24,7 +24,7 @@ function printUsage() {
     [
       "Usage: register-install.js [options]",
       "",
-      "Records installed Super 8 Studio skills paths in ~/.super8-studio.config.",
+      "Records installed SUPER 8 Studio skills paths in ~/.super8-studio.config.",
       "",
       "Options:",
       "  --target PATH     Installed skills directory to record",
@@ -98,7 +98,7 @@ function main() {
 
   installConfig.writeInstallConfig(layout, expandedBase, agentsCsv, installTargets);
   process.stdout.write(
-    `Recorded Super 8 Studio skills install registry: ${common.formatDisplayPath(
+    `Recorded SUPER 8 Studio skills install registry: ${common.formatDisplayPath(
       installConfig.installConfigPath()
     )}\n`
   );

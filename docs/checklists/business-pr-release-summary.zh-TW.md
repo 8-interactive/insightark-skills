@@ -1,4 +1,4 @@
-# Super 8 Studio API Skills 商業與 PR 快速確認表
+# SUPER 8 Studio InsightArk Skills 商業與 PR 快速確認表
 
 這份文件是主管快速掃描版，根據目前 repo 內容先填入預設值。需要主管定調或尚未在 repo 中確認的項目，標示為「待確認」。
 
@@ -16,8 +16,8 @@
 
 ## 品牌與產品名稱
 
-- 正式產品名稱：`Super 8 Studio API Skills`。
-- 正式 publisher / 公司名稱：`Super8`、`Super 8 Studio`。
+- 正式產品名稱：`SUPER 8 Studio InsightArk Skills`。
+- 正式 publisher / 公司名稱：`Super8`、`SUPER 8 Studio`。
 - 官網 URL：`https://www.no8.io`。
 - Public support contact：`platform@no8.io`。
 - Brand color：`#2F6FED`。
@@ -41,7 +41,7 @@
 
 ## 發佈渠道
 
-- GitHub repository URL：`https://github.com/8-interactive/super8-studio-api-skills`。
+- GitHub repository URL：`https://github.com/8-interactive/insightark-skills`。
 - Direct tarball download：目前 README 使用 `https://downloads.no8.io/...`。
 - Codex marketplace：待確認是否作為本次正式渠道。
 - Claude marketplace：待確認是否作為本次正式渠道。
@@ -54,7 +54,7 @@
 
 ## 對外訊息界線
 
-- 一句話定位：讓 AI agent 透過 Super 8 Studio Developer API 協助處理 CRM、conversation、customer、broadcast 與 marketing automation 工作。
+- 一句話定位：讓 AI agent 透過 SUPER 8 Studio Developer API 協助處理 CRM、conversation、customer、broadcast 與 marketing automation 工作。
 - 是否提到 Developer API token：待確認。
   - 若提到，建議明確說明 token 由 Super 8 Console 建立。
 - 是否提到 write actions：待確認。

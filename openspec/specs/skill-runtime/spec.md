@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how Super 8 Studio skills execute as Node scripts: the invocation contract, credential resolution and load order, organization context, API request and error handling, and JSON output.
+Defines how SUPER 8 Studio skills execute as Node scripts: the invocation contract, credential resolution and load order, organization context, API request and error handling, and JSON output.
 
 ## Requirements
 

@@ -1,13 +1,13 @@
 ---
 name: super8-studio-conversation-detail
-description: Operate on the Super 8 Studio Developer API to inspect one conversation and its public message timeline.
+description: Operate on the SUPER 8 Studio Developer API to inspect one conversation and its public message timeline.
 when_to_use: When a user already has a conversation id or wants to open a conversation result and optionally read its messages.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-conversation-detail
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Scripts
 

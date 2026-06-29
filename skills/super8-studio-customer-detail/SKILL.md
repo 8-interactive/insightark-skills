@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-detail
-description: Operate on the Super 8 Studio Developer API to inspect one organization-scoped customer detail record.
+description: Operate on the SUPER 8 Studio Developer API to inspect one organization-scoped customer detail record.
 when_to_use: When a user already has a customer id and wants the public developer-facing customer detail payload for that organization.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-detail
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

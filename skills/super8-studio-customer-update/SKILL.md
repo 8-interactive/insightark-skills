@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-update
-description: Operate on the Super 8 Studio Developer API to update supported public customer profile fields for one organization-scoped customer.
+description: Operate on the SUPER 8 Studio Developer API to update supported public customer profile fields for one organization-scoped customer.
 when_to_use: When a user explicitly asks to change supported customer profile fields such as display name, email, language, or other documented public customer attributes.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-update
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

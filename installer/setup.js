@@ -229,7 +229,7 @@ async function run(argv) {
   }
 
   if (mode === "user") {
-    err("Super 8 Studio API — credential setup");
+    err("SUPER 8 Studio API — credential setup");
     err("");
     err("Connect your Super 8 account so skills can call the API.");
     if (!installConfig.installConfigPresent()) {

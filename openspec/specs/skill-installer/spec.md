@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the npx-based Node installer for the Super 8 Studio skill bundle: its entry point, interactive and non-interactive flows, supported coding agents, copy semantics, and install registry management.
+Defines the npx-based Node installer for the SUPER 8 Studio skill bundle: its entry point, interactive and non-interactive flows, supported coding agents, copy semantics, and install registry management.
 
 ## Requirements
 

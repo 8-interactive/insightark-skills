@@ -20,19 +20,19 @@ skills_targets=<comma-separated resolved skills folders>
 installed_at=<UTC timestamp>
 ```
 
-`the Node setup (super8-studio-api-skills setup)`, `the Node uninstaller`, and runtime credential loading use this registry
+`the Node setup (insightark-skills setup)`, `the Node uninstaller`, and runtime credential loading use this registry
 to find installed skill directories when it exists. Marketplace and external
 skills-manager installs may not run repository scripts, so skills must also be
-able to guide users toward `the Node setup (super8-studio-api-skills setup)` or a manual env file fallback.
+able to guide users toward `the Node setup (insightark-skills setup)` or a manual env file fallback.
 
 ## 1. curl / Tarball
 
 Current flow:
 
 ```bash
-curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
-tar -xzf super8-studio-api-skills-latest.tar.gz
-cd super8-studio-api-skills
+curl -LO https://downloads.no8.io/main/releases/skills/insightark-skills-latest.tar.gz
+tar -xzf insightark-skills-latest.tar.gz
+cd insightark-skills
 npx @8-interactive/insightark-skills install
 npx @8-interactive/insightark-skills setup
 ```
@@ -119,7 +119,7 @@ npx @8-interactive/insightark-skills setup
 ```
 
 If it cannot run follow-up commands, rely on `~/.super8-studio.env`, process
-environment variables, or a manual `the Node setup (super8-studio-api-skills setup)` run from a downloaded package.
+environment variables, or a manual `the Node setup (insightark-skills setup)` run from a downloaded package.
 
 ## Answering the Current Flow Questions
 
@@ -151,7 +151,7 @@ fallbacks.
 
 | Channel | Must verify |
 | --- | --- |
-| curl/tarball | Tarball extracts, `installer/install.js` copies `skills/`, registry exists, `the Node setup (super8-studio-api-skills setup) --check` runs. |
+| curl/tarball | Tarball extracts, `installer/install.js` copies `skills/`, registry exists, `the Node setup (insightark-skills setup) --check` runs. |
 | Codex marketplace | `.codex-plugin/plugin.json` resolves `../skills/`, `.agents/plugins/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
 | Claude marketplace | `.claude-plugin/plugin.json` resolves `../skills/`, `.claude-plugin/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
 | Vercel skills add | Package includes all runtime files, docs state CLI lifecycle assumptions, registry is optional unless a follow-up target path is available. |

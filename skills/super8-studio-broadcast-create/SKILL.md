@@ -1,13 +1,13 @@
 ---
 name: super8-studio-broadcast-create
-description: Operate on the Super 8 Studio Developer API to create an asynchronous broadcast that dispatches a message batch to many customers selected by either an explicit id list or a customer-search filter.
+description: Operate on the SUPER 8 Studio Developer API to create an asynchronous broadcast that dispatches a message batch to many customers selected by either an explicit id list or a customer-search filter.
 when_to_use: When a user explicitly asks to launch a broadcast with explicit recipient selection and explicit message content.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-broadcast-create
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

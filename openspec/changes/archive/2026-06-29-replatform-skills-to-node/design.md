@@ -1,6 +1,6 @@
 ## Context
 
-The bundle ships ~24 thin bash command scripts (`skills/_super8-studio-api-shared/scripts/*.sh`) plus three core libs — `env.sh` (credential load order), `http.sh` (curl wrapper), `output.sh` (jq-based JSON printing) — and two config libs (`install-config.sh`, `release.sh`). Each `SKILL.md` names a `.sh` script. Installation is a bash flow (`install.sh` + `installer/common.sh`) reachable through `npx super8-studio-api-skills install`, which spawns `bash`. Credential setup (`setup-env.sh`) and the doctor health check are bash too.
+The bundle ships ~24 thin bash command scripts (`skills/_super8-studio-api-shared/scripts/*.sh`) plus three core libs — `env.sh` (credential load order), `http.sh` (curl wrapper), `output.sh` (jq-based JSON printing) — and two config libs (`install-config.sh`, `release.sh`). Each `SKILL.md` names a `.sh` script. Installation is a bash flow (`install.sh` + `installer/common.sh`) reachable through `npx insightark-skills install`, which spawns `bash`. Credential setup (`setup-env.sh`) and the doctor health check are bash too.
 
 This design replaces all of that with Node so install, credential setup, and skill runtime work on macOS, Linux, and native Windows. The decisions below were settled during exploration (`/opsx:explore`).
 

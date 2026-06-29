@@ -1,6 +1,6 @@
 ---
 name: super8-studio-ma-automation
-description: Create, publish, pause, inspect, and manually trigger Marketing Automation procedures on the Super 8 Studio Developer API (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON.
+description: Create, publish, pause, inspect, and manually trigger Marketing Automation procedures on the SUPER 8 Studio Developer API (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON.
 when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via the Developer API.
 allowed-mcp: false
 ---

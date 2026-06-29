@@ -1,13 +1,13 @@
 ---
 name: super8-studio-broadcast-list
-description: Operate on the Super 8 Studio Developer API to list an organization's broadcast tasks newest first with forward-only cursor pagination.
+description: Operate on the SUPER 8 Studio Developer API to list an organization's broadcast tasks newest first with forward-only cursor pagination.
 when_to_use: When a user wants to browse recent broadcasts in one organization, optionally filtered by status, or to walk the full broadcast history forward via cursor.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-broadcast-list
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

@@ -207,7 +207,7 @@ function printMissingCredentialsHelp(state) {
     })`
   );
   out.push("");
-  out.push("Authenticate: super8-studio-api-skills login");
+  out.push("Authenticate: insightark-skills login");
   out.push(`Or create ${userPath} with S8_SESSION_TOKEN — see .super8-studio.env.example`);
   out.push("");
   process.stderr.write(out.join("\n") + "\n");

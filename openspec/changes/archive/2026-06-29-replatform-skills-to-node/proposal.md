@@ -1,6 +1,6 @@
 ## Why
 
-The Super 8 Studio skill bundle is implemented entirely in bash and depends on `curl`, `jq`, and `date` at runtime, so the skills cannot run on native Windows (no WSL/Git Bash) and silently require external tools elsewhere. We want a single `npx` install flow that lets a user pick where and which coding agent to install into, and skills that run identically on macOS, Linux, and native Windows.
+The SUPER 8 Studio skill bundle is implemented entirely in bash and depends on `curl`, `jq`, and `date` at runtime, so the skills cannot run on native Windows (no WSL/Git Bash) and silently require external tools elsewhere. We want a single `npx` install flow that lets a user pick where and which coding agent to install into, and skills that run identically on macOS, Linux, and native Windows.
 
 ## What Changes
 

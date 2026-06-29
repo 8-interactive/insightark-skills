@@ -1,7 +1,7 @@
 # Distribution Implementation Guide
 
-This guide records the current distribution decisions for the Super 8 Studio
-API skills repository. Use it as the implementation reference when adding,
+This guide records the current distribution decisions for the SUPER 8 Studio
+InsightArk Skills repository. Use it as the implementation reference when adding,
 changing, or validating install paths.
 
 ## Goal

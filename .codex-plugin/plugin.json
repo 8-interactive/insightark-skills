@@ -1,14 +1,14 @@
 {
-  "name": "super8-studio-api-skills",
+  "name": "insightark-skills",
   "version": "0.5.2",
-  "description": "Reusable Super 8 Studio Developer API skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "description": "Reusable SUPER 8 Studio InsightArk Skills for conversations, customers, broadcasts, and marketing automation workflows.",
   "author": {
-    "name": "Super8",
+    "name": "SUPER 8 Studio",
     "url": "https://www.no8.io"
   },
   "homepage": "https://www.no8.io",
-  "repository": "https://github.com/8-interactive/super8-studio-api-skills",
-  "license": "UNLICENSED",
+  "repository": "https://github.com/8-interactive/insightark-skills",
+  "license": "Apache-2.0",
   "keywords": [
     "super8",
     "studio",
@@ -22,10 +22,10 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Super 8 Studio API Skills",
-    "shortDescription": "Developer API skills for Super 8 Studio CRM workflows.",
-    "longDescription": "A curated set of skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the Super 8 Studio Developer API.",
-    "developerName": "Super8",
+    "displayName": "SUPER 8 Studio InsightArk Skills",
+    "shortDescription": "SUPER 8 Studio InsightArk Skills for CRM workflows.",
+    "longDescription": "A curated set of SUPER 8 Studio InsightArk Skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the SUPER 8 Studio Developer API.",
+    "developerName": "SUPER 8 Studio",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://www.no8.io",
@@ -33,7 +33,7 @@
     "termsOfServiceURL": "https://www.no8.io/terms",
     "brandColor": "#2F6FED",
     "defaultPrompt": [
-      "Use super8-studio-session to validate my Super 8 Studio API setup.",
+      "Use super8-studio-session to validate my SUPER 8 Studio API setup.",
       "Use super8-studio-investigator to investigate recent conversations.",
       "Use super8-studio-customer-manager to search and update customers.",
       "Use super8-studio-broadcast-manager to create and monitor a broadcast."

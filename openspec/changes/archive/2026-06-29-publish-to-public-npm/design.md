@@ -1,6 +1,6 @@
 ## Context
 
-The bundle is a zero-dependency Node package with a `bin` (`super8-studio-api-skills` → `scripts/super8-skills-cli.js`) and a `files` allowlist (`.claude-plugin/`, `.codex-plugin/`, `hooks/`, `skills/`, `docs/`, `installer/`, `scripts/`, README/SECURITY/CHANGELOG). `publishConfig.access` is currently `restricted` and the name is `@super8/studio-api-skills`, which mismatches the GitHub org/repo (`8-interactive/insightark-skills`). Two client install paths exist: the Claude Code / Codex plugin marketplace (git-repo based, `source: "./"`) and `npx <package>`.
+The bundle is a zero-dependency Node package with a `bin` (`insightark-skills` → `scripts/super8-skills-cli.js`) and a `files` allowlist (`.claude-plugin/`, `.codex-plugin/`, `hooks/`, `skills/`, `docs/`, `installer/`, `scripts/`, README/SECURITY/CHANGELOG). `publishConfig.access` is currently `restricted` and the name is `@super8/studio-api-skills`, which mismatches the GitHub org/repo (`8-interactive/insightark-skills`). Two client install paths exist: the Claude Code / Codex plugin marketplace (git-repo based, `source: "./"`) and `npx <package>`.
 
 Constraints settled during exploration: source repo stays private for now; the `npx … install` command must be public; both agent families must work; clients do **not** need the managed-plugin experience (skills-installed-and-usable is enough).
 
@@ -25,9 +25,9 @@ Publish `@8-interactive/insightark-skills` to public npm; `npx @8-interactive/in
 - **Alternatives**: `npx github:…` (rejected — needs repo access); tarball URL (rejected — ugly command, manual version discovery); private scoped npm (rejected — clients would need tokens).
 
 ### D2: Rename npm name only; defer bin/plugin identifiers
-Change `package.json` `name` to `@8-interactive/insightark-skills`. Leave `bin` (`super8-studio-api-skills`) and `.claude-plugin`/`.codex-plugin`/marketplace identifiers unchanged.
+Change `package.json` `name` to `@8-interactive/insightark-skills`. Leave `bin` (`insightark-skills`) and `.claude-plugin`/`.codex-plugin`/marketplace identifiers unchanged.
 - **Why**: Aligns the public command with the org/repo and resolves the `@super8` mismatch with minimal churn. `npx @scope/name` runs the package's single `bin` regardless of the bin's name, so the rename is invisible to clients.
-- **Trade-off**: A globally-installed CLI would still be named `super8-studio-api-skills`; documented as a known minor inconsistency, to be aligned later if desired.
+- **Trade-off**: A globally-installed CLI would still be named `insightark-skills`; documented as a known minor inconsistency, to be aligned later if desired.
 
 ### D3: Publish is gated and tag-triggered
 A CI job publishes on a pushed version tag, only after `npm run validate`, `npm test`, and `npm run smoke` pass on the release commit. Uses an `NPM_TOKEN` repo secret with publish rights to `@8-interactive`.
@@ -47,7 +47,7 @@ The `files` allowlist already excludes `openspec/`, `test/`, `AGENTS.md`, `CLAUD
 - **First publish ships the wrong version** → If published before PR #2/#3 merge to `main`, clients get the old bash bundle. Mitigation: gate the first release on those merges; tag only from the Node `main`.
 - **Public exposure of skill scripts** → All shipped `.js` become world-readable. Mitigation: secret scan in the release gate; the bundle is API-client code with no embedded credentials.
 - **`NPM_TOKEN` leakage** → A publish token in CI is sensitive. Mitigation: use a granular automation token scoped to publish for `@8-interactive`; store as a masked CI secret; never echo it.
-- **Name/bin inconsistency confusion** → Package `@8-interactive/insightark-skills` vs bin `super8-studio-api-skills`. Mitigation: document; only visible on global installs, not via `npx`.
+- **Name/bin inconsistency confusion** → Package `@8-interactive/insightark-skills` vs bin `insightark-skills`. Mitigation: document; only visible on global installs, not via `npx`.
 - **Version drift across manifests** → `validate` already enforces version sync between `package.json`, both plugin manifests, and the bundle `VERSION`; keep that check in the release gate.
 
 ## Migration Plan

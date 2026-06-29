@@ -1,13 +1,13 @@
 ---
 name: super8-studio-broadcast-manager
-description: Investigate and operate on broadcast tasks through the Super 8 Studio Developer API using session validation, org scoping, broadcast creation, broadcast inspection, and broadcast listing.
+description: Investigate and operate on broadcast tasks through the SUPER 8 Studio Developer API using session validation, org scoping, broadcast creation, broadcast inspection, and broadcast listing.
 when_to_use: When a user wants a single broadcast-oriented workflow that can validate API readiness, resolve organization scope, launch a broadcast, inspect one broadcast's progress, or browse recent broadcasts.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-broadcast-manager
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Composed skills
 
