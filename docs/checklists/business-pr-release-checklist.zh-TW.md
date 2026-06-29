@@ -72,7 +72,7 @@
 - [ ] 確認 GitHub repository 是否可對外使用。
   - 目前 URL：`https://github.com/8-interactive/super8-studio-api-skills`。
 - [ ] 確認 npm package visibility。
-  - 目前 package：`@super8/studio-api-skills`。
+  - 目前 package：`@8-interactive/insightark-skills`。
   - 目前設定：`restricted`。
   - [ ] Restricted。
   - [ ] Public。

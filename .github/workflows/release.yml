@@ -1,0 +1,42 @@
+name: Release
+
+# Publishes the bundle to public npm when a version tag (v*) is pushed.
+# Gated: nothing is published unless validate + test + smoke all pass.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Publish @8-interactive/insightark-skills
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          # Configures ~/.npmrc to read the token from NODE_AUTH_TOKEN at publish.
+          registry-url: "https://registry.npmjs.org"
+
+      # The bundle ships zero runtime dependencies — nothing to install.
+
+      - name: Gate — validate
+        run: npm run validate
+
+      - name: Gate — tests
+        run: npm test
+
+      - name: Gate — smoke
+        run: npm run smoke
+
+      - name: Publish to public npm
+        run: npm publish --access public
+        env:
+          # Granular automation token with publish rights to @8-interactive.
+          # Stored as a masked CI secret; never echoed.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -12,30 +12,18 @@ It provides a curated set of reusable skills covering the full CRM lifecycle —
 
 Credentials are managed securely through the platform's native keychain on Claude Code, or via an environment config file on Codex. A built-in health check runs automatically at session start to surface credential issues early.
 
-## Plugin Install (Claude Code)
-
-### 1. Add marketplace and install
+## Install for Claude Code
 
 ```bash
-claude plugin marketplace add 8-interactive/super8-studio-api-skills
-claude plugin install super8-studio-api-skills@super8-studio-api-skills
+npx @8-interactive/insightark-skills install --agents claude-code
+npx @8-interactive/insightark-skills setup     # configure the session token, then doctor
 ```
 
-During installation, Claude Code will prompt for:
+This copies the skills into `~/.claude/skills` and configures your session token.
 
-| Variable | Description |
-| --- | --- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
-
-### 2. Enable the plugin
-
-Installed disabled by default (connects to an external API):
-
-```bash
-claude plugin enable super8-studio-api-skills@super8-studio-api-skills
-```
-
-A `SessionStart` hook runs `doctor.js` automatically so credential issues surface at the start of every session.
+> The managed plugin-marketplace install (with `userConfig` prompts and a
+> `SessionStart` doctor hook) will be available once the repository is public.
+> Until then, use the npx install above.
 
 ### Session token
 
@@ -46,26 +34,16 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ---
 
-## Plugin Install (Codex)
-
-### 1. Add marketplace and install
+## Install for Codex
 
 ```bash
-codex plugin marketplace add 8-interactive/super8-studio-api-skills
-codex plugin install super8-studio-api-skills@super8-studio-api-skills
+npx @8-interactive/insightark-skills install --agents codex
+npx @8-interactive/insightark-skills setup
 ```
 
-### 2. Configure credentials
+This copies the skills into `~/.codex/skills` and writes credentials to `~/.super8-studio.env`.
 
-Codex does not use a system keychain. Run the Node setup to write credentials to `~/.super8-studio.env`:
-
-```bash
-npx @super8/studio-api-skills setup
-```
-
-| Variable | Description |
-| --- | --- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken` |
+> The plugin-marketplace install will be available once the repository is public.
 
 ### Session token
 
@@ -81,9 +59,9 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 Pure Node — works on macOS, Linux, and **native Windows** (no bash, `curl`, or `jq` required). Node 18+ only.
 
 ```bash
-npx @super8/studio-api-skills install     # interactive: choose location → agents → confirm
-npx @super8/studio-api-skills setup       # configure credentials, then run doctor
-npx @super8/studio-api-skills doctor      # health check
+npx @8-interactive/insightark-skills install     # interactive: choose location → agents → confirm
+npx @8-interactive/insightark-skills setup       # configure credentials, then run doctor
+npx @8-interactive/insightark-skills doctor      # health check
 ```
 
 The installer asks **where** to install — global (`~`) or this repo (current
@@ -105,10 +83,10 @@ folder.
 ### Non-interactive / advanced
 
 ```bash
-npx @super8/studio-api-skills install --location global --agents claude-code,cursor,codex
-npx @super8/studio-api-skills install --location repo --agents all
-npx @super8/studio-api-skills install --target ~/.agents/skills   # shared folder, no per-agent subpaths
-npx @super8/studio-api-skills uninstall --location global --agents claude-code,codex
+npx @8-interactive/insightark-skills install --location global --agents claude-code,cursor,codex
+npx @8-interactive/insightark-skills install --location repo --agents all
+npx @8-interactive/insightark-skills install --target ~/.agents/skills   # shared folder, no per-agent subpaths
+npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
 ```
 
 ---
@@ -148,30 +126,16 @@ npx @super8/studio-api-skills uninstall --location global --agents claude-code,c
 
 憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex 則透過環境設定檔管理。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
 
-## Plugin 安裝（Claude Code）
-
-### 1. 加入 Marketplace 並安裝
+## 安裝（Claude Code）
 
 ```bash
-claude plugin marketplace add 8-interactive/super8-studio-api-skills
-claude plugin install super8-studio-api-skills@super8-studio-api-skills
+npx @8-interactive/insightark-skills install --agents claude-code
+npx @8-interactive/insightark-skills setup     # 設定 session token,接著 doctor
 ```
 
-安裝過程中，Claude Code 會提示輸入以下資訊：
+會把 skills 複製進 `~/.claude/skills` 並設定你的 session token。
 
-| 變數 | 說明 |
-| --- | --- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
-
-### 2. 啟用 Plugin
-
-預設為停用狀態（因需連線至外部 API）：
-
-```bash
-claude plugin enable super8-studio-api-skills@super8-studio-api-skills
-```
-
-`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.js`，讓憑證問題提早浮現。
+> 受管理的外掛市集安裝（含 `userConfig` 提示與 `SessionStart` doctor hook）會在 repo 公開後提供；在那之前請用上面的 npx 安裝。
 
 ### Session Token 取得方式
 
@@ -182,26 +146,16 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ---
 
-## Plugin 安裝（Codex）
-
-### 1. 加入 Marketplace 並安裝
+## 安裝（Codex）
 
 ```bash
-codex plugin marketplace add 8-interactive/super8-studio-api-skills
-codex plugin install super8-studio-api-skills@super8-studio-api-skills
+npx @8-interactive/insightark-skills install --agents codex
+npx @8-interactive/insightark-skills setup
 ```
 
-### 2. 設定憑證
+會把 skills 複製進 `~/.codex/skills`,並把憑證寫入 `~/.super8-studio.env`。
 
-Codex 不使用系統鑰匙圈，請執行 Node setup 將憑證寫入 `~/.super8-studio.env`：
-
-```bash
-npx @super8/studio-api-skills setup
-```
-
-| 變數 | 說明 |
-| --- | --- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken` |
+> 外掛市集安裝會在 repo 公開後提供。
 
 ### Session Token 取得方式
 
@@ -217,9 +171,9 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 純 Node 實作——可在 macOS、Linux 與**原生 Windows** 上執行（無需 bash、`curl` 或 `jq`）。僅需 Node 18+。
 
 ```bash
-npx @super8/studio-api-skills install     # 互動式：選擇位置 → agents → 確認
-npx @super8/studio-api-skills setup       # 設定憑證，接著執行 doctor
-npx @super8/studio-api-skills doctor      # 健康檢查
+npx @8-interactive/insightark-skills install     # 互動式：選擇位置 → agents → 確認
+npx @8-interactive/insightark-skills setup       # 設定憑證，接著執行 doctor
+npx @8-interactive/insightark-skills doctor      # 健康檢查
 ```
 
 安裝器會詢問**安裝位置**——global（`~`）或此 repo（當前目錄）——以及要**安裝給哪些
@@ -240,10 +194,10 @@ skills 複製到各 agent 的 skills 資料夾。
 ### 非互動 / 進階
 
 ```bash
-npx @super8/studio-api-skills install --location global --agents claude-code,cursor,codex
-npx @super8/studio-api-skills install --location repo --agents all
-npx @super8/studio-api-skills install --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
-npx @super8/studio-api-skills uninstall --location global --agents claude-code,codex
+npx @8-interactive/insightark-skills install --location global --agents claude-code,cursor,codex
+npx @8-interactive/insightark-skills install --location repo --agents all
+npx @8-interactive/insightark-skills install --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
+npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
 ```
 
 ---

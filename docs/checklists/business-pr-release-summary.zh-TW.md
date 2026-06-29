@@ -45,7 +45,7 @@
 - Direct tarball download：目前 README 使用 `https://downloads.no8.io/...`。
 - Codex marketplace：待確認是否作為本次正式渠道。
 - Claude marketplace：待確認是否作為本次正式渠道。
-- npm package：`@super8/studio-api-skills`。
+- npm package：`@8-interactive/insightark-skills`。
   - 目前 visibility 設定：`restricted`。
   - 本次是否發 npm：待確認。
 - Vercel `npx skills add`：待確認。
