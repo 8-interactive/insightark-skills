@@ -21,7 +21,7 @@ async function verifyOrLogin(interactive) {
       if (v.ok) err(`Authenticated as ${v.email || "your account"}.`);
       else err("A token is present but could not be verified. Run `login` to authenticate.");
     } else {
-      err("Next: authenticate with `super8-studio-api-skills login`.");
+      err("Next: authenticate with `insightark-skills login`.");
     }
     return;
   }
@@ -48,7 +48,7 @@ async function verifyOrLogin(interactive) {
     const login = require("./login.js");
     await login.run([]);
   } else {
-    err("You can authenticate later with `super8-studio-api-skills login`.");
+    err("You can authenticate later with `insightark-skills login`.");
   }
 }
 
@@ -120,7 +120,7 @@ function printPlan(layout, location, agents) {
   err("  Confirm installation");
   err("============================================================");
   err("");
-  err("Super 8 Studio API skills will be installed to:");
+  err("SUPER 8 Studio InsightArk Skills will be installed to:");
   err("");
   if (layout === "direct") {
     err(`  • ${common.formatDisplayPath(location)}`);
@@ -213,7 +213,7 @@ async function run(argv) {
   } else if (interactive) {
     err("");
     err("============================================================");
-    err("  Super 8 Studio API Skills — Installer");
+    err("  SUPER 8 Studio InsightArk Skills — Installer");
     err("============================================================");
     err("");
     err(`Package: ${common.countBundleSkills(common.BUNDLE_DIR)} skill(s) from this bundle.`);
@@ -270,7 +270,7 @@ async function run(argv) {
   err(`API environment: ${apiEnv.channel} (${apiEnv.apiUrl})`);
 
   err("");
-  err("Installing Super 8 Studio API skills...");
+  err("Installing SUPER 8 Studio InsightArk Skills...");
   err("");
   for (const target of installTargets) {
     err(`  → ${common.formatDisplayPath(target)}`);

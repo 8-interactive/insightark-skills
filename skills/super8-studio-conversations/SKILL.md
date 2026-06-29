@@ -1,13 +1,13 @@
 ---
 name: super8-studio-conversations
-description: Operate on the Super 8 Studio Developer API to browse conversation lists with organization scope, cursors, and supported filters.
+description: Operate on the SUPER 8 Studio Developer API to browse conversation lists with organization scope, cursors, and supported filters.
 when_to_use: When a user wants to find or list conversations by organization, customer, platform, inbox state, time filter, or cursor.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-conversations
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

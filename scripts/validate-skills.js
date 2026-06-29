@@ -99,13 +99,13 @@ function validateMarketplaceSources() {
 function validatePackageBin() {
   let binPath;
   try {
-    binPath = readJson("package.json").bin["super8-studio-api-skills"];
+    binPath = readJson("package.json").bin["insightark-skills"];
   } catch (_e) {
-    fail("package.json bin.super8-studio-api-skills is missing");
+    fail("package.json bin.insightark-skills is missing");
     return;
   }
   if (!binPath) {
-    fail("package.json bin.super8-studio-api-skills is missing");
+    fail("package.json bin.insightark-skills is missing");
     return;
   }
   binPath = binPath.replace(/^\.\//, "");

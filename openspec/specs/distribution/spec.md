@@ -3,12 +3,10 @@
 ## Purpose
 
 Defines how the skills bundle is distributed: published as a public npm package installable via `npx` for any supported agent, released through gated tag-triggered CI, with a controlled artifact allowlist and a private-source / public-artifact split.
-
 ## Requirements
-
 ### Requirement: Public npm package identity
 
-The bundle SHALL be published to the public npm registry as `@8-interactive/insightark-skills` with `publishConfig.access` set to `public`. The package SHALL declare a `bin` so it is runnable via `npx`. The npm package name MAY differ from the `bin` command name and the plugin manifest identifiers.
+The bundle SHALL be published to the public npm registry as `@8-interactive/insightark-skills` with `publishConfig.access` set to `public`. The package SHALL declare a `bin` so it is runnable via `npx`. The `bin` command name and the plugin manifest identifiers SHALL be `insightark-skills`, aligned with the unscoped npm package name.
 
 #### Scenario: Public, auth-free resolution
 
@@ -19,6 +17,11 @@ The bundle SHALL be published to the public npm registry as `@8-interactive/insi
 
 - **WHEN** the package is published
 - **THEN** `publishConfig.access` is `public` and the package is installable by anyone
+
+#### Scenario: Identifiers are aligned
+
+- **WHEN** the `package.json` `bin` key and the `name` field of `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, and `.agents/plugins/marketplace.json` are read
+- **THEN** each is `insightark-skills`
 
 ### Requirement: Client install command for all agents
 
@@ -70,3 +73,4 @@ The source repository MAY remain private while the published npm artifact is pub
 
 - **WHEN** the source repository is private and a client installs via `npx @8-interactive/insightark-skills install`
 - **THEN** the install succeeds using only the public npm artifact
+

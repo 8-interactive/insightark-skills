@@ -1,4 +1,4 @@
-# Super 8 Studio API Skills 商業與 PR 發佈定調清單
+# SUPER 8 Studio InsightArk Skills 商業與 PR 發佈定調清單
 
 這份文件提供給主管、CEO、法務與發佈負責人，用來確認是否可以對外發佈，以及要用什麼形式發佈。細部文案、素材製作與活動規劃交由行銷、PM 或平台負責人後續執行。
 
@@ -23,9 +23,9 @@
 ## 2. 品牌與產品名稱
 
 - [ ] 確認正式產品名稱。
-  - 目前建議：`Super 8 Studio API Skills`。
+  - 目前建議：`SUPER 8 Studio InsightArk Skills`。
 - [ ] 確認正式 publisher / 公司名稱。
-  - 目前 repo 中出現：`Super8`、`Super 8 Studio`。
+  - 目前 repo 中出現：`Super8`、`SUPER 8 Studio`。
 - [ ] 確認官網 URL。
   - 目前值：`https://www.no8.io`。
 - [ ] 確認 public support contact。
@@ -70,7 +70,7 @@
   - [ ] Vercel `npx skills add`。
   - [ ] Blog / release note / social announcement。
 - [ ] 確認 GitHub repository 是否可對外使用。
-  - 目前 URL：`https://github.com/8-interactive/super8-studio-api-skills`。
+  - 目前 URL：`https://github.com/8-interactive/insightark-skills`。
 - [ ] 確認 npm package visibility。
   - 目前 package：`@8-interactive/insightark-skills`。
   - 目前設定：`restricted`。
@@ -86,7 +86,7 @@
 ## 5. 對外訊息界線
 
 - [ ] 確認一句話定位。
-  - 建議方向：讓 AI agent 透過 Super 8 Studio Developer API 協助處理 CRM、conversation、customer、broadcast 與 marketing automation 工作。
+  - 建議方向：讓 AI agent 透過 SUPER 8 Studio Developer API 協助處理 CRM、conversation、customer、broadcast 與 marketing automation 工作。
 - [ ] 確認對外是否要提到 Developer API token。
   - [ ] 要，並清楚說明 token 由 Super 8 Console 建立。
   - [ ] 不要，交由 setup 文件說明。

@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-manager
-description: Investigate and operate on customers through the Super 8 Studio Developer API using session validation, org scoping, customer lookup, profile update, and tag mutation skills.
+description: Investigate and operate on customers through the SUPER 8 Studio Developer API using session validation, org scoping, customer lookup, profile update, and tag mutation skills.
 when_to_use: When a user wants one customer-oriented workflow that can validate API readiness, resolve organization scope, search customers, inspect one customer, update supported public fields, or add and remove customer tags.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-manager
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Composed skills
 

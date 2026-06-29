@@ -1,13 +1,13 @@
 ---
 name: super8-studio-messaging
-description: Investigate and operate on messaging through the Super 8 Studio Developer API using session validation, org scoping, conversation listing, conversation inspection, message search, and outbound message dispatch.
+description: Investigate and operate on messaging through the SUPER 8 Studio Developer API using session validation, org scoping, conversation listing, conversation inspection, message search, and outbound message dispatch.
 when_to_use: When a user wants a single messaging-oriented workflow that can validate API readiness, resolve organization scope, browse conversations, inspect one conversation, search messages, or dispatch outbound messages to a customer.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-messaging
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Composed skills
 

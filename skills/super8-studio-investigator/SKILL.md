@@ -1,13 +1,13 @@
 ---
 name: super8-studio-investigator
-description: Investigate conversations and messages through the Super 8 Studio Developer API using S8_API_URL and S8_SESSION_TOKEN.
+description: Investigate conversations and messages through the SUPER 8 Studio Developer API using S8_API_URL and S8_SESSION_TOKEN.
 when_to_use: When a user asks a natural language investigation question that may require session validation, organization scoping, conversation discovery, conversation inspection, or message search.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-investigator
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Composed skills
 

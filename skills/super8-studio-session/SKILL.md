@@ -1,13 +1,13 @@
 ---
 name: super8-studio-session
-description: Operate on the Super 8 Studio Developer API to validate S8_SESSION_TOKEN and inspect current developer session context.
+description: Operate on the SUPER 8 Studio Developer API to validate S8_SESSION_TOKEN and inspect current developer session context.
 when_to_use: When a user needs to verify that S8_API_URL and S8_SESSION_TOKEN work, inspect the authenticated user, or confirm accessible organizations before deeper investigation.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-session
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 It uses `S8_API_URL` for the API base URL and `S8_SESSION_TOKEN` for authentication.
 
 ## Credentials

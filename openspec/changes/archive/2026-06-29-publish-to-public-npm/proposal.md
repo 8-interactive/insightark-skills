@@ -5,7 +5,7 @@ Clients need a public, one-line install (`npx … install`) for every supported 
 ## What Changes
 
 - Publish the bundle to **public npm** as `@8-interactive/insightark-skills` (the `@8-interactive` org already exists).
-- **BREAKING (package identity)**: Rename the npm package from `@super8/studio-api-skills` to `@8-interactive/insightark-skills`. Only the npm `name` changes — the `bin` name (`super8-studio-api-skills`) and the plugin manifest identifiers stay as-is for now.
+- **BREAKING (package identity)**: Rename the npm package from `@super8/studio-api-skills` to `@8-interactive/insightark-skills`. Only the npm `name` changes — the `bin` name (`insightark-skills`) and the plugin manifest identifiers stay as-is for now.
 - Set `publishConfig.access` from `restricted` to `public`.
 - Add a CI publish-on-tag job that runs `npm publish`, gated by `validate` + `test` + `smoke` (no publish if any fails).
 - Update all client-facing `npx` commands (README EN + 中文, CHANGELOG) to `@8-interactive/insightark-skills`.

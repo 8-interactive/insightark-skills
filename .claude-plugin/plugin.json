@@ -1,15 +1,15 @@
 {
-  "name": "super8-studio-api-skills",
-  "displayName": "Super 8 Studio API Skills",
+  "name": "insightark-skills",
+  "displayName": "SUPER 8 Studio InsightArk Skills",
   "version": "0.5.2",
-  "description": "Reusable Super 8 Studio Developer API skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "description": "Reusable SUPER 8 Studio InsightArk Skills for conversations, customers, broadcasts, and marketing automation workflows.",
   "author": {
-    "name": "Super8",
+    "name": "SUPER 8 Studio",
     "url": "https://www.no8.io"
   },
   "homepage": "https://www.no8.io",
-  "repository": "https://github.com/8-interactive/super8-studio-api-skills",
-  "license": "UNLICENSED",
+  "repository": "https://github.com/8-interactive/insightark-skills",
+  "license": "Apache-2.0",
   "keywords": [
     "super8",
     "studio",
@@ -27,7 +27,7 @@
     "S8_SESSION_TOKEN": {
       "type": "string",
       "title": "Session token",
-      "description": "Super 8 Studio Developer API session token (starts with r:)",
+      "description": "SUPER 8 Studio Developer API session token (starts with r:)",
       "sensitive": true,
       "required": true
     }

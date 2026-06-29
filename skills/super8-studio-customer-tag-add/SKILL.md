@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-tag-add
-description: Operate on the Super 8 Studio Developer API to add one or more tags to one organization-scoped customer.
+description: Operate on the SUPER 8 Studio Developer API to add one or more tags to one organization-scoped customer.
 when_to_use: When a user explicitly asks to add tags to a specific customer in a specific organization context.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-tag-add
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

@@ -1,14 +1,14 @@
 {
   "name": "@8-interactive/insightark-skills",
   "version": "0.5.2",
-  "description": "Super 8 Studio Developer API skills bundle and installer metadata.",
-  "license": "UNLICENSED",
+  "description": "SUPER 8 Studio InsightArk Skills bundle and installer metadata.",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/8-interactive/insightark-skills.git"
   },
   "bin": {
-    "super8-studio-api-skills": "./scripts/super8-skills-cli.js"
+    "insightark-skills": "./scripts/super8-skills-cli.js"
   },
   "files": [
     ".codex-plugin/",

@@ -1,13 +1,13 @@
 ---
 name: super8-studio-org-scope
-description: Operate on the Super 8 Studio Developer API to list manageable organizations and establish organization context for org-scoped routes.
+description: Operate on the SUPER 8 Studio Developer API to list manageable organizations and establish organization context for org-scoped routes.
 when_to_use: When a user needs to inspect which organizations are available or select the orgId that downstream conversation and message routes should use.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-org-scope
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 It uses `S8_API_URL` for the API base URL, `S8_SESSION_TOKEN` for authentication, and optional `S8_ORG_ID` as default context.
 
 ## Scripts

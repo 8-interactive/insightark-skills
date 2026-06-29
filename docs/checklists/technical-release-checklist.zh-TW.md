@@ -1,4 +1,4 @@
-# Super 8 Studio API Skills 技術發佈檢查清單
+# SUPER 8 Studio InsightArk Skills 技術發佈檢查清單
 
 這份文件提供給負責開發、維運、CI/CD、package 與 release 的工程師，在發佈前做最後技術檢查。目標是確認 repo、package、安裝流程、API 環境與安全邊界都已達到可發佈狀態。
 
@@ -32,7 +32,7 @@
 - [ ] 確認 `.claude-plugin/plugin.json` 的 `skills` 指向 `../skills/`。
 - [ ] 確認 `.agents/plugins/marketplace.json` 的 source path 指向 repo root。
 - [ ] 確認 `.claude-plugin/marketplace.json` 的 source 指向 repo root。
-- [ ] 確認 `package.json` 的 `bin.super8-studio-api-skills` 指向存在的 CLI adapter。
+- [ ] 確認 `package.json` 的 `bin.insightark-skills` 指向存在的 CLI adapter。
 - [ ] 確認 package `files` 欄位包含必要內容：
   - [ ] `.codex-plugin/`
   - [ ] `.claude-plugin/`
@@ -86,8 +86,8 @@
 - [ ] Vercel `npx skills add` 仍標示為 compatibility target。
   - 在 `docs/implementation/vercel-skills-add.md` open questions 解完前，不應宣稱正式支援。
 - [ ] 確認 download URLs 與發佈 channel 對應。
-  - Staging：`https://downloads.no8.io/staging/releases/skills/super8-studio-api-skills-latest.tar.gz`
-  - Production：`https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz`
+  - Staging：`https://downloads.no8.io/staging/releases/skills/insightark-skills-latest.tar.gz`
+  - Production：`https://downloads.no8.io/main/releases/skills/insightark-skills-latest.tar.gz`
 
 ## 必跑驗證命令
 

@@ -182,7 +182,7 @@ function printMissingCredentialsHelp(state) {
   const userPath = userEnvPath();
   const repoPath = repoEnvDisplayPath();
   const out = [];
-  out.push("Missing Super 8 Studio API session token.\n");
+  out.push("Missing SUPER 8 Studio session token.\n");
   out.push(
     `Token priority (highest first): CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN / process environment > ${repoPath} > skills install dir > ${userPath}\n`
   );
@@ -207,7 +207,7 @@ function printMissingCredentialsHelp(state) {
     })`
   );
   out.push("");
-  out.push("Authenticate: super8-studio-api-skills login");
+  out.push("Authenticate: insightark-skills login");
   out.push(`Or create ${userPath} with S8_SESSION_TOKEN — see .super8-studio.env.example`);
   out.push("");
   process.stderr.write(out.join("\n") + "\n");

@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-tag-remove
-description: Operate on the Super 8 Studio Developer API to remove one or more tags from one organization-scoped customer.
+description: Operate on the SUPER 8 Studio Developer API to remove one or more tags from one organization-scoped customer.
 when_to_use: When a user explicitly asks to remove tags from a specific customer in a specific organization context.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-tag-remove
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

@@ -1,11 +1,11 @@
 {
-  "name": "super8-studio-api-skills",
+  "name": "insightark-skills",
   "interface": {
-    "displayName": "Super 8 Studio API Skills"
+    "displayName": "SUPER 8 Studio InsightArk Skills"
   },
   "plugins": [
     {
-      "name": "super8-studio-api-skills",
+      "name": "insightark-skills",
       "source": {
         "source": "local",
         "path": "./"

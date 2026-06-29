@@ -57,7 +57,7 @@ async function promptAgents(base) {
   // Pre-check agents that actually have the bundle installed under base.
   const preselected = common.detectAgentsWithBundle(base);
   return common.multiSelect(
-    "Select agents to remove Super 8 Studio API skills from:",
+    "Select agents to remove SUPER 8 Studio InsightArk Skills from:",
     items,
     { preselected }
   );
@@ -110,7 +110,7 @@ async function run(argv) {
   } else if (interactive) {
     err("");
     err("============================================================");
-    err("  Super 8 Studio API Skills — Uninstaller");
+    err("  SUPER 8 Studio InsightArk Skills — Uninstaller");
     err("============================================================");
     err("");
 
@@ -177,7 +177,7 @@ async function run(argv) {
     if (exists) {
       common.removeBundleDirs(target);
       process.stdout.write(
-        `Removed Super 8 Studio API skills from ${common.formatDisplayPath(target)}\n`
+        `Removed SUPER 8 Studio InsightArk Skills from ${common.formatDisplayPath(target)}\n`
       );
       const envFile = path.join(target.replace(/\/+$/, ""), ".super8-studio.env");
       if (fs.existsSync(envFile)) {

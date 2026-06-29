@@ -60,7 +60,7 @@
 
 ### D. 發佈韌性（distribution）
 1. **相對路徑來源 `"./"` 僅在 Git 方式新增 marketplace 時有效**；以直接 URL 提供 `marketplace.json` 會失敗。
-   - 建議官方安裝指令統一為 GitHub 簡寫：`/plugin marketplace add 8-interactive/super8-studio-api-skills`。
+   - 建議官方安裝指令統一為 GitHub 簡寫：`/plugin marketplace add 8-interactive/insightark-skills`。
 2. **私有 repo 自動更新**：需設定 `GITHUB_TOKEN`；於 README/文件補充。
 3. **`defaultEnabled`**：因連外部 API，可評估設 `false` 讓使用者明確 opt-in（需 CC v2.1.154+）。
 
@@ -89,11 +89,11 @@
 - [ ] 補 Codex 品牌/法務欄位與 `./assets/`。
 
 **Phase 4（選配）— MCP 路線評估**
-- [ ] 評估將 Super8 Developer API 包成 plugin 內建 MCP server（取代 bash 腳本的長期路線），可同時供 Claude 與 Codex 使用，並解除相對路徑共用限制。
+- [ ] 評估將 SUPER 8 Studio Developer API 包成 plugin 內建 MCP server（取代 bash 腳本的長期路線），可同時供 Claude 與 Codex 使用，並解除相對路徑共用限制。
 
 ---
 
 ## 4. 驗證方式
 - `npm run validate`（既有 `scripts/validate-skills.sh`）。
 - `claude plugin validate .`（marketplace）與 `claude plugin validate ./`（plugin 本體 + skill/agent/hook frontmatter）。
-- 本機端對端：`/plugin marketplace add ./` → `/plugin install super8-studio-api-skills@super8-studio` → 跑 `super8-studio-session` 驗證憑證提示流程。
+- 本機端對端：`/plugin marketplace add ./` → `/plugin install insightark-skills@super8-studio` → 跑 `super8-studio-session` 驗證憑證提示流程。

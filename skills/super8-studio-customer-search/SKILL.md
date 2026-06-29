@@ -1,13 +1,13 @@
 ---
 name: super8-studio-customer-search
-description: Operate on the Super 8 Studio Developer API to search organization-scoped customers with supported public filters.
+description: Operate on the SUPER 8 Studio Developer API to search organization-scoped customers with supported public filters.
 when_to_use: When a user wants to find customers by customer id, display name, platform, tags, contact fields, or supported activity time windows.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-customer-search
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

@@ -1,13 +1,13 @@
 ---
 name: super8-studio-broadcast-get
-description: Operate on the Super 8 Studio Developer API to fetch the current status, progress counts, and option summary of one broadcast task.
+description: Operate on the SUPER 8 Studio Developer API to fetch the current status, progress counts, and option summary of one broadcast task.
 when_to_use: When a user wants to poll one broadcast's status, success / fail counts, or schedule timestamps by id within an explicit organization context.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-broadcast-get
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

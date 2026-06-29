@@ -1,13 +1,13 @@
 ---
 name: super8-studio-message-search
-description: Operate on the Super 8 Studio Developer API to search messages across conversations using supported filters.
+description: Operate on the SUPER 8 Studio Developer API to search messages across conversations using supported filters.
 when_to_use: When a user needs keyword-driven evidence, conversation-scoped search, or platform-filtered message lookup inside an organization.
 allowed-mcp: false
 ---
 
 # Skill: super8-studio-message-search
 
-This skill operates on the Super 8 Studio Developer API.
+This skill operates on the SUPER 8 Studio Developer API.
 
 ## Script
 

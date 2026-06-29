@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how Super 8 Studio credential setup runs as a Node process, how credential load priority is communicated, and how a doctor health check verifies configured credentials.
+Defines how SUPER 8 Studio credential setup runs as a Node process, how credential load priority is communicated, and how a doctor health check verifies configured credentials.
 
 ## Requirements
 
