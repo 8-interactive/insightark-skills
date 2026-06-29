@@ -1,5 +1,10 @@
 # Contributing
 
+> Using an AI agent (Claude Code, Codex, Cursor, …) to make changes? Read
+> [AGENTS.md](AGENTS.md) first. Core rule: **every edit must trace to the
+> change's scope — never remove or modify adjacent code nobody asked you to
+> touch.**
+
 ## Skill Layout
 
 Canonical cross-agent skills live under `skills/`.
