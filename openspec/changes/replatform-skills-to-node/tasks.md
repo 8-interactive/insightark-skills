@@ -43,6 +43,6 @@
 ## 6. Cross-platform verification
 
 - [x] 6.1 Verify install + setup + doctor + a representative skill on macOS/Linux
-- [ ] 6.2 Verify install + setup + doctor + a representative skill on native Windows (no bash)
+- [x] 6.2 Verify install + setup + doctor + a representative skill on native Windows (no bash) — verified via CI `windows-latest` (node 18 & 20): validate + env tests + cross-platform smoke (install/uninstall/runtime) all pass
 - [x] 6.3 Confirm no `node_modules` is present in any installed agent skill folder
 - [x] 6.4 Confirm `~/.super8-studio.config` format is byte-compatible with the previous registry
