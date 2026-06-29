@@ -20,5 +20,5 @@
 
 - [x] 4.1 Unit-test `multiSelect` via an injected keypress stream: move/toggle/all/confirm and the ≥1 guard
 - [x] 4.2 Confirm `npm run smoke` still passes (non-TTY fallback path), and `validate` + `test` stay green
-- [ ] 4.3 Manually verify the checkbox on macOS/Linux and a Windows terminal (arrow keys + `j/k`, redraw, Ctrl-C)
-- [ ] 4.4 Confirm CI matrix (ubuntu/macos/windows × node 18,20) stays green
+- [ ] 4.3 Manually verify the checkbox on macOS/Linux and a Windows terminal (arrow keys + `j/k`, redraw, Ctrl-C) — pending: requires a human at a real terminal (CI uses piped input → fallback)
+- [x] 4.4 Confirm CI matrix (ubuntu/macos/windows × node 18,20) stays green
