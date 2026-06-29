@@ -11,16 +11,16 @@ allowed-mcp: false
 
 | Script | Purpose |
 |--------|---------|
-| `ma_procedure_list.sh` | `GET /developer/v1/automation/procedures` — **`--org-id`** (or `S8_ORG_ID`), optional **`--name`**, **`--skip`**, **`--limit`**. Default **`limit=20`**（腳本未指定時）；回傳僅輕量欄位（無圖檔無成效彙總）。用 **`data.hasMore`** + **`skip`** 翻頁。 |
-| `ma_procedure_status.sh` | After resolving id: `GET .../procedures/{procedureId}?orgId=...` |
-| `ma_procedure_start.sh` | `POST .../procedures/{procedureId}/start` |
-| `ma_procedure_pause.sh` | `PATCH .../procedures/{procedureId}/status` — `--action pause` \| `resume` |
-| `ma_procedure_trigger.sh` | `POST .../procedures/{procedureId}/trigger` — requires `--customer-id` |
+| `ma_procedure_list.js` | `GET /developer/v1/automation/procedures` — **`--org-id`** (or `S8_ORG_ID`), optional **`--name`**, **`--skip`**, **`--limit`**. Default **`limit=20`**（腳本未指定時）；回傳僅輕量欄位（無圖檔無成效彙總）。用 **`data.hasMore`** + **`skip`** 翻頁。 |
+| `ma_procedure_status.js` | After resolving id: `GET .../procedures/{procedureId}?orgId=...` |
+| `ma_procedure_start.js` | `POST .../procedures/{procedureId}/start` |
+| `ma_procedure_pause.js` | `PATCH .../procedures/{procedureId}/status` — `--action pause` \| `resume` |
+| `ma_procedure_trigger.js` | `POST .../procedures/{procedureId}/trigger` — requires `--customer-id` |
 
 ## Mandatory workflow
 
 1. **Collect from the customer** the target org (`orgId` if not implicit from env) and the **exact journey name or distinctive substring** they use (never guess from samples).
-2. Run **`ma_procedure_list.sh`** with `--name` set to customer text (trimmed)，**視需要分頁**直到 **`data.hasMore === false`** 或已找到目標。若 **`data.procedures` is empty**， widen wording only **after asking** the customer；若可能只是落在後頁，應先用 **`--skip`** 掃過再下結論。
+2. Run **`ma_procedure_list.js`** with `--name` set to customer text (trimmed)，**視需要分頁**直到 **`data.hasMore === false`** 或已找到目標。若 **`data.procedures` is empty**， widen wording only **after asking** the customer；若可能只是落在後頁，應先用 **`--skip`** 掃過再下結論。
 3. **Disambiguate**:
    - **0 rows** → tell the customer no match; ask for alternate spelling/substring or confirm org.
    - **1 row** → use **`procedureId`** from that row **only after** quoting **`name`** + **`platform`** + **`status`**/`editing`/`pausing` and getting customer confirmation (“是這個嗎？”).
@@ -41,7 +41,7 @@ allowed-mcp: false
 
 ## Hard rules
 
-- Do not ask customers to memorize **`procedureId`**. Operators speak in **旅程名稱 / MA 名稱**; you resolve ids via **`ma_procedure_list.sh`** first.
+- Do not ask customers to memorize **`procedureId`**. Operators speak in **旅程名稱 / MA 名稱**; you resolve ids via **`ma_procedure_list.js`** first.
 - If the customer's phrase matches multiple live journeys with similar names, **always** pause for explicit confirmation before mutating (**start**/ **pause**/ **trigger**).
 
 ## Related skill

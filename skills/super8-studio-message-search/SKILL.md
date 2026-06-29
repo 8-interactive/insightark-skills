@@ -11,7 +11,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/message_search.sh`
+- `node ../_super8-studio-api-shared/scripts/message_search.js`
 
 ## CLI
 
@@ -43,7 +43,7 @@ Optional filters:
 - To mirror Console behavior such as "Customer or a specific agent", pass both types and the agent ids:
 
 ```bash
-message_search.sh \
+message_search.js \
   --keyword hi \
   --sender-type Customer \
   --sender-type _User \
@@ -60,7 +60,7 @@ Both modes return full `DeveloperMessage` objects (including `data.content`), no
 ## Workflow
 
 1. Resolve organization context through `--org-id` or `S8_ORG_ID`.
-2. Run `message_search.sh` with at least one `--keyword` and any supported filters.
+2. Run `message_search.js` with at least one `--keyword` and any supported filters.
 3. Return the public search results and note when no evidence matches.
 
 ## Guardrails

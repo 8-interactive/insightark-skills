@@ -11,17 +11,17 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Scripts
 
-- `../_super8-studio-api-shared/scripts/conversation_detail.sh`
-- `../_super8-studio-api-shared/scripts/conversation_messages.sh`
+- `node ../_super8-studio-api-shared/scripts/conversation_detail.js`
+- `node ../_super8-studio-api-shared/scripts/conversation_messages.js`
 
 ## CLI
 
-### conversation_detail.sh
+### conversation_detail.js
 
 - `--org-id <id>` (optional, falls back to `S8_ORG_ID`)
 - `--conversation-id <id>` (required)
 
-### conversation_messages.sh
+### conversation_messages.js
 
 - `--org-id <id>` (optional, falls back to `S8_ORG_ID`)
 - `--conversation-id <id>` (required)
@@ -32,8 +32,8 @@ This skill operates on the Super 8 Studio Developer API.
 ## Workflow
 
 1. Resolve organization context through `--org-id` or `S8_ORG_ID`.
-2. Run `conversation_detail.sh --conversation-id <id>` for the conversation summary.
-3. Run `conversation_messages.sh --conversation-id <id>` when the user asks for the message timeline.
+2. Run `conversation_detail.js --conversation-id <id>` for the conversation summary.
+3. Run `conversation_messages.js --conversation-id <id>` when the user asks for the message timeline.
 
 ## Guardrails
 

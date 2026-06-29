@@ -12,11 +12,11 @@ It uses `S8_API_URL` for the API base URL, `S8_SESSION_TOKEN` for authentication
 
 ## Scripts
 
-- `../_super8-studio-api-shared/scripts/organizations.sh`
+- `node ../_super8-studio-api-shared/scripts/organizations.js`
 
 ## Workflow
 
-1. Run `organizations.sh` to retrieve the manageable organizations.
+1. Run `organizations.js` to retrieve the manageable organizations.
 2. If `S8_ORG_ID` is already set, treat it as the default org context unless the user asks to change it.
 3. If no org context is available, ask the user which returned org should scope later requests.
 

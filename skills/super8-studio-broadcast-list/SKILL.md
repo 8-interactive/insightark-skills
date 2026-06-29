@@ -11,7 +11,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/broadcast_list.sh`
+- `node ../_super8-studio-api-shared/scripts/broadcast_list.js`
 
 ## CLI
 

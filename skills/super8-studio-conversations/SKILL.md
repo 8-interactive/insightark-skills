@@ -11,7 +11,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/conversations.sh`
+- `node ../_super8-studio-api-shared/scripts/conversations.js`
 
 ## CLI
 
