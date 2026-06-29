@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **BREAKING (package identity)**: Rename the npm package from
+  `@super8/studio-api-skills` to `@8-interactive/insightark-skills` and publish
+  it to **public** npm (`publishConfig.access: public`). Install with
+  `npx @8-interactive/insightark-skills install` for any agent. The `bin`
+  command name and plugin manifest identifiers are unchanged for now.
+- Add a tag-triggered CI release job that publishes to npm only after
+  `validate` + `test` + `smoke` pass.
+- Claude Code / Codex clients install via `npx … install --agents
+  claude-code|codex`; the plugin-marketplace path returns when the repo is public.
+
 - **BREAKING**: Re-platform the entire skill bundle from bash to Node (zero
   dependencies, Node 18+). All `.sh` scripts are replaced by `.js`; `curl`,
   `jq`, and `date` are no longer required. Skills, install, credential setup,

@@ -81,7 +81,7 @@
   - 檢查 `.claude-plugin/plugin.json`。
   - 檢查 `.claude-plugin/marketplace.json`。
 - [ ] npm package 可 dry run。
-  - 目前 package name：`@super8/studio-api-skills`。
+  - 目前 package name：`@8-interactive/insightark-skills`。
   - 目前 `publishConfig.access`：`restricted`。
 - [ ] Vercel `npx skills add` 仍標示為 compatibility target。
   - 在 `docs/implementation/vercel-skills-add.md` open questions 解完前，不應宣稱正式支援。

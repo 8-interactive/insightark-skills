@@ -33,8 +33,8 @@ Current flow:
 curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
 tar -xzf super8-studio-api-skills-latest.tar.gz
 cd super8-studio-api-skills
-npx @super8/studio-api-skills install
-npx @super8/studio-api-skills setup
+npx @8-interactive/insightark-skills install
+npx @8-interactive/insightark-skills setup
 ```
 
 Recommended bootstrap flow:
@@ -42,9 +42,9 @@ Recommended bootstrap flow:
 1. Download the release tarball.
 2. Verify checksum when available.
 3. Extract to a temporary or user cache directory.
-4. Run `npx @super8/studio-api-skills install` with either interactive prompts or passed-through
+4. Run `npx @8-interactive/insightark-skills install` with either interactive prompts or passed-through
    non-interactive options.
-5. Run or instruct the user to run `npx @super8/studio-api-skills setup`.
+5. Run or instruct the user to run `npx @8-interactive/insightark-skills setup`.
 
 Registry handling: `installer/install.js` writes `~/.super8-studio.config` after resolving
 the target directories.
@@ -69,8 +69,8 @@ If users want direct skills copied into a specific local skills directory
 instead of plugin-managed discovery, use:
 
 ```bash
-npx @super8/studio-api-skills install --target ~/.agents/skills
-npx @super8/studio-api-skills setup
+npx @8-interactive/insightark-skills install --target ~/.agents/skills
+npx @8-interactive/insightark-skills setup
 ```
 
 Registry handling: Codex marketplace installs may not write
@@ -115,7 +115,7 @@ If the CLI can run a follow-up command after copying skills, use:
 
 ```bash
 scripts/register-install.js --target <skills-target>
-npx @super8/studio-api-skills setup
+npx @8-interactive/insightark-skills setup
 ```
 
 If it cannot run follow-up commands, rely on `~/.super8-studio.env`, process
@@ -123,13 +123,13 @@ environment variables, or a manual `the Node setup (super8-studio-api-skills set
 
 ## Answering the Current Flow Questions
 
-### How should `npx @super8/studio-api-skills install` be triggered outside curl?
+### How should `npx @8-interactive/insightark-skills install` be triggered outside curl?
 
 Use `installer/install.js` as the canonical installer only for channels that execute our
 scripts:
 
-- curl/tarball: call `npx @super8/studio-api-skills install`.
-- Explicit npm package binary: may call `bash npx @super8/studio-api-skills install` if users invoke it.
+- curl/tarball: call `npx @8-interactive/insightark-skills install`.
+- Explicit npm package binary: may call `bash npx @8-interactive/insightark-skills install` if users invoke it.
 - Codex/Claude marketplaces: do not assume install-time script execution.
 - Vercel `npx skills add --...`: verify CLI lifecycle before relying on script
   execution.
