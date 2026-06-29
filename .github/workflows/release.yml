@@ -25,6 +25,22 @@ jobs:
 
       # The bundle ships zero runtime dependencies — nothing to install.
 
+      - name: Verify tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          echo "git tag: $TAG | package.json: $PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Git tag ($TAG) does not match package.json version ($PKG). Use 'npm version <x>' so they stay in sync."
+            exit 1
+          fi
+          # Prerelease versions (e.g. 1.0.0-rc.1) publish under the 'next' dist-tag
+          # so they do not become the default 'latest' that bare npx installs.
+          case "$PKG" in
+            *-*) echo "NPM_DIST_TAG=next" >> "$GITHUB_ENV" ;;
+            *)   echo "NPM_DIST_TAG=latest" >> "$GITHUB_ENV" ;;
+          esac
+
       - name: Gate — validate
         run: npm run validate
 
@@ -35,7 +51,7 @@ jobs:
         run: npm run smoke
 
       - name: Publish to public npm
-        run: npm publish --access public
+        run: npm publish --access public --tag "$NPM_DIST_TAG"
         env:
           # Granular automation token with publish rights to @8-interactive.
           # Stored as a masked CI secret; never echoed.
