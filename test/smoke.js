@@ -83,7 +83,22 @@ try {
     const reg = fs.readFileSync(cfgPath, "utf8");
     check("registry has skills_targets", /\nskills_targets=/.test(reg), reg);
     check("registry has layout", /\nlayout=/.test(reg));
+    check("registry records production channel by default", /\nchannel=production\n/.test(reg), reg);
+    check("registry records api_url", /\napi_url=https:\/\/api-next\.no8\.io\n/.test(reg), reg);
   }
+
+  // 3b. --staging records the staging endpoint.
+  const stagingTarget = path.join(work, "staging");
+  r = cli(["install", "--target", stagingTarget, "--staging"]);
+  check("install --staging exits 0", r.status === 0, r.stderr);
+  const stagingReg = fs.existsSync(cfgPath) ? fs.readFileSync(cfgPath, "utf8") : "";
+  check("staging registry channel", /\nchannel=staging\n/.test(stagingReg), stagingReg);
+  check(
+    "staging registry api_url",
+    /\napi_url=https:\/\/stage-api-next\.no8\.io\n/.test(stagingReg),
+    stagingReg
+  );
+  cli(["uninstall", "--target", stagingTarget]);
 
   // 4. A skill runs via `node <path>` and handles a missing required arg
   //    deterministically (no credentials needed).
@@ -103,10 +118,15 @@ try {
   check("bundle removed", !fs.existsSync(shared));
 
   // 6. Live doctor only when credentials are available (e.g. CI secret).
+  //    The API URL is fixed at install time, so point the registry at the
+  //    token's environment via the hidden --api-url before running doctor.
   if (process.env.S8_API_URL && process.env.S8_SESSION_TOKEN) {
+    const liveTarget = path.join(work, "live");
+    cli(["install", "--target", liveTarget, "--api-url", process.env.S8_API_URL]);
     r = cli(["doctor"]);
     check("live doctor exits 0", r.status === 0, r.stdout + r.stderr);
     check("live doctor reports ok", /Doctor status: ok/.test(r.stdout));
+    check("doctor prints API root", /API URL: /.test(r.stdout), r.stdout);
   } else {
     console.log("SKIP: live doctor (S8_API_URL / S8_SESSION_TOKEN not set)");
   }

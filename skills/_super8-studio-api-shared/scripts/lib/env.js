@@ -7,8 +7,20 @@ const installConfig = require("./install-config.js");
 
 const ENV_FILENAME = ".super8-studio.env";
 
+// API URL is fixed at install time. Production is the built-in fallback used
+// when no install registry records an api_url (e.g. plugin installs).
+const PRODUCTION_API_URL = "https://api-next.no8.io";
+
 function userEnvPath() {
   return path.join(os.homedir() || "", ENV_FILENAME);
+}
+
+// Resolve the fixed API root: install-registry api_url first, else production.
+// Never reads S8_API_URL from the environment or env files.
+function resolveApiRoot() {
+  const fromRegistry = installConfig.installApiUrl();
+  const url = (fromRegistry || PRODUCTION_API_URL).replace(/\/+$/, "");
+  return { root: url, source: fromRegistry ? "registry" : "production-fallback" };
 }
 
 // Repo override file is resolved relative to the current working directory,
@@ -75,19 +87,18 @@ function applyEnvFileIfPresent(filePath) {
 // Files are applied user -> skills -> repo so later overrides earlier, then the
 // preserved process-environment values are restored on top.
 function loadEnvFiles() {
-  if (!process.env.S8_API_URL && process.env.CLAUDE_PLUGIN_OPTION_S8_API_URL) {
-    process.env.S8_API_URL = process.env.CLAUDE_PLUGIN_OPTION_S8_API_URL;
-  }
-  if (
-    !process.env.S8_SESSION_TOKEN &&
-    process.env.CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN
-  ) {
-    process.env.S8_SESSION_TOKEN =
-      process.env.CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN;
+  // Only the session token and org id are credentials. The API URL is fixed at
+  // install time (see resolveApiRoot) and is NOT read from the environment,
+  // env files, or plugin options.
+  for (const key of ["S8_SESSION_TOKEN", "S8_ORG_ID"]) {
+    const pluginKey = `CLAUDE_PLUGIN_OPTION_${key}`;
+    if (!process.env[key] && process.env[pluginKey]) {
+      process.env[key] = process.env[pluginKey];
+    }
   }
 
   const saved = {};
-  for (const key of ["S8_API_URL", "S8_SESSION_TOKEN", "S8_ORG_ID"]) {
+  for (const key of ["S8_SESSION_TOKEN", "S8_ORG_ID"]) {
     if (process.env[key]) saved[key] = process.env[key];
   }
 
@@ -140,7 +151,6 @@ function printProcessEnvInstructions() {
   if (shellName === "fish") {
     lines.push(
       `Add to ${rcFile}:`,
-      "  set -gx S8_API_URL 'https://api-next.no8.io'",
       "  set -gx S8_SESSION_TOKEN 'r:your-token'",
       "  set -gx S8_ORG_ID 'your-org-id'  # optional",
       "",
@@ -149,13 +159,11 @@ function printProcessEnvInstructions() {
   } else {
     lines.push(
       `Add to ${rcFile}:`,
-      "  export S8_API_URL='https://api-next.no8.io'",
       "  export S8_SESSION_TOKEN='r:your-token'",
       "  export S8_ORG_ID='your-org-id'  # optional",
       "",
       `Then run: source ${rcFile}`,
       "Or for the current terminal session only:",
-      "  export S8_API_URL='https://api-next.no8.io'",
       "  export S8_SESSION_TOKEN='r:your-token'"
     );
   }
@@ -170,9 +178,12 @@ function printMissingCredentialsHelp(state) {
   const userPath = userEnvPath();
   const repoPath = repoEnvDisplayPath();
   const out = [];
-  out.push("Missing Super 8 Studio API credentials.\n");
+  out.push("Missing Super 8 Studio API session token.\n");
   out.push(
-    `Priority (highest first): CLAUDE_PLUGIN_OPTION_* / process environment > ${repoPath} > skills install dir > ${userPath}\n`
+    `Token priority (highest first): CLAUDE_PLUGIN_OPTION_S8_SESSION_TOKEN / process environment > ${repoPath} > skills install dir > ${userPath}\n`
+  );
+  out.push(
+    "(API URL is fixed at install time and is not configured here.)\n"
   );
   out.push("Checked:");
   if (state.skills) {
@@ -186,13 +197,11 @@ function printMissingCredentialsHelp(state) {
   }
   out.push(`  - ${userPath} (${state.user ? "loaded" : "not found"})`);
   out.push(`  - ${repoPath} (${state.repo ? "loaded" : "not found"})`);
-  if (process.env.S8_API_URL || process.env.S8_SESSION_TOKEN) {
-    out.push("  - process environment (partially set)");
-  } else {
-    out.push(
-      "  - process environment (S8_API_URL / S8_SESSION_TOKEN not set)"
-    );
-  }
+  out.push(
+    `  - process environment (S8_SESSION_TOKEN ${
+      process.env.S8_SESSION_TOKEN ? "set" : "not set"
+    })`
+  );
   out.push("");
   out.push("Run: setup (super8-studio-api-skills setup)");
   out.push(`Or create ${userPath} — see .super8-studio.env.example`);
@@ -205,11 +214,12 @@ function printMissingCredentialsHelp(state) {
 // on failure prints actionable help and returns false (callers exit non-zero).
 function loadRuntimeEnv() {
   const state = loadEnvFiles();
-  if (!process.env.S8_API_URL || !process.env.S8_SESSION_TOKEN) {
+  if (!process.env.S8_SESSION_TOKEN) {
     printMissingCredentialsHelp(state);
     return false;
   }
-  process.env.S8_API_ROOT = process.env.S8_API_URL.replace(/\/+$/, "");
+  // API URL is fixed (registry or production fallback), not a credential.
+  process.env.S8_API_ROOT = resolveApiRoot().root;
   return true;
 }
 
@@ -252,9 +262,11 @@ function isoDaysAgo(days) {
 
 module.exports = {
   ENV_FILENAME,
+  PRODUCTION_API_URL,
   userEnvPath,
   repoEnvPath,
   parseEnvFile,
+  resolveApiRoot,
   loadEnvFiles,
   loadRuntimeEnv,
   requireRuntimeEnv,
