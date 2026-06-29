@@ -8,22 +8,22 @@ Defines how Super 8 Studio credential setup runs as a Node process, how credenti
 
 ### Requirement: Node-based credential setup
 
-Credential setup SHALL run as a Node process with no bash dependency, creating or updating the user env file (`~/.super8-studio.env`) with `S8_SESSION_TOKEN` and optional `S8_ORG_ID`. Setup SHALL NOT prompt for, accept, or write an API URL: the API environment is fixed at install time (recorded in the registry). Setup SHALL read the registry `channel`/`api_url` to choose which Console to open and which API to query for organizations, and SHALL fall back to production when no registry exists.
+`setup` is **deprecated** in favor of `login`, but SHALL remain functional. It SHALL run as a Node process with no bash dependency, creating or updating the user env file (`~/.super8-studio.env`) with `S8_SESSION_TOKEN` and optional `S8_ORG_ID`, and SHALL print a deprecation notice recommending `login`. Setup SHALL NOT prompt for, accept, or write an API URL: the API environment is fixed at install time (recorded in the registry). Setup SHALL read the registry `channel`/`api_url` to choose which Console to open and which API to query for organizations, and SHALL fall back to production when no registry exists.
 
-#### Scenario: Setup on native Windows
+#### Scenario: Deprecation notice points to login
 
-- **WHEN** a user runs credential setup on native Windows
-- **THEN** it writes `~/.super8-studio.env` without invoking bash
+- **WHEN** the user runs `setup`
+- **THEN** it prints a notice that `setup` is deprecated and recommends `login`, then proceeds
 
-#### Scenario: Token written, API URL never written
+#### Scenario: Setup still writes a token
 
 - **WHEN** the user provides a session token during setup
 - **THEN** `~/.super8-studio.env` is created with `S8_SESSION_TOKEN` (and `S8_ORG_ID` if chosen) and contains no `S8_API_URL`
 
-#### Scenario: Console derived from the registry channel
+#### Scenario: Login session overrides a setup token
 
-- **WHEN** the registry records `channel=staging` and setup opens the Console to create a token
-- **THEN** it opens the staging Console (`https://stage-console.no8.io`)
+- **WHEN** both a valid login session and a setup-written `S8_SESSION_TOKEN` exist
+- **THEN** skills use the login session token
 
 #### Scenario: No API-URL prompt
 
