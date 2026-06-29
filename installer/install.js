@@ -3,13 +3,54 @@
 const os = require("os");
 const path = require("path");
 const common = require("./common.js");
-const installConfig = require(path.join(
-  common.BUNDLE_DIR,
-  "_super8-studio-api-shared",
-  "scripts",
-  "lib",
-  "install-config.js"
-));
+const SCRIPTS_DIR = path.join(common.BUNDLE_DIR, "_super8-studio-api-shared", "scripts");
+const installConfig = require(path.join(SCRIPTS_DIR, "lib", "install-config.js"));
+const env = require(path.join(SCRIPTS_DIR, "lib", "env.js"));
+
+// After install, verify any existing token against the API; offer login when
+// interactive and the token is missing or invalid. Never launches login in
+// non-interactive mode (CI/flags/--target).
+async function verifyOrLogin(interactive) {
+  const apiRoot = env.resolveApiRoot().root;
+  const token = env.resolveToken();
+  err("");
+
+  if (!interactive) {
+    if (token) {
+      const v = await common.verifyToken(apiRoot, token);
+      if (v.ok) err(`Authenticated as ${v.email || "your account"}.`);
+      else err("A token is present but could not be verified. Run `login` to authenticate.");
+    } else {
+      err("Next: authenticate with `super8-studio-api-skills login`.");
+    }
+    return;
+  }
+
+  err("Verifying credentials...");
+  if (token) {
+    const v = await common.verifyToken(apiRoot, token);
+    if (v.ok) {
+      err(`Authenticated as ${v.email || "your account"}.`);
+      return;
+    }
+    if (v.status === 401) {
+      err("Stored token is invalid or expired.");
+    } else {
+      err(`Could not verify credentials (${v.error || "HTTP " + v.status}). Run \`login\` or \`doctor\` later.`);
+      return;
+    }
+  } else {
+    err("No credentials found yet.");
+  }
+
+  const answer = (await common.prompt("Log in now? [Y/n]: ")).trim();
+  if (["", "y", "Y", "yes", "YES"].includes(answer || "Y")) {
+    const login = require("./login.js");
+    await login.run([]);
+  } else {
+    err("You can authenticate later with `super8-studio-api-skills login`.");
+  }
+}
 
 function printUsage() {
   process.stdout.write(
@@ -240,9 +281,7 @@ async function run(argv) {
 
   err("");
   err(`Done. Installed to ${installTargets.length} location(s).`);
-  err("");
-  err("Next: run `setup` to configure credentials and verify with doctor:");
-  err("  super8-studio-api-skills setup");
+  await verifyOrLogin(interactive);
   return 0;
 }
 

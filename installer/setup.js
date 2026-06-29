@@ -216,6 +216,9 @@ async function run(argv) {
     }
   }
 
+  err("Note: `setup` is deprecated — prefer `super8-studio-api-skills login` (email/password).");
+  err("");
+
   if (envHintsOnly) {
     env.printProcessEnvInstructions();
     return 0;
