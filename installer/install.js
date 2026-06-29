@@ -21,7 +21,7 @@ async function verifyOrLogin(interactive) {
       if (v.ok) err(`Authenticated as ${v.email || "your account"}.`);
       else err("A token is present but could not be verified. Run `login` to authenticate.");
     } else {
-      err("Next: authenticate with `super8-studio-api-skills login`.");
+      err("Next: authenticate with `insightark-skills login`.");
     }
     return;
   }
@@ -48,7 +48,7 @@ async function verifyOrLogin(interactive) {
     const login = require("./login.js");
     await login.run([]);
   } else {
-    err("You can authenticate later with `super8-studio-api-skills login`.");
+    err("You can authenticate later with `insightark-skills login`.");
   }
 }
 
