@@ -35,8 +35,8 @@ This change makes the API URL an install-time constant recorded in the registry,
 - **Why**: Token/org remain legitimately per-user/per-environment; only the endpoint becomes a constant.
 
 ### D4: Setup derives targets from the registry channel
-`setup` reads `channel`/`api_url` from the registry to pick the Console base (`production` → `https://console.no8.io`, `staging` → `https://stage-console.no8.io`, `custom` → none → manual instructions) and the API to query for orgs. It drops the Production/Custom prompt and the `--api-url` flag.
-- **Why**: The endpoint is already decided at install; setup should follow it, not re-ask.
+`setup` reads `channel`/`api_url` from the registry to pick the Console base (`production` → `https://console.no8.io`, `staging` → `https://stage-console.no8.io`, `custom` → none → manual instructions) and the API to query for orgs. It drops the Production/Custom prompt and the `--api-url` flag. The Console base is a distinct concern from the API URL, so the internal `--console-url` override is **retained** — it lets a caller using a custom `--api-url` endpoint (which has no derivable Console) point setup at the right Console.
+- **Why**: The endpoint is already decided at install; setup should follow it, not re-ask. Console URL ≠ API URL, so its override stays.
 
 ### D5: Plugin installs are always production
 Remove `S8_API_URL` from `.claude-plugin` and `.codex-plugin` `userConfig`. Plugin-path runtime hits the built-in production constant (no registry). Internal staging testing uses `npx … install --staging`.

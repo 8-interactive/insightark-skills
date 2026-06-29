@@ -27,6 +27,7 @@ function printUsage() {
       "  --repo-only         Write project override file only (advanced)",
       "  --project-path PATH Project root for --repo-only",
       "  --no-open-browser   Do not open Console when creating a token",
+      "  --console-url URL   Internal: override the Console base opened to create a token",
       "  --help              Show this help message",
       "",
       "The API URL is fixed at install time and is not configured here.",
@@ -79,14 +80,18 @@ function resolveApiUrl() {
   return apiUrl;
 }
 
-// Console base is derived from the API URL (production / staging). A custom
-// endpoint has no Console mapping; setup then prints manual instructions.
-function resolveConsoleUrl(apiUrl) {
+// Console base (where setup opens the browser to create a token) is independent
+// of the API URL. It is normally derived from the API URL (production /
+// staging); a custom endpoint has no Console mapping, so `--console-url` lets an
+// internal caller point setup at the right Console (otherwise setup falls back
+// to printing manual instructions).
+function resolveConsoleUrl(apiUrl, consoleUrlOverride) {
+  if (consoleUrlOverride) return consoleUrlOverride;
   return common.consoleBaseForApiUrl(apiUrl);
 }
 
 async function promptSessionToken(apiUrl, opts) {
-  const consoleBase = resolveConsoleUrl(apiUrl);
+  const consoleBase = resolveConsoleUrl(apiUrl, opts.consoleUrlOverride);
   if (consoleBase && !opts.noOpenBrowser) {
     const tokenUrl = common.buildConsoleTokenUrl(consoleBase);
     err("");
@@ -175,6 +180,7 @@ async function run(argv) {
   let checkOnly = false;
   let envHintsOnly = false;
   let noOpenBrowser = false;
+  let consoleUrlOverride = "";
   let projectPath = "";
 
   for (let i = 0; i < argv.length; i++) {
@@ -196,6 +202,9 @@ async function run(argv) {
         break;
       case "--no-open-browser":
         noOpenBrowser = true;
+        break;
+      case "--console-url":
+        consoleUrlOverride = (argv[++i] || "").trim();
         break;
       case "--help":
         printUsage();
@@ -237,7 +246,7 @@ async function run(argv) {
     }
 
     const apiUrl = resolveApiUrl();
-    const sessionToken = await promptSessionToken(apiUrl, { noOpenBrowser });
+    const sessionToken = await promptSessionToken(apiUrl, { noOpenBrowser, consoleUrlOverride });
     let orgId = await promptOrgId(apiUrl, sessionToken);
     if (!orgId) {
       err("Warning: could not select organization. The token will be saved without S8_ORG_ID.");
