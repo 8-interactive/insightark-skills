@@ -13,6 +13,17 @@
   (global `~` or repo) → choose coding agent(s) → confirm → install. The
   advanced shared-folder mode remains available via `--target`.
 - The `~/.super8-studio.config` install-registry format is preserved.
+- **BREAKING**: The API URL is now fixed at install time and recorded in the
+  install registry (`channel` + `api_url`). `npx … install` selects production
+  by default; internal `--staging` / `--api-url` options select other
+  endpoints. Skills no longer read `S8_API_URL` from the environment,
+  `.super8-studio.env`, or plugin options — it is resolved from the registry
+  (or a built-in production fallback for plugin installs).
+- **BREAKING**: `setup` no longer prompts for or stores an API URL; it derives
+  the Console/API from the registry channel and writes only the session token
+  (+ optional org). Plugin installs are always production; `S8_API_URL` is
+  removed from plugin `userConfig`. Internal staging testers must re-run
+  `install --staging`.
 
 ## 1.0.0
 

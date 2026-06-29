@@ -44,21 +44,33 @@ function installSkillsTargets() {
     .filter((t) => t.length > 0);
 }
 
-// Write the install registry (key=value lines, mode 600). Format preserved
-// byte-for-byte with the previous bash implementation.
-function writeInstallConfig(layout, baseDir, agentsCsv, targets) {
+// Resolve the recorded API environment. `api_url` is the fixed endpoint chosen
+// at install time; `channel` is its label (production | staging | custom).
+function installApiUrl() {
+  return readInstallConfigValue("api_url");
+}
+
+function installChannel() {
+  return readInstallConfigValue("channel");
+}
+
+// Write the install registry (key=value lines, mode 600). `opts` may carry the
+// install-time API environment: { channel, apiUrl }.
+function writeInstallConfig(layout, baseDir, agentsCsv, targets, opts = {}) {
   if (!targets || targets.length === 0) {
     throw new Error("No install targets to record in config.");
   }
   const targetsLine = targets.filter((t) => t && t.length > 0).join(",");
   const installedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-  const body =
+  let body =
     "# Super 8 Studio install registry (managed by the installer)\n" +
     `layout=${layout}\n` +
     `base_dir=${baseDir || ""}\n` +
     `agents=${agentsCsv || ""}\n` +
-    `skills_targets=${targetsLine}\n` +
-    `installed_at=${installedAt}\n`;
+    `skills_targets=${targetsLine}\n`;
+  if (opts.channel) body += `channel=${opts.channel}\n`;
+  if (opts.apiUrl) body += `api_url=${opts.apiUrl}\n`;
+  body += `installed_at=${installedAt}\n`;
   fs.writeFileSync(installConfigPath(), body, { mode: 0o600 });
   fs.chmodSync(installConfigPath(), 0o600);
 }
@@ -77,6 +89,8 @@ module.exports = {
   installConfigPresent,
   readInstallConfigValue,
   installSkillsTargets,
+  installApiUrl,
+  installChannel,
   writeInstallConfig,
   removeInstallConfig,
 };

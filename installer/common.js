@@ -229,6 +229,18 @@ function openUrl(url) {
   }
 }
 
+// API environments. Production is the default; staging is internal-only.
+const PRODUCTION_API_URL = "https://api-next.no8.io";
+const STAGING_API_URL = "https://stage-api-next.no8.io";
+
+// Resolve the install-time API environment from the (internal) flags.
+// Precedence: explicit --api-url > --staging > production default.
+function resolveApiEnvironment({ staging, apiUrl } = {}) {
+  if (apiUrl) return { channel: "custom", apiUrl };
+  if (staging) return { channel: "staging", apiUrl: STAGING_API_URL };
+  return { channel: "production", apiUrl: PRODUCTION_API_URL };
+}
+
 function consoleBaseForApiUrl(apiUrl) {
   const trimmed = (apiUrl || "").replace(/\/+$/, "");
   switch (trimmed) {
@@ -268,6 +280,9 @@ module.exports = {
   promptHidden,
   closeRl,
   openUrl,
+  PRODUCTION_API_URL,
+  STAGING_API_URL,
+  resolveApiEnvironment,
   consoleBaseForApiUrl,
   buildConsoleTokenUrl,
 };

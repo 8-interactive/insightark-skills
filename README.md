@@ -25,7 +25,6 @@ During installation, Claude Code will prompt for:
 
 | Variable | Description |
 | --- | --- |
-| `S8_API_URL` | API base URL, e.g. `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
 
 ### 2. Enable the plugin
@@ -66,7 +65,6 @@ npx @super8/studio-api-skills setup
 
 | Variable | Description |
 | --- | --- |
-| `S8_API_URL` | API base URL, e.g. `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken` |
 
 ### Session token
@@ -98,7 +96,7 @@ folder.
 | Location | Path | Contents |
 | --- | --- | --- |
 | Install registry | `~/.super8-studio.config` | Skills install paths |
-| Skills dir | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`, `S8_API_URL`, `S8_ORG_ID` |
+| Skills dir | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`, `S8_ORG_ID` |
 | User (fallback) | `~/.super8-studio.env` | Fallback if install registry is missing |
 | Project override | `{project}/.super8-studio.env` | Optional `S8_ORG_ID` / stage URL override |
 
@@ -163,7 +161,6 @@ claude plugin install super8-studio-api-skills@super8-studio-api-skills
 
 | 變數 | 說明 |
 | --- | --- |
-| `S8_API_URL` | API 基礎網址，例如 `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
 
 ### 2. 啟用 Plugin
@@ -204,7 +201,6 @@ npx @super8/studio-api-skills setup
 
 | 變數 | 說明 |
 | --- | --- |
-| `S8_API_URL` | API 基礎網址，例如 `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken` |
 
 ### Session Token 取得方式
@@ -235,7 +231,7 @@ skills 複製到各 agent 的 skills 資料夾。
 | 位置 | 路徑 | 內容 |
 | --- | --- | --- |
 | 安裝登錄檔 | `~/.super8-studio.config` | Skills 安裝路徑 |
-| Skills 目錄 | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`、`S8_API_URL`、`S8_ORG_ID` |
+| Skills 目錄 | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`、`S8_ORG_ID` |
 | 使用者（備援） | `~/.super8-studio.env` | 找不到安裝登錄檔時的備援 |
 | 專案覆蓋 | `{project}/.super8-studio.env` | 可選的 `S8_ORG_ID` 或測試環境 URL |
 

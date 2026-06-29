@@ -21,9 +21,12 @@ function printUsage() {
       "  --base-dir PATH         Explicit base directory (advanced; overrides --location)",
       "  --agents LIST           Comma-separated agents: claude-code,opencode,cursor,github-copilot,codex (or \"all\")",
       "  --target PATH           Install directly to PATH (advanced; no agent subpaths; mutually exclusive with --agents)",
+      "  --staging               Internal: use the staging API endpoint instead of production",
+      "  --api-url URL           Internal: use a custom API endpoint (overrides --staging)",
       "  --help                  Show this help message",
       "",
       "Interactive mode runs when --location, --base-dir, --agents, and --target are all omitted.",
+      "API environment is fixed at install time (default: production).",
       "",
     ].join("\n")
   );
@@ -137,6 +140,8 @@ async function run(argv) {
   let baseDir = "";
   let agentsCsv = "";
   let targetDir = "";
+  let staging = false;
+  let apiUrlFlag = "";
   let interactive = true;
 
   for (let i = 0; i < argv.length; i++) {
@@ -152,6 +157,18 @@ async function run(argv) {
       case "--agents":
         agentsCsv = argv[++i] || "";
         interactive = false;
+        break;
+      // Internal API-environment options. They do NOT force non-interactive
+      // mode, so they compose with the interactive location/agents prompts.
+      case "--staging":
+        staging = true;
+        break;
+      case "--api-url":
+        apiUrlFlag = (argv[++i] || "").trim();
+        if (!apiUrlFlag) {
+          err("--api-url requires a URL value.");
+          return 1;
+        }
         break;
       case "--target":
         targetDir = argv[++i] || "";
@@ -231,8 +248,14 @@ async function run(argv) {
   }
 
   const agentsForConfig = layout === "direct" ? "" : selectedAgents.join(",");
-  installConfig.writeInstallConfig(layout, expandedBase, agentsForConfig, installTargets);
+  // API environment is fixed at install time: --api-url > --staging > production.
+  const apiEnv = common.resolveApiEnvironment({ staging, apiUrl: apiUrlFlag });
+  installConfig.writeInstallConfig(layout, expandedBase, agentsForConfig, installTargets, {
+    channel: apiEnv.channel,
+    apiUrl: apiEnv.apiUrl,
+  });
   err(`Wrote install registry ${common.formatDisplayPath(installConfig.installConfigPath())}`);
+  err(`API environment: ${apiEnv.channel} (${apiEnv.apiUrl})`);
 
   err("");
   err("Installing Super 8 Studio API skills...");

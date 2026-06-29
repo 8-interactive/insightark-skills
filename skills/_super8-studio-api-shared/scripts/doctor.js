@@ -68,7 +68,8 @@ async function main() {
       ? meData.data.latestSkillVersion
       : "";
 
-  process.stdout.write(`API URL: ${process.env.S8_API_ROOT}\n`);
+  const api = env.resolveApiRoot();
+  process.stdout.write(`API URL: ${api.root} (${api.source})\n`);
   process.stdout.write("Session token: present\n");
   const userEmail =
     meData && meData.data && meData.data.user && meData.data.user.email

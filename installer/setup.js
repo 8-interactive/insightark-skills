@@ -8,7 +8,6 @@ const common = require("./common.js");
 const SCRIPTS_DIR = path.join(common.BUNDLE_DIR, "_super8-studio-api-shared", "scripts");
 const env = require(path.join(SCRIPTS_DIR, "lib", "env.js"));
 const installConfig = require(path.join(SCRIPTS_DIR, "lib", "install-config.js"));
-const release = require(path.join(SCRIPTS_DIR, "lib", "release.js"));
 const DOCTOR_SCRIPT = path.join(SCRIPTS_DIR, "doctor.js");
 
 function err(message) {
@@ -28,9 +27,9 @@ function printUsage() {
       "  --repo-only         Write project override file only (advanced)",
       "  --project-path PATH Project root for --repo-only",
       "  --no-open-browser   Do not open Console when creating a token",
-      "  --api-url URL       Override API base URL",
-      "  --console-url URL   Override Console base URL",
       "  --help              Show this help message",
+      "",
+      "The API URL is fixed at install time and is not configured here.",
       "",
     ].join("\n")
   );
@@ -40,25 +39,21 @@ function quoteSingle(value) {
   return "'" + String(value).replace(/'/g, "'\\''") + "'";
 }
 
-function writeEnvFile(targetPath, apiUrl, sessionToken, orgId) {
-  const lines = [
-    `S8_API_URL=${quoteSingle(apiUrl)}`,
-    `S8_SESSION_TOKEN=${quoteSingle(sessionToken)}`,
-  ];
+// API URL is fixed at install time and is never written here — only the token
+// (and optional org).
+function writeEnvFile(targetPath, sessionToken, orgId) {
+  const lines = [`S8_SESSION_TOKEN=${quoteSingle(sessionToken)}`];
   if (orgId) lines.push(`S8_ORG_ID=${quoteSingle(orgId)}`);
   fs.writeFileSync(targetPath, lines.join("\n") + "\n", { mode: 0o600 });
   fs.chmodSync(targetPath, 0o600);
 }
 
-function writeRepoEnvFile(targetPath, apiUrl, orgId) {
-  const lines = [];
-  if (apiUrl) lines.push(`S8_API_URL=${quoteSingle(apiUrl)}`);
-  if (orgId) lines.push(`S8_ORG_ID=${quoteSingle(orgId)}`);
-  if (lines.length === 0) {
-    err("Nothing to write. Provide at least S8_ORG_ID or S8_API_URL for project config.");
+function writeRepoEnvFile(targetPath, orgId) {
+  if (!orgId) {
+    err("Nothing to write. Provide S8_ORG_ID for project config.");
     return false;
   }
-  fs.writeFileSync(targetPath, lines.join("\n") + "\n", { mode: 0o600 });
+  fs.writeFileSync(targetPath, `S8_ORG_ID=${quoteSingle(orgId)}\n`, { mode: 0o600 });
   fs.chmodSync(targetPath, 0o600);
   return true;
 }
@@ -74,53 +69,24 @@ function collectEnvTargets() {
   return targets;
 }
 
-async function resolveApiUrl(apiUrlOverride) {
-  if (apiUrlOverride) return apiUrlOverride;
-  if (release.releasePresent()) {
-    const apiUrl = release.readReleaseValue("api_url");
-    if (apiUrl) {
-      err(`API environment: ${release.releaseChannelLabel()} (${apiUrl})`);
-      err("");
-      return apiUrl;
-    }
-  }
-  err("Select API environment:");
-  err("  1) Production  https://api-next.no8.io");
-  err("  2) Custom URL");
-  const choice = (await common.prompt("Choice [1]: ")).trim();
-  let apiUrl;
-  switch (choice || "1") {
-    case "1":
-    case "prod":
-    case "production":
-      apiUrl = "https://api-next.no8.io";
-      break;
-    case "2":
-    case "custom":
-      apiUrl = (await common.prompt("API base URL: ")).trim();
-      break;
-    default:
-      err("Unknown choice.");
-      return resolveApiUrl(apiUrlOverride);
-  }
-  if (!apiUrl) {
-    err("API URL is required.");
-    return resolveApiUrl(apiUrlOverride);
-  }
+// API URL is fixed at install time: read it from the registry, falling back to
+// production when no registry exists. Setup never prompts for it.
+function resolveApiUrl() {
+  const apiUrl = installConfig.installApiUrl() || env.PRODUCTION_API_URL;
+  const channel = installConfig.installChannel() || "production";
+  err(`API environment: ${channel} (${apiUrl})`);
+  err("");
   return apiUrl;
 }
 
-function resolveConsoleUrl(apiUrl, consoleUrlOverride) {
-  if (consoleUrlOverride) return consoleUrlOverride;
-  if (release.releasePresent()) {
-    const consoleUrl = release.readReleaseValue("console_url");
-    if (consoleUrl) return consoleUrl;
-  }
+// Console base is derived from the API URL (production / staging). A custom
+// endpoint has no Console mapping; setup then prints manual instructions.
+function resolveConsoleUrl(apiUrl) {
   return common.consoleBaseForApiUrl(apiUrl);
 }
 
 async function promptSessionToken(apiUrl, opts) {
-  const consoleBase = resolveConsoleUrl(apiUrl, opts.consoleUrlOverride);
+  const consoleBase = resolveConsoleUrl(apiUrl);
   if (consoleBase && !opts.noOpenBrowser) {
     const tokenUrl = common.buildConsoleTokenUrl(consoleBase);
     err("");
@@ -209,8 +175,6 @@ async function run(argv) {
   let checkOnly = false;
   let envHintsOnly = false;
   let noOpenBrowser = false;
-  let consoleUrlOverride = "";
-  let apiUrlOverride = "";
   let projectPath = "";
 
   for (let i = 0; i < argv.length; i++) {
@@ -232,12 +196,6 @@ async function run(argv) {
         break;
       case "--no-open-browser":
         noOpenBrowser = true;
-        break;
-      case "--api-url":
-        apiUrlOverride = argv[++i] || "";
-        break;
-      case "--console-url":
-        consoleUrlOverride = argv[++i] || "";
         break;
       case "--help":
         printUsage();
@@ -278,18 +236,18 @@ async function run(argv) {
       }
     }
 
-    const apiUrl = await resolveApiUrl(apiUrlOverride);
-    const sessionToken = await promptSessionToken(apiUrl, { noOpenBrowser, consoleUrlOverride });
+    const apiUrl = resolveApiUrl();
+    const sessionToken = await promptSessionToken(apiUrl, { noOpenBrowser });
     let orgId = await promptOrgId(apiUrl, sessionToken);
     if (!orgId) {
-      err("Warning: could not select organization. Credentials will be saved without S8_ORG_ID.");
+      err("Warning: could not select organization. The token will be saved without S8_ORG_ID.");
       err("Set S8_ORG_ID later or re-run setup.");
       orgId = "";
     }
     err("");
     for (const target of targets) {
       common.ensureDirectory(path.dirname(target));
-      writeEnvFile(target, apiUrl, sessionToken, orgId);
+      writeEnvFile(target, sessionToken, orgId);
       process.stdout.write(`Wrote ${common.formatDisplayPath(target)} (mode 600)\n`);
     }
   } else if (mode === "repo") {
@@ -306,11 +264,10 @@ async function run(argv) {
         return 0;
       }
     }
-    err("Project config usually overrides org or API URL. Leave blank to skip.");
-    const apiUrl = (await common.prompt("S8_API_URL override (optional): ")).trim();
+    err("Project config sets a per-project org. (API URL is fixed at install time.)");
     const orgId = (await common.prompt("S8_ORG_ID: ")).trim();
     common.ensureDirectory(base);
-    if (!writeRepoEnvFile(target, apiUrl, orgId)) return 1;
+    if (!writeRepoEnvFile(target, orgId)) return 1;
     process.stdout.write(
       `Wrote ${common.formatDisplayPath(target)} (mode 600). Add this file to .gitignore.\n`
     );
