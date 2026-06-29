@@ -1,7 +1,7 @@
 ## 1. Release prerequisites
 
 - [x] 1.1 Merge PR #2 (Node re-platform) and PR #3 (fix-api-url-at-install) to `main` — merged via #2, #5 (superseded #3), #4, and #6 (release tooling)
-- [ ] 1.2 Add `NPM_TOKEN` (automation token with publish rights to `@8-interactive`) to repo CI secrets — a token was added but the first publish hit `EOTP`; must be a **Classic Automation** token to bypass 2FA in CI (pending re-issue)
+- [x] 1.2 Add `NPM_TOKEN` (Classic Automation token, publish rights to `@8-interactive`) to repo CI secrets
 
 ## 2. Package identity & access
 
@@ -29,6 +29,6 @@
 
 ## 6. Release & verify
 
-- [ ] 6.1 Tag the release and let CI publish to public npm
-- [ ] 6.2 Verify end-to-end: `npx @8-interactive/insightark-skills@<version> install` installs for a representative agent with no repo/npm auth
-- [ ] 6.3 Verify `npx @8-interactive/insightark-skills install --agents claude-code` installs skills into the Claude Code folder
+- [x] 6.1 Tag the release and let CI publish to public npm
+- [x] 6.2 Verify end-to-end: `npx @8-interactive/insightark-skills@<version> install` installs for a representative agent with no repo/npm auth
+- [x] 6.3 Verify `npx @8-interactive/insightark-skills install --agents claude-code` installs skills into the Claude Code folder
