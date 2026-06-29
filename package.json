@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "validate": "node scripts/validate-skills.js",
-    "test": "node test/env-precedence.test.js && node test/multiselect.test.js",
+    "test": "node test/env-precedence.test.js && node test/multiselect.test.js && node test/session-precedence.test.js",
     "smoke": "node test/smoke.js",
     "version": "node scripts/sync-versions.js"
   },

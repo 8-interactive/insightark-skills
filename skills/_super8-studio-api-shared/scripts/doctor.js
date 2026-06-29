@@ -7,6 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 const env = require("./lib/env.js");
+const sessionLib = require("./lib/session.js");
 const { apiRequest, formatErrorBody } = require("./lib/http.js");
 
 async function main() {
@@ -70,6 +71,14 @@ async function main() {
 
   const api = env.resolveApiRoot();
   process.stdout.write(`API URL: ${api.root} (${api.source})\n`);
+  const sess = sessionLib.readSession();
+  if (sess && sessionLib.isSessionValid(sess, api.root)) {
+    process.stdout.write(
+      `Auth source: login session (${sess.email || "?"}${sess.expiresAt ? ", expires " + sess.expiresAt : ""})\n`
+    );
+  } else {
+    process.stdout.write("Auth source: environment / credential file\n");
+  }
   process.stdout.write("Session token: present\n");
   const userEmail =
     meData && meData.data && meData.data.user && meData.data.user.email

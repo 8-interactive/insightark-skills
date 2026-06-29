@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Add `login` / `logout`: `login` authenticates with email + password (+ TOTP
+  when enabled), lets you pick an organization, and stores a session at
+  `~/.super8-studio.session`; `logout` clears it locally (the API has no
+  server-side revoke).
+- **BREAKING (precedence)**: a valid login session takes priority over
+  `S8_SESSION_TOKEN`. An expired session, or one issued against a different
+  install-fixed API URL, is ignored (with a re-login notice) and resolution
+  falls through. Org resolution gains the session org: `--org-id` → session
+  `orgId` → `S8_ORG_ID` → env files.
+- `install` (interactive) verifies an existing token via `/auth/me` after
+  copying and offers to `login` when it is missing or invalid; non-interactive
+  installs print guidance instead.
+- `setup` is **deprecated** (still works) and points to `login`.
+
 - **BREAKING (package identity)**: Rename the npm package from
   `@super8/studio-api-skills` to `@8-interactive/insightark-skills` and publish
   it to **public** npm (`publishConfig.access: public`). Install with

@@ -4,8 +4,12 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const installConfig = require("./install-config.js");
+const sessionLib = require("./session.js");
 
 const ENV_FILENAME = ".super8-studio.env";
+
+// The validated login session in effect for this run (set by token resolution).
+let activeSession = null;
 
 // API URL is fixed at install time. Production is the built-in fallback used
 // when no install registry records an api_url (e.g. plugin installs).
@@ -203,8 +207,8 @@ function printMissingCredentialsHelp(state) {
     })`
   );
   out.push("");
-  out.push("Run: setup (super8-studio-api-skills setup)");
-  out.push(`Or create ${userPath} — see .super8-studio.env.example`);
+  out.push("Authenticate: super8-studio-api-skills login");
+  out.push(`Or create ${userPath} with S8_SESSION_TOKEN — see .super8-studio.env.example`);
   out.push("");
   process.stderr.write(out.join("\n") + "\n");
   printProcessEnvInstructions();
@@ -212,14 +216,42 @@ function printMissingCredentialsHelp(state) {
 
 // Load env files and verify required credentials. Returns true on success;
 // on failure prints actionable help and returns false (callers exit non-zero).
+// A valid login session is the highest-priority credential — it overrides the
+// token from the environment/files. An expired session or one issued against a
+// different API root is ignored (with a notice) and resolution falls through.
+function applySessionOverride(apiRoot) {
+  const session = sessionLib.readSession();
+  if (session && sessionLib.isSessionValid(session, apiRoot)) {
+    process.env.S8_SESSION_TOKEN = session.token;
+    activeSession = session;
+  } else {
+    activeSession = null;
+    if (session && sessionLib.sessionPresent()) {
+      process.stderr.write(
+        "Login session is expired or was issued for another API environment — run `login` again.\n"
+      );
+    }
+  }
+}
+
+// Resolve the token without printing help or exiting (for callers like install
+// that want to probe). Returns the token string or null.
+function resolveToken() {
+  loadEnvFiles();
+  applySessionOverride(resolveApiRoot().root);
+  return process.env.S8_SESSION_TOKEN || null;
+}
+
 function loadRuntimeEnv() {
   const state = loadEnvFiles();
+  const apiRoot = resolveApiRoot().root;
+  applySessionOverride(apiRoot);
   if (!process.env.S8_SESSION_TOKEN) {
     printMissingCredentialsHelp(state);
     return false;
   }
   // API URL is fixed (registry or production fallback), not a credential.
-  process.env.S8_API_ROOT = resolveApiRoot().root;
+  process.env.S8_API_ROOT = apiRoot;
   return true;
 }
 
@@ -232,9 +264,10 @@ function requireRuntimeEnv() {
 
 function resolveOrgId(explicitOrgId) {
   if (explicitOrgId) return explicitOrgId;
+  if (activeSession && activeSession.orgId) return activeSession.orgId;
   if (process.env.S8_ORG_ID) return process.env.S8_ORG_ID;
   process.stderr.write(
-    `Missing organization context. Provide --org-id or set S8_ORG_ID in ${repoEnvDisplayPath()} or ${userEnvPath()}.\n`
+    `Missing organization context. Provide --org-id, run \`login\` to set a default org, or set S8_ORG_ID in ${repoEnvDisplayPath()} or ${userEnvPath()}.\n`
   );
   process.exit(1);
 }
@@ -267,6 +300,7 @@ module.exports = {
   repoEnvPath,
   parseEnvFile,
   resolveApiRoot,
+  resolveToken,
   loadEnvFiles,
   loadRuntimeEnv,
   requireRuntimeEnv,

@@ -16,7 +16,7 @@ Credentials are managed securely through the platform's native keychain on Claud
 
 ```bash
 npx @8-interactive/insightark-skills install --agents claude-code
-npx @8-interactive/insightark-skills setup     # configure the session token, then doctor
+npx @8-interactive/insightark-skills login     # log in (email/password), saves a session
 ```
 
 This copies the skills into `~/.claude/skills` and configures your session token.
@@ -38,7 +38,7 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ```bash
 npx @8-interactive/insightark-skills install --agents codex
-npx @8-interactive/insightark-skills setup
+npx @8-interactive/insightark-skills login
 ```
 
 This copies the skills into `~/.codex/skills` and writes credentials to `~/.super8-studio.env`.
@@ -60,7 +60,7 @@ Pure Node — works on macOS, Linux, and **native Windows** (no bash, `curl`, or
 
 ```bash
 npx @8-interactive/insightark-skills install     # interactive: choose location → agents → confirm
-npx @8-interactive/insightark-skills setup       # configure credentials, then run doctor
+npx @8-interactive/insightark-skills login       # log in (email/password), saves a session
 npx @8-interactive/insightark-skills doctor      # health check
 ```
 
@@ -78,7 +78,7 @@ folder.
 | User (fallback) | `~/.super8-studio.env` | Fallback if install registry is missing |
 | Project override | `{project}/.super8-studio.env` | Optional `S8_ORG_ID` / stage URL override |
 
-**Load order:** user file → skills install dir → project file → process environment.
+**Token precedence:** login session (`~/.super8-studio.session`) → process environment (`S8_SESSION_TOKEN`) → project file → skills install dir → user file.
 
 ### Non-interactive / advanced
 
@@ -88,6 +88,19 @@ npx @8-interactive/insightark-skills install --location repo --agents all
 npx @8-interactive/insightark-skills install --target ~/.agents/skills   # shared folder, no per-agent subpaths
 npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
 ```
+
+---
+
+## Authentication
+
+Log in with your Super 8 account (recommended) instead of pasting a token:
+
+```bash
+npx @8-interactive/insightark-skills login    # email + password (+ TOTP if enabled), pick an org
+npx @8-interactive/insightark-skills logout   # clear the local session
+```
+
+`login` stores a session at `~/.super8-studio.session` that takes **priority over `S8_SESSION_TOKEN`**. It expires automatically; `logout` removes it locally (the API has no server-side revoke). After `install`, an interactive run verifies any existing credential and offers to log in if needed. `setup` (pasting a Console token) still works but is **deprecated**.
 
 ---
 
@@ -130,7 +143,7 @@ npx @8-interactive/insightark-skills uninstall --location global --agents claude
 
 ```bash
 npx @8-interactive/insightark-skills install --agents claude-code
-npx @8-interactive/insightark-skills setup     # 設定 session token,接著 doctor
+npx @8-interactive/insightark-skills login     # log in (email/password), saves a session
 ```
 
 會把 skills 複製進 `~/.claude/skills` 並設定你的 session token。
@@ -150,7 +163,7 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ```bash
 npx @8-interactive/insightark-skills install --agents codex
-npx @8-interactive/insightark-skills setup
+npx @8-interactive/insightark-skills login
 ```
 
 會把 skills 複製進 `~/.codex/skills`,並把憑證寫入 `~/.super8-studio.env`。
@@ -172,7 +185,7 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ```bash
 npx @8-interactive/insightark-skills install     # 互動式：選擇位置 → agents → 確認
-npx @8-interactive/insightark-skills setup       # 設定憑證，接著執行 doctor
+npx @8-interactive/insightark-skills login       # log in (email/password), saves a session
 npx @8-interactive/insightark-skills doctor      # 健康檢查
 ```
 
@@ -189,7 +202,7 @@ skills 複製到各 agent 的 skills 資料夾。
 | 使用者（備援） | `~/.super8-studio.env` | 找不到安裝登錄檔時的備援 |
 | 專案覆蓋 | `{project}/.super8-studio.env` | 可選的 `S8_ORG_ID` 或測試環境 URL |
 
-**載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
+**Token 優先序：** 登入 session（`~/.super8-studio.session`）→ Process 環境變數（`S8_SESSION_TOKEN`）→ 專案檔案 → Skills 安裝目錄 → 使用者檔案。
 
 ### 非互動 / 進階
 
@@ -199,6 +212,19 @@ npx @8-interactive/insightark-skills install --location repo --agents all
 npx @8-interactive/insightark-skills install --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
 npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
 ```
+
+---
+
+## 驗證登入
+
+建議用 Super 8 帳號登入(取代貼 token):
+
+```bash
+npx @8-interactive/insightark-skills login    # email + password(+ TOTP 若啟用),選 org
+npx @8-interactive/insightark-skills logout   # 清除本地 session
+```
+
+`login` 會把 session 存到 `~/.super8-studio.session`,其**優先於 `S8_SESSION_TOKEN`**。session 會自動過期;`logout` 只清本地(API 無 server 端 revoke)。`install` 互動模式會驗證既有憑證,需要時引導登入。`setup`(貼 Console token)仍可用但**已 deprecated**。
 
 ---
 

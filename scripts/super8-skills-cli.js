@@ -12,7 +12,9 @@ function usage() {
       "Usage:",
       "  super8-studio-api-skills install [options]",
       "  super8-studio-api-skills uninstall [options]",
-      "  super8-studio-api-skills setup [options]",
+      "  super8-studio-api-skills login",
+      "  super8-studio-api-skills logout",
+      "  super8-studio-api-skills setup [options]   (deprecated; use login)",
       "  super8-studio-api-skills doctor",
       "",
       "Examples:",
@@ -44,6 +46,16 @@ async function main() {
     case "uninstall": {
       const uninstall = require(path.join(root, "installer", "uninstall.js"));
       finish(await uninstall.run(args));
+      break;
+    }
+    case "login": {
+      const login = require(path.join(root, "installer", "login.js"));
+      finish(await login.run(args));
+      break;
+    }
+    case "logout": {
+      const logout = require(path.join(root, "installer", "logout.js"));
+      finish(await logout.run(args));
       break;
     }
     case "setup": {

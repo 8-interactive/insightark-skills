@@ -395,6 +395,28 @@ function resolveApiEnvironment({ staging, apiUrl } = {}) {
   return { channel: "production", apiUrl: PRODUCTION_API_URL };
 }
 
+// Verify a token against /developer/v1/auth/me. Non-throwing: returns
+// { ok, status, email, error } so callers can branch on 401 vs network errors.
+async function verifyToken(apiRoot, token) {
+  let res;
+  try {
+    res = await fetch(`${apiRoot.replace(/\/+$/, "")}/developer/v1/auth/me`, {
+      method: "GET",
+      headers: { Accept: "application/json", _SessionToken: token },
+    });
+  } catch (e) {
+    return { ok: false, status: 0, error: e && e.message ? e.message : String(e) };
+  }
+  let email;
+  try {
+    const data = await res.json();
+    email = data && data.data && data.data.user && data.data.user.email;
+  } catch (_e) {
+    // ignore body parse errors
+  }
+  return { ok: res.status >= 200 && res.status < 300, status: res.status, email };
+}
+
 function consoleBaseForApiUrl(apiUrl) {
   const trimmed = (apiUrl || "").replace(/\/+$/, "");
   switch (trimmed) {
@@ -435,6 +457,7 @@ module.exports = {
   multiSelect,
   detectAgentsAtBase,
   detectAgentsWithBundle,
+  verifyToken,
   closeRl,
   openUrl,
   PRODUCTION_API_URL,
