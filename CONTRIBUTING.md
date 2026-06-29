@@ -2,16 +2,16 @@
 
 ## Skill Layout
 
-Canonical cross-agent skills live under `bundle/`.
+Canonical cross-agent skills live under `skills/`.
 
 ```text
-bundle/<skill-name>/SKILL.md
-bundle/_super8-studio-api-shared/scripts/
+skills/<skill-name>/SKILL.md
+skills/_super8-studio-api-shared/scripts/
 ```
 
 The underscore-prefixed shared directory is runtime support, not a triggerable
-skill. Do not point plugin manifests at `claude-code/`; that directory is only
-for Claude Code-specific overrides.
+skill. Skill scripts are Node (`.js`) and run with `node <path>` — zero
+dependencies, no bash required.
 
 ## Skill Rules
 
@@ -20,19 +20,20 @@ for Claude Code-specific overrides.
 - Read-only skills must stay read-only.
 - Write-action skills must require explicit confirmation before API mutation or
   outbound messaging.
-- Shared shell helpers belong in `_super8-studio-api-shared/scripts/`.
+- Shared Node helpers belong in `_super8-studio-api-shared/scripts/` (libs in `scripts/lib/`).
 
 ## Validation
 
-Run this before opening a PR or publishing a package:
+Run these before opening a PR or publishing a package:
 
 ```bash
-bash scripts/validate-skills.sh
+npm run validate          # node scripts/validate-skills.js
+npm test                  # node test/env-precedence.test.js
 ```
 
 If the change affects install behavior, test at least one direct install target:
 
 ```bash
-./install.sh --target /tmp/super8-skills-test
-./setup-env.sh --check
+node scripts/super8-skills-cli.js install --target /tmp/super8-skills-test
+node scripts/super8-skills-cli.js setup --check
 ```

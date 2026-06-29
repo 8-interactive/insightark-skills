@@ -36,7 +36,7 @@ Installed disabled by default (connects to an external API):
 claude plugin enable super8-studio-api-skills@super8-studio-api-skills
 ```
 
-A `SessionStart` hook runs `doctor.sh` automatically so credential issues surface at the start of every session.
+A `SessionStart` hook runs `doctor.js` automatically so credential issues surface at the start of every session.
 
 ### Session token
 
@@ -58,10 +58,10 @@ codex plugin install super8-studio-api-skills@super8-studio-api-skills
 
 ### 2. Configure credentials
 
-Codex does not use a system keychain. Run `setup-env.sh` to write credentials to `~/.super8-studio.env`:
+Codex does not use a system keychain. Run the Node setup to write credentials to `~/.super8-studio.env`:
 
 ```bash
-./setup-env.sh
+npx @super8/studio-api-skills setup
 ```
 
 | Variable | Description |
@@ -78,13 +78,20 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ---
 
-## Manual Install
+## Install via npx (any coding agent)
+
+Pure Node — works on macOS, Linux, and **native Windows** (no bash, `curl`, or `jq` required). Node 18+ only.
 
 ```bash
-./install.sh
-./setup-env.sh
-./setup-env.sh --check
+npx @super8/studio-api-skills install     # interactive: choose location → agents → confirm
+npx @super8/studio-api-skills setup       # configure credentials, then run doctor
+npx @super8/studio-api-skills doctor      # health check
 ```
+
+The installer asks **where** to install — global (`~`) or this repo (current
+directory) — and **which** coding agents to install for (Claude Code, OpenCode,
+Cursor, GitHub Copilot, Codex), then copies the skills into each agent's skills
+folder.
 
 ### Config files
 
@@ -97,12 +104,13 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 **Load order:** user file → skills install dir → project file → process environment.
 
-### CLI options
+### Non-interactive / advanced
 
 ```bash
-./install.sh --base-dir ~ --agents claude-code,cursor,codex
-./install.sh --target ~/.agents/skills   # shared folder, no per-agent subpaths
-./uninstall.sh --base-dir ~ --agents claude-code,codex
+npx @super8/studio-api-skills install --location global --agents claude-code,cursor,codex
+npx @super8/studio-api-skills install --location repo --agents all
+npx @super8/studio-api-skills install --target ~/.agents/skills   # shared folder, no per-agent subpaths
+npx @super8/studio-api-skills uninstall --location global --agents claude-code,codex
 ```
 
 ---
@@ -166,7 +174,7 @@ claude plugin install super8-studio-api-skills@super8-studio-api-skills
 claude plugin enable super8-studio-api-skills@super8-studio-api-skills
 ```
 
-`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.sh`，讓憑證問題提早浮現。
+`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.js`，讓憑證問題提早浮現。
 
 ### Session Token 取得方式
 
@@ -188,10 +196,10 @@ codex plugin install super8-studio-api-skills@super8-studio-api-skills
 
 ### 2. 設定憑證
 
-Codex 不使用系統鑰匙圈，請執行 `setup-env.sh` 將憑證寫入 `~/.super8-studio.env`：
+Codex 不使用系統鑰匙圈，請執行 Node setup 將憑證寫入 `~/.super8-studio.env`：
 
 ```bash
-./setup-env.sh
+npx @super8/studio-api-skills setup
 ```
 
 | 變數 | 說明 |
@@ -208,13 +216,19 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ---
 
-## 手動安裝
+## 透過 npx 安裝（適用任何 coding agent）
+
+純 Node 實作——可在 macOS、Linux 與**原生 Windows** 上執行（無需 bash、`curl` 或 `jq`）。僅需 Node 18+。
 
 ```bash
-./install.sh
-./setup-env.sh
-./setup-env.sh --check
+npx @super8/studio-api-skills install     # 互動式：選擇位置 → agents → 確認
+npx @super8/studio-api-skills setup       # 設定憑證，接著執行 doctor
+npx @super8/studio-api-skills doctor      # 健康檢查
 ```
+
+安裝器會詢問**安裝位置**——global（`~`）或此 repo（當前目錄）——以及要**安裝給哪些
+coding agent**（Claude Code、OpenCode、Cursor、GitHub Copilot、Codex），然後將
+skills 複製到各 agent 的 skills 資料夾。
 
 ### 設定檔說明
 
@@ -227,12 +241,13 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 **載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
 
-### CLI 選項
+### 非互動 / 進階
 
 ```bash
-./install.sh --base-dir ~ --agents claude-code,cursor,codex
-./install.sh --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
-./uninstall.sh --base-dir ~ --agents claude-code,codex
+npx @super8/studio-api-skills install --location global --agents claude-code,cursor,codex
+npx @super8/studio-api-skills install --location repo --agents all
+npx @super8/studio-api-skills install --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
+npx @super8/studio-api-skills uninstall --location global --agents claude-code,codex
 ```
 
 ---

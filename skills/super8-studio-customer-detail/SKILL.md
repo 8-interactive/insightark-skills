@@ -11,12 +11,12 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/customer_detail.sh`
+- `node ../_super8-studio-api-shared/scripts/customer_detail.js`
 
 ## Workflow
 
 1. Resolve organization context through `--org-id` or `S8_ORG_ID`.
-2. Require an explicit customer id and run `customer_detail.sh --customer-id <id>`.
+2. Require an explicit customer id and run `customer_detail.js --customer-id <id>`.
 3. Return only the public customer detail payload from the developer API response.
 
 ## Guardrails

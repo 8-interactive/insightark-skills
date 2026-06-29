@@ -10,7 +10,7 @@ with tokens, customer data, request logs, or exploit details.
 
 - Never commit `.super8-studio.env`, `_SessionToken`, or `S8_SESSION_TOKEN`.
 - Never paste Developer API tokens into chat, email, screenshots, or tickets.
-- `setup-env.sh` writes credential files with mode `600`.
+- The Node setup (`super8-studio-api-skills setup`) writes credential files with mode `600`.
 - Rotate a token immediately if it may have been exposed.
 
 ## Skill Behavior

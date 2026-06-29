@@ -11,7 +11,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/customer_search.sh`
+- `node ../_super8-studio-api-shared/scripts/customer_search.js`
 
 ## CLI
 
@@ -36,16 +36,16 @@ This skill operates on the Super 8 Studio Developer API.
 ## Workflow
 
 1. Resolve organization context through `--org-id` or `S8_ORG_ID`.
-2. Run `customer_search.sh` with only supported public filters such as `--customer-id`, `--display-name`, `--platform`, `--include-tag`, `--exclude-tag`, `--joined-start-at`, `--last-inbound-start-at`, `--last-message-start-at`, `--limit`, and `--skip`.
+2. Run `customer_search.js` with only supported public filters such as `--customer-id`, `--display-name`, `--platform`, `--include-tag`, `--exclude-tag`, `--joined-start-at`, `--last-inbound-start-at`, `--last-message-start-at`, `--limit`, and `--skip`.
 3. Return the public customer search results and offset page metadata.
 
 ## Segment insight playbook
 
 Use this three-step loop when the user asks what a customer segment (for example VIP tag holders) recently talked about:
 
-1. **Find the segment** — `customer_search.sh` with `--include-tag` and a recent activity window such as `--last-message-start-at` (keep `--limit` at 20 or fewer for analysis).
-2. **Resolve each conversation** — for each `customerId` in the search result, run `conversations.sh --customer-id <id> --limit 1` from `super8-studio-conversations`.
-3. **Sample messages** — run `conversation_messages.sh --conversation-id <id> --limit 10 --order desc` from `super8-studio-conversation-detail`.
+1. **Find the segment** — `customer_search.js` with `--include-tag` and a recent activity window such as `--last-message-start-at` (keep `--limit` at 20 or fewer for analysis).
+2. **Resolve each conversation** — for each `customerId` in the search result, run `conversations.js --customer-id <id> --limit 1` from `super8-studio-conversations`.
+3. **Sample messages** — run `conversation_messages.js --conversation-id <id> --limit 10 --order desc` from `super8-studio-conversation-detail`.
 
 Cap analysis at roughly **20 customers** and **10 messages per customer** unless the user explicitly requests a larger sample.
 

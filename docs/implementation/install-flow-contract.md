@@ -6,9 +6,9 @@ our scripts should record installed skills paths in `~/.super8-studio.config`.
 
 ## Shared State
 
-`install.sh` is the source of truth for registry writes. It calls
+`installer/install.js` is the source of truth for registry writes. It calls
 `super8_write_install_config` from
-`skills/_super8-studio-api-shared/scripts/lib/install-config.sh`.
+`skills/_super8-studio-api-shared/scripts/lib/install-config.js`.
 
 The registry stores:
 
@@ -20,10 +20,10 @@ skills_targets=<comma-separated resolved skills folders>
 installed_at=<UTC timestamp>
 ```
 
-`setup-env.sh`, `uninstall.sh`, and runtime credential loading use this registry
+`the Node setup (super8-studio-api-skills setup)`, `the Node uninstaller`, and runtime credential loading use this registry
 to find installed skill directories when it exists. Marketplace and external
 skills-manager installs may not run repository scripts, so skills must also be
-able to guide users toward `setup-env.sh` or a manual env file fallback.
+able to guide users toward `the Node setup (super8-studio-api-skills setup)` or a manual env file fallback.
 
 ## 1. curl / Tarball
 
@@ -33,8 +33,8 @@ Current flow:
 curl -LO https://downloads.no8.io/main/releases/skills/super8-studio-api-skills-latest.tar.gz
 tar -xzf super8-studio-api-skills-latest.tar.gz
 cd super8-studio-api-skills
-./install.sh
-./setup-env.sh
+npx @super8/studio-api-skills install
+npx @super8/studio-api-skills setup
 ```
 
 Recommended bootstrap flow:
@@ -42,11 +42,11 @@ Recommended bootstrap flow:
 1. Download the release tarball.
 2. Verify checksum when available.
 3. Extract to a temporary or user cache directory.
-4. Run `./install.sh` with either interactive prompts or passed-through
+4. Run `npx @super8/studio-api-skills install` with either interactive prompts or passed-through
    non-interactive options.
-5. Run or instruct the user to run `./setup-env.sh`.
+5. Run or instruct the user to run `npx @super8/studio-api-skills setup`.
 
-Registry handling: `install.sh` writes `~/.super8-studio.config` after resolving
+Registry handling: `installer/install.js` writes `~/.super8-studio.config` after resolving
 the target directories.
 
 ## 2. Codex add marketplace
@@ -61,7 +61,7 @@ Codex-specific files:
 .agents/plugins/marketplace.json
 ```
 
-Do not assume Codex marketplace install executes `install.sh`. Codex plugin
+Do not assume Codex marketplace install executes `installer/install.js`. Codex plugin
 installation makes skills available through the plugin system; credential setup
 must be a documented follow-up step or a skill-guided workflow.
 
@@ -69,8 +69,8 @@ If users want direct skills copied into a specific local skills directory
 instead of plugin-managed discovery, use:
 
 ```bash
-./install.sh --target ~/.agents/skills
-./setup-env.sh
+npx @super8/studio-api-skills install --target ~/.agents/skills
+npx @super8/studio-api-skills setup
 ```
 
 Registry handling: Codex marketplace installs may not write
@@ -89,7 +89,7 @@ Claude-specific files:
 ```
 
 Claude Code installs marketplace plugins into its plugin cache. Do not assume
-the install flow can run `install.sh`. Use plugin skills, user-facing setup
+the install flow can run `installer/install.js`. Use plugin skills, user-facing setup
 instructions, or Claude `userConfig` when a future release supports the exact
 credential shape this package needs.
 
@@ -107,29 +107,29 @@ npx skills add --...
 Treat this as an external skills-manager path. The exact source syntax and
 lifecycle behavior must be verified against the current CLI before publishing.
 
-Do not assume `npx skills add --...` executes `install.sh`, npm lifecycle
+Do not assume `npx skills add --...` executes `installer/install.js`, npm lifecycle
 scripts, or package binaries unless the CLI documentation explicitly guarantees
 that behavior.
 
 If the CLI can run a follow-up command after copying skills, use:
 
 ```bash
-scripts/register-install.sh --target <skills-target>
-./setup-env.sh
+scripts/register-install.js --target <skills-target>
+npx @super8/studio-api-skills setup
 ```
 
 If it cannot run follow-up commands, rely on `~/.super8-studio.env`, process
-environment variables, or a manual `setup-env.sh` run from a downloaded package.
+environment variables, or a manual `the Node setup (super8-studio-api-skills setup)` run from a downloaded package.
 
 ## Answering the Current Flow Questions
 
-### How should `./install.sh` be triggered outside curl?
+### How should `npx @super8/studio-api-skills install` be triggered outside curl?
 
-Use `install.sh` as the canonical installer only for channels that execute our
+Use `installer/install.js` as the canonical installer only for channels that execute our
 scripts:
 
-- curl/tarball: call `./install.sh`.
-- Explicit npm package binary: may call `bash ./install.sh` if users invoke it.
+- curl/tarball: call `npx @super8/studio-api-skills install`.
+- Explicit npm package binary: may call `bash npx @super8/studio-api-skills install` if users invoke it.
 - Codex/Claude marketplaces: do not assume install-time script execution.
 - Vercel `npx skills add --...`: verify CLI lifecycle before relying on script
   execution.
@@ -138,12 +138,12 @@ The adapters should not duplicate target resolution logic.
 
 ### How should `~/.super8-studio.config` be recorded outside curl?
 
-Do not write the file independently in each channel when `install.sh` can run.
-Call `install.sh`, because it already writes the registry through
+Do not write the file independently in each channel when `installer/install.js` can run.
+Call `installer/install.js`, because it already writes the registry through
 `super8_write_install_config`.
 
 If an install platform copies files itself and later exposes a known target path,
-use `scripts/register-install.sh --target <dir>` as an optional follow-up. If no
+use `scripts/register-install.js --target <dir>` as an optional follow-up. If no
 follow-up command can run, treat the registry as unavailable and rely on env
 fallbacks.
 
@@ -151,7 +151,7 @@ fallbacks.
 
 | Channel | Must verify |
 | --- | --- |
-| curl/tarball | Tarball extracts, `install.sh` copies `skills/`, registry exists, `setup-env.sh --check` runs. |
+| curl/tarball | Tarball extracts, `installer/install.js` copies `skills/`, registry exists, `the Node setup (super8-studio-api-skills setup) --check` runs. |
 | Codex marketplace | `.codex-plugin/plugin.json` resolves `../skills/`, `.agents/plugins/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
 | Claude marketplace | `.claude-plugin/plugin.json` resolves `../skills/`, `.claude-plugin/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
 | Vercel skills add | Package includes all runtime files, docs state CLI lifecycle assumptions, registry is optional unless a follow-up target path is available. |

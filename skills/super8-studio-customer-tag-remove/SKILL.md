@@ -11,7 +11,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 ## Script
 
-- `../_super8-studio-api-shared/scripts/customer_tag_remove.sh`
+- `node ../_super8-studio-api-shared/scripts/customer_tag_remove.js`
 
 ## CLI
 
@@ -23,7 +23,7 @@ This skill operates on the Super 8 Studio Developer API.
 
 1. Resolve organization context through `--org-id` or `S8_ORG_ID`.
 2. Require an explicit customer id and one or more explicit tags.
-3. Run `customer_tag_remove.sh` and return the acceptance response from the public developer API.
+3. Run `customer_tag_remove.js` and return the acceptance response from the public developer API.
 
 ## Guardrails
 

@@ -13,19 +13,19 @@
   "files": [
     ".codex-plugin/",
     ".claude-plugin/",
+    "hooks/",
     "skills/",
     "docs/",
     "installer/",
     "scripts/",
-    "install.sh",
-    "setup-env.sh",
-    "uninstall.sh",
     "README.md",
     "SECURITY.md",
     "CHANGELOG.md"
   ],
   "scripts": {
-    "validate": "bash scripts/validate-skills.sh"
+    "validate": "node scripts/validate-skills.js",
+    "test": "node test/env-precedence.test.js",
+    "smoke": "node test/smoke.js"
   },
   "engines": {
     "node": ">=18"

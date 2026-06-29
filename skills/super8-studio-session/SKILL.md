@@ -14,19 +14,19 @@ It uses `S8_API_URL` for the API base URL and `S8_SESSION_TOKEN` for authenticat
 
 Scripts auto-load `~/.super8-studio.env` then `./.super8-studio.env` (repo overrides user). Process environment variables take highest priority.
 
-If credentials are missing, run `./install.sh` then `./setup-env.sh` from the skill bundle (opens Console to create a token and picks a Developer-API-enabled org). Or create `~/.super8-studio.env` from `.super8-studio.env.example`.
+If credentials are missing, run `./install.js` then `./setup-env.js` from the skill bundle (opens Console to create a token and picks a Developer-API-enabled org). Or create `~/.super8-studio.env` from `.super8-studio.env.example`.
 
 ## Scripts
 
-- `../_super8-studio-api-shared/scripts/doctor.sh`
-- `../_super8-studio-api-shared/scripts/auth_me.sh`
-- `../_super8-studio-api-shared/scripts/organizations.sh`
+- `node ../_super8-studio-api-shared/scripts/doctor.js`
+- `node ../_super8-studio-api-shared/scripts/auth_me.js`
+- `node ../_super8-studio-api-shared/scripts/organizations.js`
 
 ## Workflow
 
-1. Run `doctor.sh` when environment readiness is unknown.
-2. Run `auth_me.sh` to inspect the current authenticated session.
-3. Run `organizations.sh` when the caller also needs manageable organization context.
+1. Run `doctor.js` when environment readiness is unknown.
+2. Run `auth_me.js` to inspect the current authenticated session.
+3. Run `organizations.js` when the caller also needs manageable organization context.
 
 ## Guardrails
 

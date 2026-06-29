@@ -11,17 +11,17 @@ allowed-mcp: false
 
 | Script | Purpose |
 |--------|---------|
-| `ma_procedure_preflight.sh` | **Requires `--confirmation-file`.** Local gate before `validate`/`create`: OpenAPI root keys (`orgId`, `templateType`, `name`, `enabled`, `platform`, **`startTime`/`endTime`**, `limits`, `oos`, graph), **`limits.message` + `limits.per_customer` required** (`per_customer` may be **`onceByDay`**), **`oos.enabled === true` ⇒ hour/minute/duration required**, Meta `fbTag`, placeholder scan, `matchTopLevel` deep-equal. Run only **after** customer sign-off. |
-| `ma_procedure_validate.sh` | `POST /developer/v1/automation/procedures/validate` — same body as create; **HTTP 2xx** and prints JSON; **exits 0 only if `data.valid === true`**. |
-| `ma_procedure_create.sh` | `POST /developer/v1/automation/procedures` — body from `--json-file`. Server runs the same checks as validate; invalid payload returns **400**. |
-| `ma_procedure_start.sh` | `POST .../procedures/{id}/start` — publish draft. |
-| `ma_procedure_pause.sh` | `PATCH .../procedures/{id}/status` — `--action pause` or `resume`. |
-| `ma_procedure_status.sh` | `GET .../procedures/{id}` — status summary and push count. |
-| `ma_procedure_trigger.sh` | `POST .../procedures/{id}/trigger` — `--customer-id` required; optional `--type`. **Only when `procedure.status` is `progress` (進行中)** enqueue; drafts / paused / before start window / ended / disabled → **HTTP 400** `error/ma-trigger-not-allowed` and **`data.reasonStatus`** (`editing` \| `pausing` \| `terminated` \| `scheduled` \| `done`, or **`unknown`** if settings missing). Call **`ma_procedure_status.sh`** first to verify. |
+| `ma_procedure_preflight.js` | **Requires `--confirmation-file`.** Local gate before `validate`/`create`: OpenAPI root keys (`orgId`, `templateType`, `name`, `enabled`, `platform`, **`startTime`/`endTime`**, `limits`, `oos`, graph), **`limits.message` + `limits.per_customer` required** (`per_customer` may be **`onceByDay`**), **`oos.enabled === true` ⇒ hour/minute/duration required**, Meta `fbTag`, placeholder scan, `matchTopLevel` deep-equal. Run only **after** customer sign-off. |
+| `ma_procedure_validate.js` | `POST /developer/v1/automation/procedures/validate` — same body as create; **HTTP 2xx** and prints JSON; **exits 0 only if `data.valid === true`**. |
+| `ma_procedure_create.js` | `POST /developer/v1/automation/procedures` — body from `--json-file`. Server runs the same checks as validate; invalid payload returns **400**. |
+| `ma_procedure_start.js` | `POST .../procedures/{id}/start` — publish draft. |
+| `ma_procedure_pause.js` | `PATCH .../procedures/{id}/status` — `--action pause` or `resume`. |
+| `ma_procedure_status.js` | `GET .../procedures/{id}` — status summary and push count. |
+| `ma_procedure_trigger.js` | `POST .../procedures/{id}/trigger` — `--customer-id` required; optional `--type`. **Only when `procedure.status` is `progress` (進行中)** enqueue; drafts / paused / before start window / ended / disabled → **HTTP 400** `error/ma-trigger-not-allowed` and **`data.reasonStatus`** (`editing` \| `pausing` \| `terminated` \| `scheduled` \| `done`, or **`unknown`** if settings missing). Call **`ma_procedure_status.js`** first to verify. |
 
 ### Locate journeys by customer-provided name
 
-Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish(start) / pause / resume / trigger when only the **旅程名稱** is known, use skill **`super8-studio-ma-procedure-locate`** and **`ma_procedure_list.sh`** to resolve **`procedureId`**, confirm with the customer, then invoke the scripts in this skill that accept `--procedure-id`.
+Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish(start) / pause / resume / trigger when only the **旅程名稱** is known, use skill **`super8-studio-ma-procedure-locate`** and **`ma_procedure_list.js`** to resolve **`procedureId`**, confirm with the customer, then invoke the scripts in this skill that accept `--procedure-id`.
 
 ### Confirmation file (`--confirmation-file`)
 
@@ -72,7 +72,7 @@ If the customer says “dormancy” or “sleep,” clarify whether they mean **
 
 ## Pre-create checklist (customer must confirm all rows)
 
-**Do not** run `ma_procedure_validate.sh` or `ma_procedure_create.sh` until `ma_procedure_preflight.sh` succeeds **with** `--confirmation-file`, and **every** row below is explicitly agreed with the customer:
+**Do not** run `ma_procedure_validate.js` or `ma_procedure_create.js` until `ma_procedure_preflight.js` succeeds **with** `--confirmation-file`, and **every** row below is explicitly agreed with the customer:
 
 | Area | Customer must provide |
 |------|------------------------|
@@ -97,10 +97,10 @@ Phrases like “same as before” or “you decide” are **not** literal values
 1. Run a **gap check** against this checklist; any gap → **questions only, no API calls**.
 2. After the customer fills gaps, write the JSON file (values only from the customer plus meaningless id/coordinates for graph wiring).
 3. Show a compact final field table and get explicit customer sign-off.
-4. Run **`ma_procedure_preflight.sh --json-file PATH --confirmation-file PATH`**; if it fails, ask follow-up questions and revise only with customer agreement (update `matchTopLevel` after any approved change).
+4. Run **`ma_procedure_preflight.js --json-file PATH --confirmation-file PATH`**; if it fails, ask follow-up questions and revise only with customer agreement (update `matchTopLevel` after any approved change).
 5. Ensure credentials are available (`~/.super8-studio.env`, `./.super8-studio.env`, or process env). Scripts load them automatically. Use `S8_ORG_ID` or the customer-selected org aligned with body `orgId`.
-6. Run **`ma_procedure_validate.sh`**; if `data.valid === false`, parse **`data.errors`** (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON；**不得**為了過驗證擅自改業務意涵。
-7. After a successful validate, run **`ma_procedure_create.sh`**; if HTTP **400**，讀取錯誤 envelope：`success: false`，結構化錯誤通常在 **`data.errors`**（與 validate 相同形狀時可同樣對應 `path`）；將 **`path` + `message`** 轉述給客戶要求補齊。Cap at **three** validate-fix rounds, each change explainable to the customer.
+6. Run **`ma_procedure_validate.js`**; if `data.valid === false`, parse **`data.errors`** (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON；**不得**為了過驗證擅自改業務意涵。
+7. After a successful validate, run **`ma_procedure_create.js`**; if HTTP **400**，讀取錯誤 envelope：`success: false`，結構化錯誤通常在 **`data.errors`**（與 validate 相同形狀時可同樣對應 `path`）；將 **`path` + `message`** 轉述給客戶要求補齊。Cap at **three** validate-fix rounds, each change explainable to the customer.
 8. **Do not** copy names, times, keywords, or copy from sample JSON onto a real customer “to save time.”
 
 **讀取校驗結果（給 agent / 腳本）**
