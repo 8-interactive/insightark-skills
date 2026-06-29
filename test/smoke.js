@@ -117,6 +117,24 @@ try {
   check("uninstall --target exits 0", r.status === 0, r.stderr);
   check("bundle removed", !fs.existsSync(shared));
 
+  // 5b. Interactive install via piped stdin exercises the non-TTY agent
+  //     selection fallback (typed list). cwd is a temp dir so "repo" location
+  //     installs there, not into this repo. Answers: 2=repo, 3=cursor, Y=confirm.
+  const itmp = path.join(work, "interactive");
+  fs.mkdirSync(itmp, { recursive: true });
+  r = spawnSync(process.execPath, [CLI, "install"], {
+    cwd: itmp,
+    input: "2\n3\nY\n",
+    encoding: "utf8",
+  });
+  check("interactive install exits 0", r.status === 0, r.stderr);
+  check(
+    "non-TTY agent fallback selected cursor",
+    fs.existsSync(path.join(itmp, ".cursor", "skills", "_super8-studio-api-shared")),
+    r.stderr
+  );
+  cli(["uninstall", "--target", path.join(itmp, ".cursor", "skills")]);
+
   // 6. Live doctor only when credentials are available (e.g. CI secret).
   //    The API URL is fixed at install time, so point the registry at the
   //    token's environment via the hidden --api-url before running doctor.
