@@ -1,7 +1,7 @@
 ## 1. Release prerequisites
 
-- [ ] 1.1 Merge PR #2 (Node re-platform) and PR #3 (fix-api-url-at-install) to `main`
-- [ ] 1.2 Add `NPM_TOKEN` (automation token with publish rights to `@8-interactive`) to repo CI secrets
+- [x] 1.1 Merge PR #2 (Node re-platform) and PR #3 (fix-api-url-at-install) to `main` — merged via #2, #5 (superseded #3), #4, and #6 (release tooling)
+- [ ] 1.2 Add `NPM_TOKEN` (automation token with publish rights to `@8-interactive`) to repo CI secrets — a token was added but the first publish hit `EOTP`; must be a **Classic Automation** token to bypass 2FA in CI (pending re-issue)
 
 ## 2. Package identity & access
 
