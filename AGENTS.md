@@ -52,3 +52,20 @@ CI runs these on ubuntu/macos/**windows** × node 18 & 20; keep the matrix green
 - Internal-only options (e.g. `install --staging`, `--api-url`) belong in
   `--help` and code comments, **not** the README.
 - User-facing behavior changes go in the README (EN + 中文) and `CHANGELOG.md`.
+
+## Releasing
+
+The version lives in four files that `validate` requires to match: `package.json`,
+`skills/_super8-studio-api-shared/VERSION`, and both plugin manifests. **Never bump
+them by hand.** Use:
+
+```bash
+npm version <patch|minor|major|x.y.z>   # bumps package.json, syncs the other
+                                        # three, commits, and creates tag vX.Y.Z
+git push --follow-tags                  # push the commit + tag
+```
+
+Pushing the `v*` tag triggers `.github/workflows/release.yml`, which verifies the
+tag equals `package.json` version, runs the validate/test/smoke gate, then
+`npm publish`. A prerelease version (`1.0.0-rc.1`) publishes under the `next`
+dist-tag so it does not become the `latest` that a bare `npx … install` resolves.

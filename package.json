@@ -25,7 +25,8 @@
   "scripts": {
     "validate": "node scripts/validate-skills.js",
     "test": "node test/env-precedence.test.js",
-    "smoke": "node test/smoke.js"
+    "smoke": "node test/smoke.js",
+    "version": "node scripts/sync-versions.js"
   },
   "engines": {
     "node": ">=18"
