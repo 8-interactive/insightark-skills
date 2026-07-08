@@ -1,57 +1,24 @@
 # Changelog
 
-## Unreleased
+## 2.0.0
 
-- Add `login` / `logout`: `login` authenticates with email + password (+ TOTP
-  when enabled), lets you pick an organization, and stores a session at
-  `~/.super8-studio.session`; `logout` clears it locally (the API has no
-  server-side revoke).
-- **BREAKING (precedence)**: a valid login session takes priority over
-  `S8_SESSION_TOKEN`. An expired session, or one issued against a different
-  install-fixed API URL, is ignored (with a re-login notice) and resolution
-  falls through. Org resolution gains the session org: `--org-id` → session
-  `orgId` → `S8_ORG_ID` → env files.
-- `install` (interactive) verifies an existing token via `/auth/me` after
-  copying and offers to `login` when it is missing or invalid; non-interactive
-  installs print guidance instead.
-- `setup` is **deprecated** (still works) and points to `login`.
+- Consolidate per-tool skills into 7 workflow-oriented MCP skills.
+- Use the hosted InsightArk MCP server as the primary execution path.
+- Add customer-facing MCP client setup guidance for Codex, Cursor, and Claude Code.
+- Keep CDN/tarball distribution compatible with channel-specific releases.
+- Align npm package name with GitHub distribution repo: `@8-interactive/insightark-skills`.
 
-- **BREAKING (package identity)**: Rename the npm package from
-  `@super8/studio-api-skills` to `@8-interactive/insightark-skills` and publish
-  it to **public** npm (`publishConfig.access: public`). Install with
-  `npx @8-interactive/insightark-skills install` for any agent. The `bin`
-  command name and plugin manifest identifiers are unchanged for now.
-- Add a tag-triggered CI release job that publishes to npm only after
-  `validate` + `test` + `smoke` pass.
-- Claude Code / Codex clients install via `npx … install --agents
-  claude-code|codex`; the plugin-marketplace path returns when the repo is public.
+## 1.1.0
 
-- **BREAKING**: Re-platform the entire skill bundle from bash to Node (zero
-  dependencies, Node 18+). All `.sh` scripts are replaced by `.js`; `curl`,
-  `jq`, and `date` are no longer required. Skills, install, credential setup,
-  and the doctor health check now run on macOS, Linux, and **native Windows**.
-- **BREAKING**: Skill invocation contract changed — `SKILL.md` files now run
-  `node <path>` instead of a `.sh` script. Existing bash installs must be
-  re-installed.
-- Add a pure-Node `npx` installer with a simplified flow: choose location
-  (global `~` or repo) → choose coding agent(s) → confirm → install. The
-  advanced shared-folder mode remains available via `--target`.
-- The `~/.super8-studio.config` install-registry format is preserved.
-- **BREAKING**: The API URL is now fixed at install time and recorded in the
-  install registry (`channel` + `api_url`). `npx … install` selects production
-  by default; internal `--staging` / `--api-url` options select other
-  endpoints. Skills no longer read `S8_API_URL` from the environment,
-  `.super8-studio.env`, or plugin options — it is resolved from the registry
-  (or a built-in production fallback for plugin installs).
-- **BREAKING**: `setup` no longer prompts for or stores an API URL; it derives
-  the Console/API from the registry channel and writes only the session token
-  (+ optional org). Plugin installs are always production; `S8_API_URL` is
-  removed from plugin `userConfig`. Internal staging testers must re-run
-  `install --staging`.
+- Renamed all skills from `super8-studio-*` to `insightark-*`.
+- npm package renamed from `@super8/studio-api-skills` to `@insightark/skills`, bin renamed to `insightark-skills`.
+- Product rebranded to "SUPER 8 Studio InsightArk Skills".
+- GitHub repo moved to `8-interactive/insightark-skills`.
+- `docs/` excluded from npm publish and CDN tarball (dev-only content).
 
 ## 1.0.0
 
 - Add canonical skill bundle installer for direct skills installation.
-- Add shared runtime scripts for SUPER 8 Studio Developer API workflows.
+- Add shared runtime scripts for Super 8 Studio Developer API workflows.
 - Add plugin, marketplace, npm, and validation metadata for multi-channel
   installation readiness.

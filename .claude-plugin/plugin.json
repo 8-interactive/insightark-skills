@@ -1,16 +1,17 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "0.6.0",
-  "description": "Reusable SUPER 8 Studio InsightArk Skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "version": "2.0.1",
+  "description": "Reusable InsightArk skills for conversations, customers, broadcasts, and marketing automation workflows.",
   "author": {
-    "name": "SUPER 8 Studio",
+    "name": "Super8",
     "url": "https://www.no8.io"
   },
   "homepage": "https://www.no8.io",
   "repository": "https://github.com/8-interactive/insightark-skills",
-  "license": "Apache-2.0",
+  "license": "UNLICENSED",
   "keywords": [
+    "insightark",
     "super8",
     "studio",
     "api",
@@ -24,10 +25,17 @@
   "skills": "./skills/",
   "defaultEnabled": false,
   "userConfig": {
+    "S8_API_URL": {
+      "type": "string",
+      "title": "API base URL",
+      "description": "InsightArk Developer API base URL (e.g. https://api-next.no8.io)",
+      "required": true,
+      "default": "https://api-next.no8.io"
+    },
     "S8_SESSION_TOKEN": {
       "type": "string",
       "title": "Session token",
-      "description": "SUPER 8 Studio Developer API session token (starts with r:)",
+      "description": "InsightArk Developer API session token (starts with r:)",
       "sensitive": true,
       "required": true
     }

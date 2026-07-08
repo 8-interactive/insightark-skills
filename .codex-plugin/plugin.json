@@ -1,15 +1,16 @@
 {
   "name": "insightark-skills",
-  "version": "0.6.0",
-  "description": "Reusable SUPER 8 Studio InsightArk Skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "version": "2.0.1",
+  "description": "Reusable InsightArk skills for conversations, customers, broadcasts, and marketing automation workflows.",
   "author": {
-    "name": "SUPER 8 Studio",
+    "name": "Super8",
     "url": "https://www.no8.io"
   },
   "homepage": "https://www.no8.io",
   "repository": "https://github.com/8-interactive/insightark-skills",
-  "license": "Apache-2.0",
+  "license": "UNLICENSED",
   "keywords": [
+    "insightark",
     "super8",
     "studio",
     "api",
@@ -23,20 +24,23 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
-    "shortDescription": "SUPER 8 Studio InsightArk Skills for CRM workflows.",
-    "longDescription": "A curated set of SUPER 8 Studio InsightArk Skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the SUPER 8 Studio Developer API.",
-    "developerName": "SUPER 8 Studio",
+    "shortDescription": "InsightArk skills for SUPER 8 Studio CRM workflows.",
+    "longDescription": "A curated set of skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the InsightArk Developer API.",
+    "developerName": "Super8",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://www.no8.io",
     "privacyPolicyURL": "https://www.no8.io/privacy",
     "termsOfServiceURL": "https://www.no8.io/terms",
     "brandColor": "#2F6FED",
     "defaultPrompt": [
-      "Use super8-studio-session to validate my SUPER 8 Studio API setup.",
-      "Use super8-studio-investigator to investigate recent conversations.",
-      "Use super8-studio-customer-manager to search and update customers.",
-      "Use super8-studio-broadcast-manager to create and monitor a broadcast."
+      "Use insightark-session to validate my InsightArk API setup.",
+      "Use insightark-investigator to investigate recent conversations.",
+      "Use insightark-customer-manager to search and update customers.",
+      "Use insightark-broadcast-manager to create and monitor a broadcast."
     ]
   }
 }

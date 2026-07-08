@@ -6,24 +6,40 @@
 
 <a name="english"></a>
 
-**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code and Codex that brings the [SUPER 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
+**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code and Codex that brings the [Super 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
 
 It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
 
 Credentials are managed securely through the platform's native keychain on Claude Code, or via an environment config file on Codex. A built-in health check runs automatically at session start to surface credential issues early.
 
-## Install for Claude Code
+## Plugin Install (Claude Code)
+
+### 1. Add marketplace and install
 
 ```bash
-npx @8-interactive/insightark-skills install --agents claude-code
-npx @8-interactive/insightark-skills login     # log in (email/password), saves a session
+claude plugin marketplace add 8-interactive/insightark-skills
+claude plugin install insightark-skills@insightark-skills
 ```
 
-This copies the skills into `~/.claude/skills` and configures your session token.
+> **Internal staging:** pin the marketplace catalog to the `staging` branch:
+> `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-> The managed plugin-marketplace install (with `userConfig` prompts and a
-> `SessionStart` doctor hook) will be available once the repository is public.
-> Until then, use the npx install above.
+During installation, Claude Code will prompt for:
+
+| Variable           | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `S8_API_URL`       | API base URL, e.g. `https://api-next.no8.io`          |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
+
+### 2. Enable the plugin
+
+Installed disabled by default (connects to an external API):
+
+```bash
+claude plugin enable insightark-skills@insightark-skills
+```
+
+A `SessionStart` hook runs `doctor.sh` automatically so credential issues surface at the start of every session.
 
 ### Session token
 
@@ -34,16 +50,27 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ---
 
-## Install for Codex
+## Plugin Install (Codex)
+
+### 1. Add marketplace and install
 
 ```bash
-npx @8-interactive/insightark-skills install --agents codex
-npx @8-interactive/insightark-skills login
+codex plugin marketplace add 8-interactive/insightark-skills
+codex plugin install insightark-skills@insightark-skills
 ```
 
-This copies the skills into `~/.codex/skills` and writes credentials to `~/.super8-studio.env`.
+### 2. Configure credentials
 
-> The plugin-marketplace install will be available once the repository is public.
+Codex does not use a system keychain. Run `setup-env.sh` to write credentials to `~/.insightark.env`:
+
+```bash
+./setup-env.sh
+```
+
+| Variable           | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `S8_API_URL`       | API base URL, e.g. `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
 
 ### Session token
 
@@ -54,53 +81,79 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ---
 
-## Install via npx (any coding agent)
+## Tarball Install
 
-Pure Node — works on macOS, Linux, and **native Windows** (no bash, `curl`, or `jq` required). Node 18+ only.
+Download and extract the latest release directly from the CDN, then run the installer:
+
+**macOS / Linux**
 
 ```bash
-npx @8-interactive/insightark-skills install     # interactive: choose location → agents → confirm
-npx @8-interactive/insightark-skills login       # log in (email/password), saves a session
-npx @8-interactive/insightark-skills doctor      # health check
+curl -L https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz \
+  -o insightark-skills-v2-latest.tar.gz
+tar -xzf insightark-skills-v2-latest.tar.gz
+cd insightark-skills
+./install.sh
+./setup-env.sh
 ```
 
-The installer asks **where** to install — global (`~`) or this repo (current
-directory) — and **which** coding agents to install for (Claude Code, OpenCode,
-Cursor, GitHub Copilot, Codex), then copies the skills into each agent's skills
-folder.
+**Windows (PowerShell)**
+
+```powershell
+Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" `
+  -OutFile "insightark-skills-v2-latest.tar.gz"
+tar -xzf insightark-skills-v2-latest.tar.gz
+cd insightark-skills
+./install.sh
+./setup-env.sh
+```
+
+> Staging channel: replace `main` with `staging` in the URL above.
+
+---
+
+## Manual Install
+
+Clone or download from the [GitHub repository](https://github.com/8-interactive/insightark-skills), then run:
+
+```bash
+./install.sh
+./setup-env.sh
+./setup-env.sh --check
+```
 
 ### Config files
 
-| Location | Path | Contents |
-| --- | --- | --- |
-| Install registry | `~/.super8-studio.config` | Skills install paths |
-| Skills dir | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`, `S8_ORG_ID` |
-| User (fallback) | `~/.super8-studio.env` | Fallback if install registry is missing |
-| Project override | `{project}/.super8-studio.env` | Optional `S8_ORG_ID` / stage URL override |
+| Location         | Path                              | Contents                                      |
+| ---------------- | --------------------------------- | --------------------------------------------- |
+| Install registry | `~/.insightark.config`            | Skills install paths                          |
+| Skills dir       | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`, `S8_API_URL`, `S8_ORG_ID` |
+| User (fallback)  | `~/.insightark.env`               | Fallback if install registry is missing       |
+| Project override | `{project}/.insightark.env`       | Optional `S8_ORG_ID` / stage URL override     |
 
-**Token precedence:** login session (`~/.super8-studio.session`) → process environment (`S8_SESSION_TOKEN`) → project file → skills install dir → user file.
+**Load order:** user file → skills install dir → project file → process environment.
 
-### Non-interactive / advanced
+### CLI options
 
 ```bash
-npx @8-interactive/insightark-skills install --location global --agents claude-code,cursor,codex
-npx @8-interactive/insightark-skills install --location repo --agents all
-npx @8-interactive/insightark-skills install --target ~/.agents/skills   # shared folder, no per-agent subpaths
-npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
+./install.sh --base-dir ~ --agents claude-code,cursor,codex
+./install.sh --target ~/.agents/skills   # shared folder, no per-agent subpaths
+./uninstall.sh --base-dir ~ --agents claude-code,codex
 ```
 
 ---
 
-## Authentication
+## MCP Client Setup
 
-Log in with your Super 8 account (recommended) instead of pasting a token:
+The hosted InsightArk MCP server is available at:
 
-```bash
-npx @8-interactive/insightark-skills login    # email + password (+ TOTP if enabled), pick an org
-npx @8-interactive/insightark-skills logout   # clear the local session
-```
+| Environment | Endpoint |
+| --- | --- |
+| Production | `https://api-next.no8.io/mcp` |
+| Staging | `https://stage-api-next.no8.io/mcp` |
 
-`login` stores a session at `~/.super8-studio.session` that takes **priority over `S8_SESSION_TOKEN`**. It expires automatically; `logout` removes it locally (the API has no server-side revoke). After `install`, an interactive run verifies any existing credential and offers to log in if needed. `setup` (pasting a Console token) still works but is **deprecated**.
+MCP uses the same Developer `_SessionToken` as the Developer API. The organization must have Developer API enabled, and the token owner must be the organization owner or an InsightArk admin.
+
+Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md).
 
 ---
 
@@ -108,47 +161,54 @@ npx @8-interactive/insightark-skills logout   # clear the local session
 
 | Skill | Purpose |
 | --- | --- |
-| `super8-studio-conversations` | List conversations by platform, inbox state, customer, or activity time |
-| `super8-studio-conversation-detail` | Conversation summary and message timeline |
-| `super8-studio-message-search` | Keyword search across the org or within one conversation |
-| `super8-studio-customer-search` | Find customer segments by tag or activity |
-| `super8-studio-customer-detail` | Customer profile and activity |
-| `super8-studio-customer-manager` | Manage customer records |
-| `super8-studio-customer-update` | Update customer fields |
-| `super8-studio-customer-tag-add` | Add tags to a customer |
-| `super8-studio-customer-tag-remove` | Remove tags from a customer |
-| `super8-studio-customer-send-message` | Send a message to a customer |
-| `super8-studio-broadcast-create` | Create a broadcast |
-| `super8-studio-broadcast-get` | Get broadcast details |
-| `super8-studio-broadcast-list` | List broadcasts |
-| `super8-studio-broadcast-manager` | Manage broadcast lifecycle |
-| `super8-studio-messaging` | Compose and send messages |
-| `super8-studio-investigator` | Deep investigation across conversations and customers |
-| `super8-studio-session` | Session and auth utilities |
-| `super8-studio-org-scope` | Org-scoped API utilities |
+| `insightark-session` | Validate the developer session, list manageable organizations, and inspect credit usage. |
+| `insightark-conversations` | Triage conversation inboxes by platform, inbox state, customer, or activity time. |
+| `insightark-investigator` | Deep-dive into conversations and messages for investigation or debugging. |
+| `insightark-customer-manager` | Search customers, inspect profiles, update supported fields, and manage tags. |
+| `insightark-messaging` | Compose, preview, optionally upload media, and send 1:1 customer messages. |
+| `insightark-broadcast-manager` | Preview, create, list, and inspect broadcast tasks. |
+| `insightark-ma-automation` | Validate, create, start, pause, inspect, and trigger Marketing Automation procedures. |
 
-**Typical flow:** `customer-search` or `conversations` → `message-search` → `conversation-detail`
+**Typical flow:** `insightark-session` → a workflow skill for the task → preview/approval before any write operation.
 
 ---
 
 <a name="中文"></a>
 
-**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code 與 Codex 的 Plugin，將 [SUPER 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
+**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code 與 Codex 的 Plugin，將 [Super 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
 
 內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
 
 憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex 則透過環境設定檔管理。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
 
-## 安裝（Claude Code）
+## Plugin 安裝（Claude Code）
+
+### 1. 加入 Marketplace 並安裝
 
 ```bash
-npx @8-interactive/insightark-skills install --agents claude-code
-npx @8-interactive/insightark-skills login     # log in (email/password), saves a session
+claude plugin marketplace add 8-interactive/insightark-skills
+claude plugin install insightark-skills@insightark-skills
 ```
 
-會把 skills 複製進 `~/.claude/skills` 並設定你的 session token。
+> **內部 staging 測試：** 指定 marketplace catalog 的 `staging` branch：
+> `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-> 受管理的外掛市集安裝（含 `userConfig` 提示與 `SessionStart` doctor hook）會在 repo 公開後提供；在那之前請用上面的 npx 安裝。
+安裝過程中，Claude Code 會提示輸入以下資訊：
+
+| 變數               | 說明                                          |
+| ------------------ | --------------------------------------------- |
+| `S8_API_URL`       | API 基礎網址，例如 `https://api-next.no8.io`  |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
+
+### 2. 啟用 Plugin
+
+預設為停用狀態（因需連線至外部 API）：
+
+```bash
+claude plugin enable insightark-skills@insightark-skills
+```
+
+`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.sh`，讓憑證問題提早浮現。
 
 ### Session Token 取得方式
 
@@ -159,16 +219,27 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ---
 
-## 安裝（Codex）
+## Plugin 安裝（Codex）
+
+### 1. 加入 Marketplace 並安裝
 
 ```bash
-npx @8-interactive/insightark-skills install --agents codex
-npx @8-interactive/insightark-skills login
+codex plugin marketplace add 8-interactive/insightark-skills
+codex plugin install insightark-skills@insightark-skills
 ```
 
-會把 skills 複製進 `~/.codex/skills`,並把憑證寫入 `~/.super8-studio.env`。
+### 2. 設定憑證
 
-> 外掛市集安裝會在 repo 公開後提供。
+Codex 不使用系統鑰匙圈，請執行 `setup-env.sh` 將憑證寫入 `~/.insightark.env`：
+
+```bash
+./setup-env.sh
+```
+
+| 變數               | 說明                                         |
+| ------------------ | -------------------------------------------- |
+| `S8_API_URL`       | API 基礎網址，例如 `https://api-next.no8.io` |
+| `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
 
 ### Session Token 取得方式
 
@@ -179,52 +250,79 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ---
 
-## 透過 npx 安裝（適用任何 coding agent）
+## Tarball 安裝
 
-純 Node 實作——可在 macOS、Linux 與**原生 Windows** 上執行（無需 bash、`curl` 或 `jq`）。僅需 Node 18+。
+從 CDN 直接下載最新發佈版，解壓後執行安裝程式：
+
+**macOS / Linux**
 
 ```bash
-npx @8-interactive/insightark-skills install     # 互動式：選擇位置 → agents → 確認
-npx @8-interactive/insightark-skills login       # log in (email/password), saves a session
-npx @8-interactive/insightark-skills doctor      # 健康檢查
+curl -L https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz \
+  -o insightark-skills-v2-latest.tar.gz
+tar -xzf insightark-skills-v2-latest.tar.gz
+cd insightark-skills
+./install.sh
+./setup-env.sh
 ```
 
-安裝器會詢問**安裝位置**——global（`~`）或此 repo（當前目錄）——以及要**安裝給哪些
-coding agent**（Claude Code、OpenCode、Cursor、GitHub Copilot、Codex），然後將
-skills 複製到各 agent 的 skills 資料夾。
+**Windows（PowerShell）**
+
+```powershell
+Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" `
+  -OutFile "insightark-skills-v2-latest.tar.gz"
+tar -xzf insightark-skills-v2-latest.tar.gz
+cd insightark-skills
+./install.sh
+./setup-env.sh
+```
+
+> Staging channel：將上方 URL 中的 `main` 替換為 `staging` 即可。
+
+---
+
+## 手動安裝
+
+從 [GitHub repository](https://github.com/8-interactive/insightark-skills) Clone 或下載後執行：
+
+```bash
+./install.sh
+./setup-env.sh
+./setup-env.sh --check
+```
 
 ### 設定檔說明
 
-| 位置 | 路徑 | 內容 |
-| --- | --- | --- |
-| 安裝登錄檔 | `~/.super8-studio.config` | Skills 安裝路徑 |
-| Skills 目錄 | `{skills-target}/.super8-studio.env` | `S8_SESSION_TOKEN`、`S8_ORG_ID` |
-| 使用者（備援） | `~/.super8-studio.env` | 找不到安裝登錄檔時的備援 |
-| 專案覆蓋 | `{project}/.super8-studio.env` | 可選的 `S8_ORG_ID` 或測試環境 URL |
+| 位置           | 路徑                              | 內容                                          |
+| -------------- | --------------------------------- | --------------------------------------------- |
+| 安裝登錄檔     | `~/.insightark.config`            | Skills 安裝路徑                               |
+| Skills 目錄    | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`、`S8_API_URL`、`S8_ORG_ID` |
+| 使用者（備援） | `~/.insightark.env`               | 找不到安裝登錄檔時的備援                      |
+| 專案覆蓋       | `{project}/.insightark.env`       | 可選的 `S8_ORG_ID` 或測試環境 URL             |
 
-**Token 優先序：** 登入 session（`~/.super8-studio.session`）→ Process 環境變數（`S8_SESSION_TOKEN`）→ 專案檔案 → Skills 安裝目錄 → 使用者檔案。
+**載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
 
-### 非互動 / 進階
+### CLI 選項
 
 ```bash
-npx @8-interactive/insightark-skills install --location global --agents claude-code,cursor,codex
-npx @8-interactive/insightark-skills install --location repo --agents all
-npx @8-interactive/insightark-skills install --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
-npx @8-interactive/insightark-skills uninstall --location global --agents claude-code,codex
+./install.sh --base-dir ~ --agents claude-code,cursor,codex
+./install.sh --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
+./uninstall.sh --base-dir ~ --agents claude-code,codex
 ```
 
 ---
 
-## 驗證登入
+## MCP Client 設定
 
-建議用 Super 8 帳號登入(取代貼 token):
+Hosted InsightArk MCP server 位於：
 
-```bash
-npx @8-interactive/insightark-skills login    # email + password(+ TOTP 若啟用),選 org
-npx @8-interactive/insightark-skills logout   # 清除本地 session
-```
+| 環境 | Endpoint |
+| --- | --- |
+| Production | `https://api-next.no8.io/mcp` |
+| Staging | `https://stage-api-next.no8.io/mcp` |
 
-`login` 會把 session 存到 `~/.super8-studio.session`,其**優先於 `S8_SESSION_TOKEN`**。session 會自動過期;`logout` 只清本地(API 無 server 端 revoke)。`install` 互動模式會驗證既有憑證,需要時引導登入。`setup`(貼 Console token)仍可用但**已 deprecated**。
+MCP 使用與 Developer API 相同的 Developer `_SessionToken`。組織必須啟用 Developer API，且 token 所屬使用者必須是該組織 owner 或 InsightArk admin。
+
+Codex、Cursor、Claude Code 的設定方式請見 [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md)。
 
 ---
 
@@ -232,23 +330,12 @@ npx @8-interactive/insightark-skills logout   # 清除本地 session
 
 | Skill | 用途 |
 | --- | --- |
-| `super8-studio-conversations` | 依平台、收件匣狀態、客戶或活動時間列出對話 |
-| `super8-studio-conversation-detail` | 對話摘要與訊息時間軸 |
-| `super8-studio-message-search` | 跨全組織或在單一對話中搜尋關鍵字 |
-| `super8-studio-customer-search` | 依標籤或活動搜尋客戶族群 |
-| `super8-studio-customer-detail` | 客戶個人資料與活動紀錄 |
-| `super8-studio-customer-manager` | 管理客戶資料 |
-| `super8-studio-customer-update` | 更新客戶欄位 |
-| `super8-studio-customer-tag-add` | 為客戶新增標籤 |
-| `super8-studio-customer-tag-remove` | 移除客戶標籤 |
-| `super8-studio-customer-send-message` | 傳送訊息給客戶 |
-| `super8-studio-broadcast-create` | 建立廣播 |
-| `super8-studio-broadcast-get` | 取得廣播詳情 |
-| `super8-studio-broadcast-list` | 列出廣播 |
-| `super8-studio-broadcast-manager` | 管理廣播生命週期 |
-| `super8-studio-messaging` | 撰寫與發送訊息 |
-| `super8-studio-investigator` | 跨對話與客戶的深度調查 |
-| `super8-studio-session` | Session 與驗證工具 |
-| `super8-studio-org-scope` | 組織範圍 API 工具 |
+| `insightark-session` | 驗證 developer session、列出可管理組織、查看 credits。 |
+| `insightark-conversations` | 依平台、收件匣狀態、客戶或活動時間整理 conversation inbox。 |
+| `insightark-investigator` | 深入查詢對話與訊息，用於調查與除錯。 |
+| `insightark-customer-manager` | 搜尋客戶、查看 profile、更新支援欄位、加減 tags。 |
+| `insightark-messaging` | 編寫、預覽、必要時上傳 media，並傳送 1:1 customer message。 |
+| `insightark-broadcast-manager` | 預覽、建立、列出與查詢 broadcast task。 |
+| `insightark-ma-automation` | 驗證、建立、啟動、暫停、查詢與 trigger Marketing Automation procedure。 |
 
-**典型流程：** `customer-search` 或 `conversations` → `message-search` → `conversation-detail`
+**典型流程：** `insightark-session` → 依任務選擇 workflow skill → 寫入前先 preview / approval。
