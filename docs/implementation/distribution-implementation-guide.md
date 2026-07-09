@@ -31,27 +31,45 @@ Use one public repository with multiple platform-specific metadata layers.
 ├── .agents/plugins/marketplace.json # Codex repo marketplace catalog
 ├── .claude-plugin/plugin.json       # Claude plugin manifest
 ├── .claude-plugin/marketplace.json  # Claude marketplace catalog
-├── package.json                     # npm / Vercel skills-add package metadata
+├── .cursor-plugin/plugin.json       # Cursor plugin manifest
+├── package.json                     # Private dev tooling only (npm run validate); NOT customer distribution
 ├── install.sh                       # Direct installer
 ├── setup-env.sh                     # Credential setup
 ├── uninstall.sh                     # Direct uninstall
 ├── installer/common.sh              # Shared bash helpers for install/uninstall
 └── scripts/
     ├── register-install.sh          # Optional registry helper
-    ├── insightark-skills-cli.js     # Package CLI adapter (delegates to install.sh)
-    └── validate-skills.sh           # Release validation
+    ├── validate-skills.sh           # Release validation
+    └── validate-mcp-skills.js       # MCP skill content validation
 ```
 
 Codex and Claude have separate plugin formats. Keep both manifests in the
 same repo, but do not try to make one manifest serve both platforms.
+
+## Customer vs maintainer artifacts
+
+| Artifact | In public mirror tree? | Purpose |
+| --- | --- | --- |
+| `skills/`, plugin manifests, `install.sh`, MCP JSON | Yes | Customer install |
+| `package.json` | **No** | Monorepo dev only (`npm run validate`) |
+| `scripts/build-release-dir.sh`, `publish-to-github.sh`, `gen-mcp-from-release.sh` | **No** | CI only |
+| `.github/workflows/` | **No** | Retired (Drone in monorepo is CI) |
+
+Do **not** treat `npm pack` contents as a customer distribution contract.
+`validate-release-tree.sh` is the authoritative check for mirror contents.
 
 ## Distribution Matrix
 
 | Path | Purpose | Required files | Runs `install.sh`? | Writes `~/.insightark.config`? |
 | --- | --- | --- | --- | --- |
 | curl / tarball | Full direct install | `install.sh`, `setup-env.sh`, `skills/`, `installer/` | Yes | Yes |
+| GitHub mirror clone | Manual / Cursor local repo | Same as tarball (public mirror tree) | Optional (`./install.sh`) | If `install.sh` used |
 | Codex marketplace | Codex plugin discovery/install | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `skills/` | No | No |
 | Claude marketplace | Claude plugin discovery/install | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/` | No | No |
+| Cursor local repo | Cursor plugin install | `.cursor-plugin/plugin.json`, `skills/`, `mcp.json` | No | No |
+
+**Retired:** `npm install` / `npx @8-interactive/insightark-skills` — not a
+supported customer path. See `plugin-release-process.md`.
 
 Important: marketplace installs are plugin discovery/install flows, not
 shell installer flows. Do not document them as install hooks unless the
@@ -154,8 +172,9 @@ Rules:
 | `.agents/plugins/marketplace.json` | Codex repo marketplace catalog. |
 | `.claude-plugin/plugin.json` | Claude plugin manifest. |
 | `.claude-plugin/marketplace.json` | Claude marketplace catalog. |
-| `package.json` | npm package metadata for the CLI adapter. |
-| `scripts/publish-to-github.sh` | Sync bundle from number8-next to insightark-skills (Drone CI). |
+| `.cursor-plugin/plugin.json` | Cursor plugin manifest. |
+| `package.json` | **Maintainer only** — private dev scripts; excluded from mirror tree. |
+| `scripts/publish-to-github.sh` | Sync mirror tree to GitHub (Drone CI; not in customer bundle). |
 
 ## Adding a New Distribution Path
 
@@ -180,13 +199,13 @@ Before publishing (see also
 
 - `npm run validate` passes (`bash scripts/validate-skills.sh` +
   `node scripts/validate-mcp-skills.js`).
-- Versions match across (`validate-skills.sh` enforces these four; keep
-  `.claude-plugin/marketplace.json` / `.agents/plugins/marketplace.json` in
-  step manually):
+- Versions match across (`validate-skills.sh` enforces these four):
   - `skills/_insightark-shared/VERSION`
   - `.codex-plugin/plugin.json`
   - `.claude-plugin/plugin.json`
-  - `package.json`
+  - `.cursor-plugin/plugin.json`
+- `bash scripts/validate-release-tree.sh --dir <mirror-tree>` passes for staging and production fixtures.
+- Public mirror tree does **not** include `package.json`, npm publish metadata, or CI-only scripts.
 - Direct tarball install is tested with a temporary `HOME`.
 - Codex marketplace discovery is tested.
 - Claude marketplace discovery is tested.

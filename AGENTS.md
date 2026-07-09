@@ -51,12 +51,15 @@ npm run validate   # bash scripts/validate-skills.sh + node scripts/validate-mcp
   the README.
 - User-facing behavior changes go in the README (EN + 中文) and
   `CHANGELOG.md`.
-- `docs/` is dev-only reference material — excluded from the npm package and
-  CDN tarball (see `CHANGELOG.md` 1.1.0).
+- `docs/` is dev-only reference material — excluded from the public mirror tree
+  and CDN tarball.
 
 ## Releasing
 
-The version must match across `package.json`,
-`skills/_insightark-shared/VERSION`, `.codex-plugin/plugin.json`, and
-`.claude-plugin/plugin.json` — `npm run validate` checks this. See
-`docs/implementation/plugin-release-process.md` for the full release flow.
+Version must match across `skills/_insightark-shared/VERSION` and all platform
+plugin manifests (`.claude-plugin`, `.codex-plugin`, `.cursor-plugin`) —
+`npm run validate` checks this. Customer distribution is S3 tarball + GitHub
+mirror only; **not** npm. See `docs/implementation/plugin-release-process.md`.
+
+Root `package.json` is **private dev tooling** (`npm run validate` in Drone).
+It is intentionally absent from `build-release-dir.sh` output.

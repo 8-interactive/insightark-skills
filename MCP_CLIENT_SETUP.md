@@ -4,6 +4,8 @@ This guide connects an AI agent to the hosted InsightArk MCP server.
 
 The MCP server is hosted by Super 8 Studio. Customers do not install a server locally; they configure their MCP client to call the hosted endpoint with a Developer API `_SessionToken`.
 
+**Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests (`.mcp.json` / `mcp.json`). Install the plugin, configure `S8_SESSION_TOKEN`, and confirm MCP is connected. Manual client config below is the **fallback** when plugin-native MCP wiring is unavailable.
+
 ## Access Requirements
 
 MCP uses the same access model as the Super 8 Studio Developer API.
@@ -25,9 +27,48 @@ Tokens are shown once when created. Do not commit tokens or paste them into shar
 
 Use production for customer installs. Use staging only for internal validation.
 
-## Codex
+## Claude Code (plugin-first)
 
-Codex MCP configuration lives in `~/.codex/config.toml`.
+Install from marketplace (see `README.md`). The plugin bundles `.mcp.json` with the baked URL for your release channel. You only configure `S8_SESSION_TOKEN` during install.
+
+Verify:
+
+```bash
+claude plugin details insightark-skills@insightark-skills
+# MCP servers ≥ 1; insightark → https://…/mcp
+```
+
+**Manual fallback** (if plugin MCP is not active):
+
+```bash
+claude mcp add insightark https://api-next.no8.io/mcp \
+  --transport http \
+  --header "_SessionToken: r:replace-with-developer-session-token"
+```
+
+Start or restart Claude Code, then run `/mcp` and confirm `insightark` is connected.
+
+To remove manual registration:
+
+```bash
+claude mcp remove insightark
+```
+
+For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
+
+## Codex (plugin-first)
+
+Install from marketplace. The Codex plugin references `./.mcp.json` with baked URL and `${user_config.S8_SESSION_TOKEN}` for the `_SessionToken` header.
+
+If plugin MCP token substitution does not work on your Codex build, run from the plugin checkout:
+
+```bash
+./setup-env.sh --session-token "r:..." --write-client-configs
+```
+
+This upserts `mcp_servers.insightark` in `~/.codex/config.toml` while preserving unrelated servers and top-level settings.
+
+**Manual fallback** — edit `~/.codex/config.toml` directly:
 
 If your Codex build supports remote HTTP MCP directly, configure the hosted URL and `_SessionToken` header using the current Codex MCP schema. If it only supports stdio MCP servers, use `mcp-remote` as a bridge:
 
@@ -48,11 +89,19 @@ Restart Codex after editing the file. Then ask Codex to list or use the `insight
 
 For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
 
-## Cursor
+## Cursor (plugin + setup-env)
 
-Cursor supports project or user MCP configuration.
+Install the plugin from the GitHub mirror or a local checkout. Root `mcp.json` contains the baked hosted URL.
 
-Use either:
+Run:
+
+```bash
+./setup-env.sh --write-client-configs
+```
+
+This merges `mcpServers.insightark` into `~/.cursor/mcp.json` (or use `--session-token` for non-interactive runs).
+
+**Manual fallback** — use either:
 
 - Project: `.cursor/mcp.json`
 - User: `~/.cursor/mcp.json`
@@ -71,26 +120,6 @@ Use either:
 ```
 
 Restart Cursor or reload MCP servers, then open Cursor Settings -> MCP and confirm `insightark` is connected.
-
-For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
-
-## Claude Code
-
-Claude Code can register the hosted MCP server from the CLI:
-
-```bash
-claude mcp add insightark https://api-next.no8.io/mcp \
-  --transport http \
-  --header "_SessionToken: r:replace-with-developer-session-token"
-```
-
-Start or restart Claude Code, then run `/mcp` and confirm `insightark` is connected.
-
-To remove it:
-
-```bash
-claude mcp remove insightark
-```
 
 For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
 
@@ -135,3 +164,5 @@ Current workflow skills:
 | Developer API not enabled | Enable Developer API for the organization before using MCP. |
 | Rate limit exceeded | MCP and Developer API share quota. Wait for refill or reduce request volume. |
 | Tool exists but requires `orgId` | Pass `orgId` in every org-scoped tool call. |
+| Plugin installed but MCP missing | Run `claude plugin details` (Claude) or `./setup-env.sh --write-client-configs` (Cursor/Codex fallback). |
+| Wrong environment URL | Staging marketplace/tarball bakes `stage-api-next`; production bakes `api-next`. |

@@ -6,7 +6,7 @@
 
 <a name="english"></a>
 
-**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code and Codex that brings the [Super 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
+**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code, Codex, and Cursor that brings the [Super 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
 
 It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
 
@@ -24,12 +24,13 @@ claude plugin install insightark-skills@insightark-skills
 > **Internal staging:** pin the marketplace catalog to the `staging` branch:
 > `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-During installation, Claude Code will prompt for:
+During installation, Claude Code will prompt for your Developer API session token only. The hosted MCP endpoint URL is baked into the plugin at release time (production vs staging).
 
 | Variable           | Description                                           |
 | ------------------ | ----------------------------------------------------- |
-| `S8_API_URL`       | API base URL, e.g. `https://api-next.no8.io`          |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
+
+After install, run `claude plugin details insightark-skills@insightark-skills` and confirm **MCP servers ≥ 1** (`insightark` with the hosted HTTP URL).
 
 ### 2. Enable the plugin
 
@@ -61,16 +62,20 @@ codex plugin install insightark-skills@insightark-skills
 
 ### 2. Configure credentials
 
-Codex does not use a system keychain. Run `setup-env.sh` to write credentials to `~/.insightark.env`:
+The Codex plugin bundles hosted MCP via `.mcp.json` and prompts for `S8_SESSION_TOKEN` at install time.
+
+If your Codex build does not wire plugin MCP tokens correctly, run `setup-env.sh` to write `~/.insightark.env` and optionally merge client MCP config:
 
 ```bash
 ./setup-env.sh
+# or non-interactive + client config fallback:
+./setup-env.sh --session-token "r:..." --write-client-configs
 ```
 
 | Variable           | Description                                  |
 | ------------------ | -------------------------------------------- |
-| `S8_API_URL`       | API base URL, e.g. `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
+| `S8_API_URL`       | Optional override in `.insightark.env` only (default URL comes from release channel) |
 
 ### Session token
 
@@ -78,6 +83,25 @@ Codex does not use a system keychain. Run `setup-env.sh` to write credentials to
 2. Create a token (shown **once**)
 
 Tokens expire after six months. Never commit tokens or share them in chat.
+
+---
+
+## Plugin Install (Cursor)
+
+### 1. Install from GitHub mirror or local checkout
+
+Install the plugin from the [GitHub mirror](https://github.com/8-interactive/insightark-skills) using **Cursor → Settings → Plugins → Install from local repo**, or clone and point Cursor at the checkout.
+
+### 2. Configure credentials and MCP
+
+Run `setup-env.sh` after install. Use `--write-client-configs` to upsert `mcpServers.insightark` in `~/.cursor/mcp.json` with the baked hosted URL and your token:
+
+```bash
+./setup-env.sh
+./setup-env.sh --session-token "r:..." --write-client-configs
+```
+
+Confirm **Cursor Settings → MCP** shows `insightark` connected.
 
 ---
 
@@ -175,7 +199,7 @@ Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SET
 
 <a name="中文"></a>
 
-**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code 與 Codex 的 Plugin，將 [Super 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
+**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code、Codex 與 Cursor 的 Plugin，將 [Super 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
 
 內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
 
@@ -193,12 +217,13 @@ claude plugin install insightark-skills@insightark-skills
 > **內部 staging 測試：** 指定 marketplace catalog 的 `staging` branch：
 > `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-安裝過程中，Claude Code 會提示輸入以下資訊：
+安裝過程中，Claude Code 僅會提示輸入 Developer API session token。Hosted MCP endpoint 已在發佈時寫入 plugin（production / staging 依 channel 而定）。
 
 | 變數               | 說明                                          |
 | ------------------ | --------------------------------------------- |
-| `S8_API_URL`       | API 基礎網址，例如 `https://api-next.no8.io`  |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
+
+安裝後執行 `claude plugin details insightark-skills@insightark-skills`，確認 **MCP servers ≥ 1**（`insightark` 指向 hosted HTTP URL）。
 
 ### 2. 啟用 Plugin
 
@@ -230,16 +255,19 @@ codex plugin install insightark-skills@insightark-skills
 
 ### 2. 設定憑證
 
-Codex 不使用系統鑰匙圈，請執行 `setup-env.sh` 將憑證寫入 `~/.insightark.env`：
+Codex plugin 透過 `.mcp.json` 內建 hosted MCP，安裝時會提示 `S8_SESSION_TOKEN`。
+
+若你的 Codex 版本無法正確套用 plugin MCP token，請執行 `setup-env.sh` 寫入 `~/.insightark.env`，並可選擇合併 client MCP 設定：
 
 ```bash
 ./setup-env.sh
+./setup-env.sh --session-token "r:..." --write-client-configs
 ```
 
 | 變數               | 說明                                         |
 | ------------------ | -------------------------------------------- |
-| `S8_API_URL`       | API 基礎網址，例如 `https://api-next.no8.io` |
 | `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
+| `S8_API_URL`       | 僅於 `.insightark.env` 可選覆寫（預設 URL 依 release channel） |
 
 ### Session Token 取得方式
 
@@ -247,6 +275,25 @@ Codex 不使用系統鑰匙圈，請執行 `setup-env.sh` 將憑證寫入 `~/.in
 2. 建立 Token（**僅顯示一次**）
 
 Token 有效期六個月，請勿提交至版本控制或在對話中分享。
+
+---
+
+## Plugin 安裝（Cursor）
+
+### 1. 從 GitHub mirror 或本機 checkout 安裝
+
+從 [GitHub mirror](https://github.com/8-interactive/insightark-skills) 以 **Cursor → Settings → Plugins → Install from local repo** 安裝，或 clone 後指向該目錄。
+
+### 2. 設定憑證與 MCP
+
+安裝後執行 `setup-env.sh`。加上 `--write-client-configs` 可將 `mcpServers.insightark` 寫入 `~/.cursor/mcp.json`（含 baked URL 與 token）：
+
+```bash
+./setup-env.sh
+./setup-env.sh --session-token "r:..." --write-client-configs
+```
+
+於 **Cursor Settings → MCP** 確認 `insightark` 已連線。
 
 ---
 

@@ -1,8 +1,8 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "2.0.1",
-  "description": "Reusable InsightArk skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "version": "2.0.2",
+  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Configure S8_SESSION_TOKEN after install (Console → Developer API → Create token).",
   "author": {
     "name": "Super8",
     "url": "https://www.no8.io"
@@ -14,7 +14,7 @@
     "insightark",
     "super8",
     "studio",
-    "api",
+    "mcp",
     "crm",
     "conversations",
     "customers",
@@ -25,17 +25,10 @@
   "skills": "./skills/",
   "defaultEnabled": false,
   "userConfig": {
-    "S8_API_URL": {
-      "type": "string",
-      "title": "API base URL",
-      "description": "InsightArk Developer API base URL (e.g. https://api-next.no8.io)",
-      "required": true,
-      "default": "https://api-next.no8.io"
-    },
     "S8_SESSION_TOKEN": {
       "type": "string",
       "title": "Session token",
-      "description": "InsightArk Developer API session token (starts with r:)",
+      "description": "InsightArk Developer API session token (starts with r:). Create one in Console → Account Settings → Developer API.",
       "sensitive": true,
       "required": true
     }

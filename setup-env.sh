@@ -10,6 +10,7 @@ doctor_script="$script_dir/skills/_insightark-shared/scripts/doctor.sh"
 example_file="$script_dir/.insightark.env.example"
 
 source "$script_dir/installer/common.sh"
+source "$script_dir/installer/client-config.sh"
 source "$install_config_lib"
 source "$release_lib"
 
@@ -20,6 +21,10 @@ no_open_browser="false"
 console_url_override=""
 api_url_override=""
 project_path=""
+session_token_override=""
+org_id_override=""
+write_client_configs="false"
+skip_doctor="false"
 
 super8_setup_print_usage() {
   cat <<EOF
@@ -34,6 +39,10 @@ Options:
   --project-path PATH Project root for --repo-only
   --user-only         Same as no options (interactive wizard)
   --no-open-browser   Do not open Console when creating a token
+  --session-token T   Session token (non-interactive; skips token prompt)
+  --org-id ID         Organization ID (non-interactive; skips org prompt)
+  --write-client-configs  Upsert ~/.cursor/mcp.json and ~/.codex/config.toml
+  --skip-doctor       Skip doctor check after writing credentials (harness use)
   --api-url URL       Override API base URL (local dev / cross-environment testing)
   --console-url URL   Override Console base URL
   --help              Show this help message
@@ -125,6 +134,11 @@ super8_resolve_console_url() {
   super8_console_base_for_api_url "$api_url"
 }
 
+super8_resolve_mcp_url() {
+  local api_url="${1%/}"
+  printf '%s/mcp' "$api_url"
+}
+
 super8_prompt_api_url() {
   local choice api_url
   printf 'Select API environment (local / git checkout):\n' >&2
@@ -153,6 +167,11 @@ super8_prompt_api_url() {
 super8_prompt_session_token() {
   local api_url="$1"
   local console_base token_url token
+
+  if [ -n "$session_token_override" ]; then
+    printf '%s' "$session_token_override"
+    return 0
+  fi
 
   console_base="$(super8_resolve_console_url "$api_url")"
 
@@ -308,6 +327,22 @@ while [ "$#" -gt 0 ]; do
       console_url_override="${2:-}"
       shift 2
       ;;
+    --session-token)
+      session_token_override="${2:-}"
+      shift 2
+      ;;
+    --org-id)
+      org_id_override="${2:-}"
+      shift 2
+      ;;
+    --write-client-configs)
+      write_client_configs="true"
+      shift
+      ;;
+    --skip-doctor)
+      skip_doctor="true"
+      shift
+      ;;
     --help)
       super8_setup_print_usage
       exit 0
@@ -369,7 +404,9 @@ if [ "$mode" = "user" ]; then
   api_url="$(super8_resolve_api_url)"
   session_token="$(super8_prompt_session_token "$api_url")"
   org_id=""
-  if org_id="$(super8_prompt_org_id_from_api "$api_url" "$session_token")"; then
+  if [ -n "$org_id_override" ]; then
+    org_id="$org_id_override"
+  elif org_id="$(super8_prompt_org_id_from_api "$api_url" "$session_token")"; then
     :
   else
     printf 'Warning: could not select organization. Credentials will be saved without S8_ORG_ID.\n' >&2
@@ -378,6 +415,9 @@ if [ "$mode" = "user" ]; then
   fi
   printf '\n' >&2
   super8_write_env_to_targets "$api_url" "$session_token" "$org_id"
+  if [ "$write_client_configs" = "true" ]; then
+    super8_merge_client_mcp_configs "$(super8_resolve_mcp_url "$api_url")" "$session_token"
+  fi
 elif [ "$mode" = "repo" ]; then
   if [ -z "$project_path" ]; then
     printf 'Project path for .insightark.env: ' >&2
@@ -407,7 +447,7 @@ elif [ "$mode" = "repo" ]; then
   printf 'Wrote %s (mode 600). Add this file to .gitignore.\n' "$target"
 fi
 
-if [ -f "$doctor_script" ]; then
+if [ -f "$doctor_script" ] && [ "$skip_doctor" = "false" ]; then
   printf '\nRunning doctor...\n'
   if bash "$doctor_script"; then
     printf 'Setup complete.\n'

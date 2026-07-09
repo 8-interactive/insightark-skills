@@ -104,10 +104,10 @@ our scripts:
 
 - curl/tarball: call `./install.sh`.
 - Manual clone/download: call `./install.sh` directly.
-- Codex/Claude marketplaces: do not assume install-time script execution.
+- Codex/Claude/Cursor marketplaces: do not assume install-time script execution.
 
-Adapters (e.g. `scripts/insightark-skills-cli.js`) should delegate to
-`install.sh` rather than duplicating target-resolution logic.
+**Retired:** `npx @8-interactive/insightark-skills` / npm registry install. Customers
+use tarball, GitHub mirror, or plugin marketplaces only.
 
 ### How should `~/.insightark.config` be recorded outside curl?
 

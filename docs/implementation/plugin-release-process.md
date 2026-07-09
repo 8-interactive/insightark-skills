@@ -1,64 +1,73 @@
 # Plugin Release Process
 
 Internal reference for cutting a release of this bundle. Not shipped to
-customers (`docs/` is excluded from the npm package and CDN tarball).
+customers (`docs/` is excluded from the public mirror tree / CDN tarball).
+
+## Customer distribution (single source)
+
+All customer-facing artifacts come from **one public mirror tree** built in
+the `number8-next` monorepo:
+
+```text
+write-release.sh → gen-mcp-from-release.sh → npm run validate → build-release-dir.sh
+  → validate-release-tree.sh → S3 tarball + publish-to-github.sh --source <same tree>
+```
+
+Customers install through:
+
+| Path | Artifact |
+| --- | --- |
+| **S3 / CDN tarball** | `https://downloads.no8.io/{staging\|main}/releases/skills/insightark-skills-v2-latest.tar.gz` |
+| **GitHub mirror** | `https://github.com/8-interactive/insightark-skills` (`staging` or `main` branch) — plugin marketplaces + clone/`install.sh` |
+| **Claude / Codex / Cursor plugins** | Marketplace or local repo install from the GitHub mirror |
+
+**Not a customer path:** `npm install`, `npx @8-interactive/insightark-skills`, or
+`npm pack` / `npm publish`. The monorepo keeps a **private** root `package.json`
+only so maintainers can run `npm run validate` locally and in Drone. That file is
+**not** copied into the public mirror tree (`build-release-dir.sh` allowlist).
 
 ## Version sources of truth
 
-Four files must carry the same version — `npm run validate` checks this:
+These files must carry the same version — `npm run validate` checks this:
 
-- `package.json`
 - `skills/_insightark-shared/VERSION`
 - `.codex-plugin/plugin.json`
 - `.claude-plugin/plugin.json`
+- `.cursor-plugin/plugin.json`
 
-Never bump them by hand; use `npm version <patch|minor|major|x.y.z>`, which
-bumps `package.json` and should sync the other three (see
-`scripts/sync-versions.js` if present, otherwise update the remaining three
-files in the same commit).
+Bump `VERSION` and all three plugin manifests together in the same commit.
+`package.json` `version` is optional dev metadata only (not validated for sync).
 
-## Before tagging
+## Before publishing
 
-1. Run `bash scripts/validate-skills.sh`.
-2. Run `node scripts/validate-mcp-skills.js`.
-3. If MCP-facing behavior changed, run the E2E harness against staging (see
-   `tools/insightark-skill/e2e/HARNESS.md` in the source monorepo) before
-   promoting.
-4. Update `CHANGELOG.md` with a dated entry.
+1. Run `npm run prepare-release` (or `write-release.sh` + `gen-mcp-from-release.sh` for your branch).
+2. Run `npm run validate`.
+3. Run `bash scripts/validate-install-harness.sh`.
+4. If MCP-facing behavior changed, run the E2E harness against staging (see
+   `e2e/HARNESS.md`) before promoting.
+5. Update `CHANGELOG.md` with a dated entry.
 
-## Two distribution channels
+## Automated publish (staging / main)
 
-This bundle ships through two independent channels — keep both in sync:
+On every push to `staging` or `main` in `number8-next`, Drone:
 
-| Channel | Source of truth | Trigger |
-| --- | --- | --- |
-| S3 / CDN tarball (`downloads.no8.io/{branch}/releases/skills/...`) | `number8-next` monorepo, built by Drone (`.drone.yml`) | push to `staging` / `main` in the monorepo |
-| GitHub repo + npm (`@8-interactive/insightark-skills`) + plugin marketplaces | `8-interactive/insightark-skills` GitHub repo | Drone `publish-to-github.sh --ci` on `number8-next` `staging`/`main` push; npm via `v*` tag on GitHub repo |
+1. Writes `RELEASE` and generates MCP manifests
+2. Runs `npm run validate` and `validate-release-tree.sh`
+3. Uploads S3 tarball from `/tmp/insightark-skills`
+4. Runs `scripts/publish-to-github.sh --ci --source /tmp/insightark-skills`
 
-## Publishing to the GitHub repo / npm
+Branch mapping:
 
-### Automated sync (staging / main)
+- `number8-next` `staging` → `insightark-skills` `staging`
+- `number8-next` `main` → `insightark-skills` `main`
 
-On every push to `staging` or `main` in `number8-next`, Drone runs
-`scripts/publish-to-github.sh --ci` after `npm run validate`:
+If the bundle is unchanged, GitHub sync is a no-op (no commit, no push).
 
-- `number8-next` `staging` → `insightark-skills` `staging` branch
-- `number8-next` `main` → `insightark-skills` `main` branch
+Drone secrets (GitHub App): `insightark_skills_github_app_id`,
+`insightark_skills_github_app_installation_id`,
+`insightark_skills_github_app_private_key`.
 
-No review branch (`sync/...`) is created. If the bundle is unchanged, the
-step is a no-op (no commit, no push).
-
-Requires Drone secrets:
-
-- `insightark_skills_github_app_id` — e.g. `4244140`
-- `insightark_skills_github_app_installation_id` — e.g. `145139908`
-- `insightark_skills_github_app_private_key` — full `.pem` private key contents
-
-The App must be installed on `8-interactive` with `insightark-skills` repository
-access and **Contents: Read and write**. Alternatively, set `GITHUB_TOKEN` to a
-PAT for local runs.
-
-Internal staging marketplace install:
+### Internal staging marketplace install
 
 ```bash
 claude plugin marketplace add 8-interactive/insightark-skills@staging
@@ -72,24 +81,27 @@ claude plugin marketplace add 8-interactive/insightark-skills
 claude plugin install insightark-skills@insightark-skills
 ```
 
-### Manual sync (optional)
+### Manual GitHub sync (optional)
 
 ```bash
+DRONE_BRANCH=staging bash tools/insightark-skill/installer/write-release.sh
+bash tools/insightark-skill/scripts/gen-mcp-from-release.sh
+bash tools/insightark-skill/scripts/build-release-dir.sh --out /tmp/insightark-skills
 GITHUB_TOKEN=... bash tools/insightark-skill/scripts/publish-to-github.sh \
-  --clone-to /tmp/insightark-skills --branch staging --push
+  --ci --source /tmp/insightark-skills
 ```
-1. Ensure `main` on `insightark-skills` is up to date (Drone sync on
-   `number8-next` `main` push).
-2. Tag the GitHub repo with `vX.Y.Z` matching `package.json` and push the tag.
-3. Pushing the tag triggers `.github/workflows/release.yml`, which verifies
-   the tag matches `package.json`, runs `npm run validate`, then
-   `npm publish`. A prerelease version (`1.0.0-rc.1`) publishes under the
-   `next` dist-tag.
 
 ## Marketplace listings
 
 `claude plugin marketplace add 8-interactive/insightark-skills` and
-`codex plugin marketplace add 8-interactive/insightark-skills` read
-`.claude-plugin/marketplace.json` / `.agents/plugins/marketplace.json`
-directly from the GitHub repo — there is no separate marketplace submission
-step. Keep both manifests' `version` fields in sync with the release.
+`codex plugin marketplace add 8-interactive/insightark-skills` read manifests
+from the GitHub mirror — no separate marketplace submission step. Keep plugin
+`version` fields in sync with `skills/_insightark-shared/VERSION`.
+
+## Retired: npm registry distribution
+
+Historically the public `insightark-skills` GitHub repo published
+`@8-interactive/insightark-skills` to npm via tag-triggered GitHub Actions.
+That path is **retired**. Do not document `npm install` / `npx` for customers.
+Do not re-add `package.json`, `.github/workflows`, or CI-only scripts to the
+public mirror tree.

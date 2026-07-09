@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.2
+
+- Bundle hosted MCP with workflow skills for Claude Code, Codex, and Cursor plugins.
+- Bake MCP endpoint URL per release channel (`staging` / `main`); remove `S8_API_URL` from Claude plugin `userConfig`.
+- Add `setup-env.sh` client-config merge for `~/.cursor/mcp.json` and Codex `~/.codex/config.toml` fallback.
+- Add packaging validators: `validate-release-tree.sh`, `validate-install-harness.sh`; reorder CI to generate MCP before validate.
+- **Retire npm customer distribution** — remove `npx` CLI adapter; `package.json` is private dev tooling only and is excluded from the public mirror tree.
+
 ## 2.0.0
 
 - Consolidate per-tool skills into 7 workflow-oriented MCP skills.

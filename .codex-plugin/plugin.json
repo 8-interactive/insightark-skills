@@ -1,7 +1,7 @@
 {
   "name": "insightark-skills",
-  "version": "2.0.1",
-  "description": "Reusable InsightArk skills for conversations, customers, broadcasts, and marketing automation workflows.",
+  "version": "2.0.2",
+  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations.",
   "author": {
     "name": "Super8",
     "url": "https://www.no8.io"
@@ -13,19 +13,25 @@
     "insightark",
     "super8",
     "studio",
-    "api",
+    "mcp",
     "crm",
-    "conversations",
-    "customers",
-    "broadcast",
-    "marketing-automation",
     "skills"
   ],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "S8_SESSION_TOKEN": {
+      "type": "string",
+      "title": "Session token",
+      "description": "InsightArk Developer API session token (starts with r:).",
+      "sensitive": true,
+      "required": true
+    }
+  },
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
-    "shortDescription": "InsightArk skills for SUPER 8 Studio CRM workflows.",
-    "longDescription": "A curated set of skills for investigating conversations, managing customers, sending broadcasts, and automating marketing journeys via the InsightArk Developer API.",
+    "shortDescription": "InsightArk skills and hosted MCP for SUPER 8 Studio.",
+    "longDescription": "Seven workflow skills plus bundled hosted MCP for investigating conversations, managing customers, broadcasts, and marketing automation.",
     "developerName": "Super8",
     "category": "Productivity",
     "capabilities": [
@@ -37,7 +43,7 @@
     "termsOfServiceURL": "https://www.no8.io/terms",
     "brandColor": "#2F6FED",
     "defaultPrompt": [
-      "Use insightark-session to validate my InsightArk API setup.",
+      "Use insightark-session to validate my InsightArk MCP setup.",
       "Use insightark-investigator to investigate recent conversations.",
       "Use insightark-customer-manager to search and update customers.",
       "Use insightark-broadcast-manager to create and monitor a broadcast."
