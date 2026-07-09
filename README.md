@@ -24,7 +24,7 @@ claude plugin install insightark-skills@insightark-skills
 > **Internal staging:** pin the marketplace catalog to the `staging` branch:
 > `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-During installation, Claude Code will prompt for your Developer API session token only. The hosted MCP endpoint URL is baked into the plugin at release time (production vs staging).
+Claude CLI `install` does **not** reliably prompt for credentials. After install, Claude will report that one required `userConfig` option is not set — you must configure it in Claude Code (or pass it via CLI).
 
 | Variable           | Description                                           |
 | ------------------ | ----------------------------------------------------- |
@@ -44,7 +44,11 @@ A `SessionStart` hook runs `doctor.sh` automatically so credential issues surfac
 
 ### 3. Configure `S8_SESSION_TOKEN` (required)
 
-Claude CLI install/enable may not prompt for credentials. Open Claude Code and run:
+After `install`, you will typically see:
+
+> `1 userConfig option not yet set (1 required) — run /plugin configure insightark-skills@insightark-skills in Claude Code, or pass --config KEY=VALUE.`
+
+Open Claude Code and run:
 
 ```text
 /plugin configure insightark-skills@insightark-skills
@@ -232,7 +236,8 @@ claude plugin install insightark-skills@insightark-skills
 > **內部 staging 測試：** 指定 marketplace catalog 的 `staging` branch：
 > `claude plugin marketplace add 8-interactive/insightark-skills@staging`
 
-安裝過程中，Claude Code 僅會提示輸入 Developer API session token。Hosted MCP endpoint 已在發佈時寫入 plugin（production / staging 依 channel 而定）。
+Hosted MCP endpoint 已在發佈時寫入 plugin（production / staging 依 channel 而定）。但 Claude CLI 的 `install` **不一定會**提示設定 token；你需要在 Claude Code 內完成 `/plugin configure`（或用 CLI `--config` 傳入）。
+Claude CLI 的 `install` **不一定會**提示設定憑證。安裝後通常會看到「尚有 1 個必填 `userConfig` 未設定」，需要你在 Claude Code 內完成設定（或在 CLI 用 `--config` 傳入）。
 
 | 變數               | 說明                                          |
 | ------------------ | --------------------------------------------- |
@@ -249,6 +254,25 @@ claude plugin enable insightark-skills@insightark-skills
 ```
 
 `SessionStart` hook 會在每次 session 開始時自動執行 `doctor.sh`，讓憑證問題提早浮現。
+
+### 3. 設定 `S8_SESSION_TOKEN`（必填）
+
+安裝後通常會看到類似訊息：
+
+> `1 userConfig option not yet set (1 required) — run /plugin configure insightark-skills@insightark-skills in Claude Code, or pass --config KEY=VALUE.`
+
+請打開 Claude Code 並執行：
+
+```text
+/plugin configure insightark-skills@insightark-skills
+```
+
+Token 取得位置：
+
+- Production：`https://console.no8.io` → Account Settings → Developer API → Create token
+- Staging：`https://stage-console.no8.io` → Account Settings → Developer API → Create token
+
+Token 以 `r:` 開頭，且只會顯示一次。
 
 ### Session Token 取得方式
 
