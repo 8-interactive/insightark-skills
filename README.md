@@ -42,6 +42,21 @@ claude plugin enable insightark-skills@insightark-skills
 
 A `SessionStart` hook runs `doctor.sh` automatically so credential issues surface at the start of every session.
 
+### 3. Configure `S8_SESSION_TOKEN` (required)
+
+Claude CLI install/enable may not prompt for credentials. Open Claude Code and run:
+
+```text
+/plugin configure insightark-skills@insightark-skills
+```
+
+Get your token from Console:
+
+- Production: `https://console.no8.io` → Account Settings → Developer API → Create token
+- Staging: `https://stage-console.no8.io` → Account Settings → Developer API → Create token
+
+The token starts with `r:` and is shown once.
+
 ### Session token
 
 1. Console → **Account Settings → Developer API**

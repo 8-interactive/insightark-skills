@@ -38,6 +38,17 @@ claude plugin details insightark-skills@insightark-skills
 # MCP servers ≥ 1; insightark → https://…/mcp
 ```
 
+If CLI install/enable did not prompt for a token, open Claude Code and run:
+
+```text
+/plugin configure insightark-skills@insightark-skills
+```
+
+Token source:
+
+- Production Console: `https://console.no8.io` → Account Settings → Developer API → Create token
+- Staging Console: `https://stage-console.no8.io` → Account Settings → Developer API → Create token
+
 **Manual fallback** (if plugin MCP is not active):
 
 ```bash
