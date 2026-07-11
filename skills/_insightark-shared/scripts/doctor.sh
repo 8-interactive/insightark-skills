@@ -87,10 +87,14 @@ print_token_onboarding() {
 
 s8_mcp_tool_call() {
   local tool_name="$1"
-  local args_json="${2:-{}}"
+  local args_json="${2-}"
   local response_file="$3"
   local status_file="$4"
   local body status url
+
+  if [ -z "$args_json" ]; then
+    args_json='{}'
+  fi
 
   body="$(jq -nc --arg name "$tool_name" --argjson args "$args_json" \
     '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:$name,arguments:$args}}')"
