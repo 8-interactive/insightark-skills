@@ -36,14 +36,14 @@ s8_expect_success() {
       return 0
       ;;
     401)
-      printf 'Developer API session is invalid or expired.\n' >&2
-      printf 'Create a new token in Super 8 Console: Account Settings → Developer API.\n' >&2
+      printf 'InsightArk MCP session is invalid or expired.\n' >&2
+      printf 'Create a new token in Super 8 Console: Account Settings → InsightArk MCP.\n' >&2
       printf 'Do not commit tokens to version control.\n' >&2
       jq '.' "$response_file" >&2 2>/dev/null || cat "$response_file" >&2
       return 1
       ;;
     429)
-      printf 'Developer API rate limit exceeded.\n' >&2
+      printf 'InsightArk MCP rate limit exceeded.\n' >&2
       jq '.' "$response_file" >&2 2>/dev/null || cat "$response_file" >&2
       return 1
       ;;

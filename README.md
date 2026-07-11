@@ -6,7 +6,7 @@
 
 <a name="english"></a>
 
-**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code, Codex, and Cursor that brings the [Super 8 Studio](https://www.no8.io) Developer API directly into your AI agent workflow.
+**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code, Codex, and Cursor that brings [Super 8 Studio](https://www.no8.io) InsightArk MCP directly into your AI agent workflow.
 
 It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
 
@@ -28,7 +28,7 @@ Claude CLI `install` does **not** reliably prompt for credentials. After install
 
 | Variable           | Description                                           |
 | ------------------ | ----------------------------------------------------- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken` (stored in system keychain) |
+| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken` (stored in system keychain) |
 
 After install, run `claude plugin details insightark-skills@insightark-skills` and confirm **MCP servers ≥ 1** (`insightark` with the hosted HTTP URL).
 
@@ -56,14 +56,14 @@ Open Claude Code and run:
 
 Get your token from Console:
 
-- Production: `https://console.no8.io` → Account Settings → Developer API → Create token
-- Staging: `https://stage-console.no8.io` → Account Settings → Developer API → Create token
+- Production: `https://console.no8.io` → Account Settings → InsightArk MCP → Create token
+- Staging: `https://stage-console.no8.io` → Account Settings → InsightArk MCP → Create token
 
 The token starts with `r:` and is shown once.
 
 ### Session token
 
-1. Console → **Account Settings → Developer API**
+1. Console → **Account Settings → InsightArk MCP**
 2. Create a token (shown **once**)
 
 Tokens expire after six months. Never commit tokens or share them in chat.
@@ -93,12 +93,12 @@ If your Codex build does not wire plugin MCP tokens correctly, run `setup-env.sh
 
 | Variable           | Description                                  |
 | ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
+| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
 | `S8_API_URL`       | Optional override in `.insightark.env` only (default URL comes from release channel) |
 
 ### Session token
 
-1. Console → **Account Settings → Developer API**
+1. Console → **Account Settings → InsightArk MCP**
 2. Create a token (shown **once**)
 
 Tokens expire after six months. Never commit tokens or share them in chat.
@@ -194,7 +194,7 @@ The hosted InsightArk MCP server is available at:
 | Production | `https://api-next.no8.io/mcp` |
 | Staging | `https://stage-api-next.no8.io/mcp` |
 
-MCP uses the same Developer `_SessionToken` as the Developer API. The organization must have Developer API enabled, and the token owner must be the organization owner or an InsightArk admin.
+MCP uses an InsightArk MCP `_SessionToken`. The organization must have InsightArk MCP available (not disabled), and the token owner must be the organization owner or an InsightArk admin.
 
 Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md).
 
@@ -218,7 +218,7 @@ Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SET
 
 <a name="中文"></a>
 
-**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code、Codex 與 Cursor 的 Plugin，將 [Super 8 Studio](https://www.no8.io) Developer API 直接整合進 AI Agent 工作流程。
+**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code、Codex 與 Cursor 的 Plugin，將 [Super 8 Studio](https://www.no8.io) InsightArk MCP 直接整合進 AI Agent 工作流程。
 
 內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
 
@@ -241,7 +241,7 @@ Claude CLI 的 `install` **不一定會**提示設定憑證。安裝後通常會
 
 | 變數               | 說明                                          |
 | ------------------ | --------------------------------------------- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken`（儲存於系統鑰匙圈） |
+| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`（儲存於系統鑰匙圈） |
 
 安裝後執行 `claude plugin details insightark-skills@insightark-skills`，確認 **MCP servers ≥ 1**（`insightark` 指向 hosted HTTP URL）。
 
@@ -269,14 +269,14 @@ claude plugin enable insightark-skills@insightark-skills
 
 Token 取得位置：
 
-- Production：`https://console.no8.io` → Account Settings → Developer API → Create token
-- Staging：`https://stage-console.no8.io` → Account Settings → Developer API → Create token
+- Production：`https://console.no8.io` → Account Settings → InsightArk MCP → Create token
+- Staging：`https://stage-console.no8.io` → Account Settings → InsightArk MCP → Create token
 
 Token 以 `r:` 開頭，且只會顯示一次。
 
 ### Session Token 取得方式
 
-1. Console → **Account Settings → Developer API**
+1. Console → **Account Settings → InsightArk MCP**
 2. 建立 Token（**僅顯示一次**）
 
 Token 有效期六個月，請勿提交至版本控制或在對話中分享。
@@ -305,12 +305,12 @@ Codex plugin 透過 `.mcp.json` 內建 hosted MCP，安裝時會提示 `S8_SESSI
 
 | 變數               | 說明                                         |
 | ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | Developer `_SessionToken`                    |
+| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
 | `S8_API_URL`       | 僅於 `.insightark.env` 可選覆寫（預設 URL 依 release channel） |
 
 ### Session Token 取得方式
 
-1. Console → **Account Settings → Developer API**
+1. Console → **Account Settings → InsightArk MCP**
 2. 建立 Token（**僅顯示一次**）
 
 Token 有效期六個月，請勿提交至版本控制或在對話中分享。
@@ -406,7 +406,7 @@ Hosted InsightArk MCP server 位於：
 | Production | `https://api-next.no8.io/mcp` |
 | Staging | `https://stage-api-next.no8.io/mcp` |
 
-MCP 使用與 Developer API 相同的 Developer `_SessionToken`。組織必須啟用 Developer API，且 token 所屬使用者必須是該組織 owner 或 InsightArk admin。
+MCP 使用 InsightArk MCP `_SessionToken`。組織必須可用 InsightArk MCP（未 disable），且 token 所屬使用者必須是該組織 owner 或 InsightArk admin。
 
 Codex、Cursor、Claude Code 的設定方式請見 [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md)。
 

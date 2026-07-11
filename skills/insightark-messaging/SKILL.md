@@ -34,7 +34,7 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## Example requests
 
-- `Validate my Developer API session and show conversations in org org_demo_001 from the past 24 hours.`
+- `Validate my InsightArk MCP session and show conversations in org org_demo_001 from the past 24 hours.`
 - `Open conversation conv_abc in org org_demo_001 and show the latest messages.`
 - `Search messages in org org_demo_001 for "refund" within the past 7 days.`
 - `Send the text "Your order is on the way" to customer cus_123 in org org_demo_001.`

@@ -177,12 +177,12 @@ super8_prompt_session_token() {
 
   if [ -n "$console_base" ] && [ "$no_open_browser" = "false" ]; then
     token_url="$(super8_build_console_token_url "$console_base")"
-    printf '\nOpening Super 8 Console to create a Developer API token...\n' >&2
+    printf '\nOpening Super 8 Console to create an InsightArk MCP token...\n' >&2
     printf '%s\n\n' "$token_url" >&2
     super8_open_url "$token_url"
     printf 'Copy the token from the one-time modal, then paste it below.\n' >&2
   else
-    printf 'In Super 8 Console: Account Settings → Developer API → Create token.\n' >&2
+    printf 'In Super 8 Console: Account Settings → InsightArk MCP → Create token.\n' >&2
   fi
 
   printf 'Paste S8_SESSION_TOKEN: ' >&2
@@ -209,18 +209,23 @@ super8_fetch_eligible_orgs() {
 
   status="$(
     curl -sS -o "$response_file" -w '%{http_code}' \
-      -H 'Accept: application/json' \
+      -H 'Accept: application/json, text/event-stream' \
+      -H 'Content-Type: application/json' \
       -H "_SessionToken: ${token}" \
-      "${api_url}/developer/v1/auth/organizations"
+      --data "$(jq -nc '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"auth.organizations",arguments:{}}}')" \
+      "${api_url%/}/mcp"
   )"
 
   if [ "$status" != "200" ]; then
-    printf 'Failed to list organizations (HTTP %s).\n' "$status" >&2
+    printf 'Failed to list organizations via MCP (HTTP %s).\n' "$status" >&2
     jq '.' "$response_file" >&2 2>/dev/null || cat "$response_file" >&2
     return 1
   fi
 
-  jq -c '[.data.organizations[] | select(.developerApiEnabled == true)]' "$response_file"
+  jq -c '
+    (.result.content[0].text | fromjson | .organizations // [])
+    | map(select(.insightArkMcpDisabled != true))
+  ' "$response_file"
 }
 
 super8_prompt_org_id_from_api() {
@@ -234,8 +239,8 @@ super8_prompt_org_id_from_api() {
   count="$(printf '%s' "$orgs_json" | jq 'length')"
 
   if [ "$count" -eq 0 ]; then
-    printf 'No organizations with Developer API enabled for this account.\n' >&2
-    printf 'Enable Developer API in Console organization settings, then retry.\n' >&2
+    printf 'No manageable organizations for this account.\n' >&2
+    printf 'Ensure you are an org owner/admin, then retry.\n' >&2
     return 1
   fi
 
@@ -247,7 +252,7 @@ super8_prompt_org_id_from_api() {
     return 0
   fi
 
-  printf '\nSelect organization (Developer API enabled):\n' >&2
+  printf '\nSelect organization:\n' >&2
   idx=1
   while IFS=$'\t' read -r org_id display_name; do
     org_ids+=("$org_id")

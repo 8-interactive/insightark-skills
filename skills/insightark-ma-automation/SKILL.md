@@ -1,7 +1,7 @@
 ---
 name: insightark-ma-automation
 description: Create, publish, pause, inspect, and manually trigger Marketing Automation procedures via InsightArk MCP (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON.
-when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via the Developer API.
+when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via InsightArk MCP.
 allowed-mcp: true
 ---
 
@@ -26,7 +26,7 @@ Customers usually refer to **`name`**, not **`procedureId`**. For query status /
 ## Hard rules: no presetting business fields
 
 - **Before the customer states each item explicitly**, do not fill, guess, or substitute "usual defaults" for any **business- or behavior-related** field (e.g. do not silent-pick arbitrary root `templateType` keys, invented schedule bounds, `limits`, platform, trigger rules, message copy, `fbTag`, `oos`).
-- **Procedure root `templateType`:** required for Developer API persistence and Studio parity; **it is not** "選一張後台現成旅程範本". **從空白畫布建立**：與 MA Studio 一致時通常為 **`all`** — still require the customer to **explicitly confirm** this value (`all` vs another documented key). Separate from **message node** `messages[].templateType` (e.g. `card`, `imagemap`).
+- **Procedure root `templateType`:** required for InsightArk MCP persistence and Studio parity; **it is not** "選一張後台現成旅程範本". **從空白畫布建立**：與 MA Studio 一致時通常為 **`all`** — still require the customer to **explicitly confirm** this value (`all` vs another documented key). Separate from **message node** `messages[].templateType` (e.g. `card`, `imagemap`).
 - **Ask and complete the checklist first**, then assemble JSON, then `ma.procedure.validate`, then `ma.procedure.create`. If anything is missing, stay in Q&A: list **what is still missing** and ask with minimal follow-ups.
 - Only after the customer has confirmed the overall behavior may you add **non-semantic structure placeholders** (e.g. node `id`, canvas `position`, edge `source` / `target`), and label them as wiring-only in your explanation; **do not** use structure to skip unanswered business choices.
 - Body `orgId` and journey content still require customer confirmation even when org context is known from session.

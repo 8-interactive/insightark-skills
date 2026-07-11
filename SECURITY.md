@@ -9,7 +9,7 @@ issues with tokens, customer data, request logs, or exploit details.
 ## Token Handling
 
 - Never commit `.insightark.env`, `_SessionToken`, or `S8_SESSION_TOKEN`.
-- Never paste Developer API tokens into chat, email, screenshots, or tickets.
+- Never paste InsightArk MCP tokens into chat, email, screenshots, or tickets.
 - `./setup-env.sh` writes credential files (project `.insightark.env`, user
   `~/.insightark.env`) with mode `600`.
 - `install.sh` writes the install registry (`~/.insightark.config`) with mode
@@ -19,7 +19,7 @@ issues with tokens, customer data, request logs, or exploit details.
 ## Skill Behavior
 
 Skills must not ask for passwords, TOTP codes, browser session cookies, or any
-credential other than a SUPER 8 Studio Developer API token. Skills read
+credential other than a SUPER 8 Studio InsightArk MCP token. Skills read
 credentials only through the shared resolver
 (`skills/_insightark-shared/scripts/lib/env.sh`), which checks process
 environment variables, then `.insightark.env` (project, then skills-directory,

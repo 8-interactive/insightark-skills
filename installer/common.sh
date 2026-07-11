@@ -188,10 +188,10 @@ super8_print_interactive_header() {
 
   if [ "$mode" = "install" ]; then
     printf 'This script installs AI agent skills for the Super 8 Studio\n' >&2
-    printf 'Developer API. After install, your agent (Cursor, Claude Code,\n' >&2
+    printf 'InsightArk MCP. After install, your agent (Cursor, Claude Code,\n' >&2
     printf 'OpenCode, GitHub Copilot, Codex, etc.) can help you manage\n' >&2
     printf 'customers, conversations, broadcasts, marketing automation,\n' >&2
-    printf 'and more via shell scripts backed by the API.\n' >&2
+    printf 'and more via hosted MCP tools.\n' >&2
     if [ -n "$bundle_dir" ] && [ -d "$bundle_dir" ]; then
       printf '\n' >&2
       printf 'Package: %s skill(s) from this bundle.\n' \
@@ -516,6 +516,6 @@ super8_console_base_for_api_url() {
 super8_build_console_token_url() {
   local console_base="${1%/}"
   local label="${2:-insightark-skills}"
-  printf '%s/account-setting/user-info?setup=developer-api-skills&action=create-token&label=%s' \
+  printf '%s/account-setting/user-info?setup=insightark-mcp-skills&action=create-token&label=%s' \
     "$console_base" "$label"
 }

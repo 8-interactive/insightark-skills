@@ -2,19 +2,19 @@
 
 This guide connects an AI agent to the hosted InsightArk MCP server.
 
-The MCP server is hosted by Super 8 Studio. Customers do not install a server locally; they configure their MCP client to call the hosted endpoint with a Developer API `_SessionToken`.
+The MCP server is hosted by Super 8 Studio. Customers do not install a server locally; they configure their MCP client to call the hosted endpoint with a InsightArk MCP `_SessionToken`.
 
 **Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests (`.mcp.json` / `mcp.json`). Install the plugin, configure `S8_SESSION_TOKEN`, and confirm MCP is connected. Manual client config below is the **fallback** when plugin-native MCP wiring is unavailable.
 
 ## Access Requirements
 
-MCP uses the same access model as the Super 8 Studio Developer API.
+MCP uses the InsightArk MCP access model (owner/admin token + org scope).
 
-- The organization must have Developer API enabled.
+- The organization must have InsightArk MCP enabled.
 - The token owner must be the organization owner or an InsightArk admin.
-- The token must be created from Console -> Account Settings -> Developer API.
+- The token must be created from Console -> Account Settings → InsightArk MCP.
 - Every org-scoped tool call must include `orgId`.
-- MCP and Developer API share the same per-org rate limit and credit quota.
+- MCP uses the org InsightArk MCP monthly credit and RPM quota.
 
 Tokens are shown once when created. Do not commit tokens or paste them into shared chats.
 
@@ -46,15 +46,15 @@ If CLI install/enable did not prompt for a token, open Claude Code and run:
 
 Token source:
 
-- Production Console: `https://console.no8.io` → Account Settings → Developer API → Create token
-- Staging Console: `https://stage-console.no8.io` → Account Settings → Developer API → Create token
+- Production Console: `https://console.no8.io` → Account Settings → InsightArk MCP → Create token
+- Staging Console: `https://stage-console.no8.io` → Account Settings → InsightArk MCP → Create token
 
 **Manual fallback** (if plugin MCP is not active):
 
 ```bash
 claude mcp add insightark https://api-next.no8.io/mcp \
   --transport http \
-  --header "_SessionToken: r:replace-with-developer-session-token"
+  --header "_SessionToken: r:replace-with-insightark-mcp-token"
 ```
 
 Start or restart Claude Code, then run `/mcp` and confirm `insightark` is connected.
@@ -93,7 +93,7 @@ args = [
 startup_timeout_sec = 120
 
 [mcp_servers.insightark.env]
-S8_SESSION_TOKEN = "r:replace-with-developer-session-token"
+S8_SESSION_TOKEN = "r:replace-with-insightark-mcp-token"
 ```
 
 Restart Codex after editing the file. Then ask Codex to list or use the `insightark` MCP tools.
@@ -123,7 +123,7 @@ This merges `mcpServers.insightark` into `~/.cursor/mcp.json` (or use `--session
     "insightark": {
       "url": "https://api-next.no8.io/mcp",
       "headers": {
-        "_SessionToken": "r:replace-with-developer-session-token"
+        "_SessionToken": "r:replace-with-insightark-mcp-token"
       }
     }
   }
@@ -145,10 +145,10 @@ After connecting, ask the client to call:
 Expected result:
 
 - `auth.me` returns the developer user.
-- `auth.organizations` includes the target organization with Developer API enabled.
-- `credits.usage` returns the current Developer API credit snapshot.
+- `auth.organizations` includes the target organization with InsightArk MCP enabled.
+- `credits.usage` returns the current InsightArk MCP credit snapshot.
 
-If org-scoped tools fail, confirm the token owner is the org owner or an InsightArk admin and that Developer API is enabled for that organization.
+If org-scoped tools fail, confirm the token owner is the org owner or an InsightArk admin and that InsightArk MCP is not disabled for that organization.
 
 ## Skills and MCP Together
 
@@ -170,10 +170,10 @@ Current workflow skills:
 
 | Symptom | Likely cause / fix |
 | --- | --- |
-| `401` or invalid session | Token is missing, expired, or invalid. Create a new Developer API token. |
+| `401` or invalid session | Token is missing, expired, or invalid. Create a new InsightArk MCP token. |
 | Organization access denied | The token owner is not owner/admin for the requested `orgId`. |
-| Developer API not enabled | Enable Developer API for the organization before using MCP. |
-| Rate limit exceeded | MCP and Developer API share quota. Wait for refill or reduce request volume. |
+| InsightArk MCP disabled for the organization | Enable InsightArk MCP for the organization before using MCP. |
+| Rate limit exceeded | MCP quota. Wait for refill or reduce request volume. |
 | Tool exists but requires `orgId` | Pass `orgId` in every org-scoped tool call. |
 | Plugin installed but MCP missing | Run `claude plugin details` (Claude) or `./setup-env.sh --write-client-configs` (Cursor/Codex fallback). |
 | Wrong environment URL | Staging marketplace/tarball bakes `stage-api-next`; production bakes `api-next`. |

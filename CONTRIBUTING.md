@@ -25,7 +25,7 @@ There are 7 workflow-oriented skills (`insightark-session`,
 `insightark-investigator`, `insightark-customer-manager`,
 `insightark-messaging`, `insightark-broadcast-manager`,
 `insightark-conversations`, `insightark-ma-automation`). Each wraps a set of
-related InsightArk Developer API operations behind the hosted MCP server.
+related InsightArk MCP operations behind the hosted MCP server.
 Prefer extending an existing workflow skill over adding a new narrowly-scoped
 one — the bundle intentionally consolidated per-endpoint skills into these 7.
 

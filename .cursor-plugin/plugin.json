@@ -2,7 +2,7 @@
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
   "version": "2.0.2",
-  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Run ./setup-env.sh after install to configure your Developer API token.",
+  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Run ./setup-env.sh after install to configure your InsightArk MCP token.",
   "author": {
     "name": "Super8",
     "url": "https://www.no8.io"

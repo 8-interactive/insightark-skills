@@ -63,7 +63,7 @@ print_token_onboarding() {
   printf '\nMissing or invalid S8_SESSION_TOKEN.\n\n' >&2
   printf 'How to get a token:\n' >&2
   printf '  1) Open Console: %s\n' "$console_url" >&2
-  printf '  2) Account Settings → Developer API → Create token\n' >&2
+  printf '  2) Account Settings → InsightArk MCP → Create token\n' >&2
   printf '  3) Copy the token (starts with r:) — shown once\n\n' >&2
   if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
     printf 'Then in Claude Code, run:\n' >&2
@@ -85,9 +85,46 @@ print_token_onboarding() {
   fi
 }
 
+s8_mcp_tool_call() {
+  local tool_name="$1"
+  local args_json="${2:-{}}"
+  local response_file="$3"
+  local status_file="$4"
+  local body status url
+
+  body="$(jq -nc --arg name "$tool_name" --argjson args "$args_json" \
+    '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:$name,arguments:$args}}')"
+  url="${S8_API_ROOT%/}/mcp"
+  status="$(
+    curl -sS -X POST \
+      -H 'Accept: application/json, text/event-stream' \
+      -H 'Content-Type: application/json' \
+      -H "_SessionToken: ${S8_SESSION_TOKEN}" \
+      -o "$response_file" \
+      -w '%{http_code}' \
+      --data "$body" \
+      "$url"
+  )"
+  printf '%s' "$status" >"$status_file"
+}
+
+s8_mcp_tool_ok() {
+  local response_file="$1"
+  local is_error
+  is_error="$(jq -r '.result.isError // false' "$response_file" 2>/dev/null || printf 'true')"
+  if [ "$is_error" = "true" ]; then
+    return 1
+  fi
+  return 0
+}
+
+s8_mcp_tool_text_json() {
+  local response_file="$1"
+  jq -r '.result.content[0].text // empty' "$response_file"
+}
+
 s8_load_env_files || true
 if [ -z "${S8_API_URL:-}" ]; then
-  # Default for onboarding; real URL is baked into plugin MCP per release channel.
   S8_API_URL='https://api-next.no8.io'
 fi
 if [ -z "${S8_SESSION_TOKEN:-}" ]; then
@@ -103,34 +140,29 @@ orgs_file="$(mktemp)"
 orgs_status_file="$(mktemp)"
 trap 'rm -f "$response_file" "$status_file" "$orgs_file" "$orgs_status_file"' EXIT
 
-s8_api_request GET "/developer/v1/auth/me" "" "$response_file" "$status_file" || fail 'Failed to reach auth/me endpoint'
-if ! s8_expect_success "$(<"$status_file")" "$response_file"; then
+s8_mcp_tool_call 'auth.me' '{}' "$response_file" "$status_file" || fail 'Failed to reach MCP auth.me'
+if ! s8_expect_success "$(<"$status_file")" "$response_file" || ! s8_mcp_tool_ok "$response_file"; then
   print_token_onboarding "$(console_base_url_for_api "$S8_API_ROOT")"
   fail 'Current session is not usable'
 fi
 
 bundle_version_file="$script_dir/../VERSION"
 installed_version="$(cat "$bundle_version_file" 2>/dev/null || printf 'unknown')"
-latest_skill_version="$(jq -r '.data.latestSkillVersion // empty' "$response_file")"
+auth_payload="$(s8_mcp_tool_text_json "$response_file")"
 
 printf 'API URL: %s\n' "$S8_API_ROOT"
+printf 'MCP endpoint: %s/mcp\n' "${S8_API_ROOT%/}"
 printf 'Session token: present\n'
-jq -r '"User: " + (.data.user.email // "unknown")' "$response_file"
+printf '%s\n' "$auth_payload" | jq -r '"User: " + (.user.email // "unknown")'
 printf 'Installed skill bundle version: %s\n' "$installed_version"
-if [ -n "$latest_skill_version" ]; then
-  printf 'Latest skill bundle version: %s\n' "$latest_skill_version"
-  if [ "$installed_version" != "$latest_skill_version" ] && [ "$installed_version" != "unknown" ]; then
-    printf 'Warning: skill bundle is outdated. Re-run install.sh to update.\n' >&2
-  fi
-fi
 
-s8_api_request GET "/developer/v1/auth/organizations" "" "$orgs_file" "$orgs_status_file" || fail 'Failed to reach auth/organizations endpoint'
-if s8_expect_success "$(<"$orgs_status_file")" "$orgs_file"; then
-  jq -r '
-    (.data.organizations // []) as $orgs
+s8_mcp_tool_call 'auth.organizations' '{}' "$orgs_file" "$orgs_status_file" || fail 'Failed to reach MCP auth.organizations'
+if s8_expect_success "$(<"$orgs_status_file")" "$orgs_file" && s8_mcp_tool_ok "$orgs_file"; then
+  s8_mcp_tool_text_json "$orgs_file" | jq -r '
+    (.organizations // []) as $orgs
     | "Organizations in account: " + ($orgs | length | tostring)
-    , "Developer API enabled: " + ([$orgs[] | select(.developerApiEnabled == true)] | length | tostring)
-  ' "$orgs_file"
+    , "InsightArk MCP available (not disabled): " + ([ $orgs[] | select(.insightArkMcpDisabled != true) ] | length | tostring)
+  '
 fi
 
 if [ -n "${S8_ORG_ID:-}" ]; then
@@ -140,4 +172,3 @@ else
 fi
 
 printf 'Doctor status: ok\n'
-printf 'Local message validate: requires jq (same as all send/preview scripts). Without jq, only file-exists checks run; full validation on API.\n'

@@ -22,7 +22,7 @@ independently copyable.
 The bundle intentionally consolidated many narrow, per-endpoint skills into 7
 workflow-oriented skills (see the table in `README.md`). Before adding a new
 skill folder, check whether the operation belongs inside an existing workflow
-skill instead — most Developer API surface area fits one of the 7.
+skill instead — most InsightArk MCP surface area fits one of the 7.
 
 ## Frontmatter contract
 

@@ -163,7 +163,7 @@ Rules:
 | --- | --- |
 | `skills/` | Single source of truth for skills and shared runtime. |
 | `install.sh` | Copy `skills/` to selected direct-install targets and write registry. |
-| `setup-env.sh` | Configure Developer API credentials and run doctor. |
+| `setup-env.sh` | Configure InsightArk MCP credentials and run doctor. |
 | `uninstall.sh` | Remove direct-installed bundle dirs using registry or selected targets. |
 | `scripts/register-install.sh` | Optional follow-up registry writer when another tool copied files. |
 | `scripts/validate-skills.sh` | Static validation for all distribution metadata and skill frontmatter. |
