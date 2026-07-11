@@ -23,7 +23,7 @@
     "S8_SESSION_TOKEN": {
       "type": "string",
       "title": "Session token",
-      "description": "InsightArk InsightArk MCP session token (starts with r:).",
+      "description": "InsightArk MCP session token (starts with r:).",
       "sensitive": true,
       "required": true
     }
