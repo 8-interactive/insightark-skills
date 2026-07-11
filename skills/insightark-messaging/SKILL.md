@@ -11,25 +11,25 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## MCP Tools
 
-- `auth.me` — validate session (no `orgId` required)
-- `auth.organizations` — list manageable organizations (no `orgId` required)
-- `messaging.conversation.list` — browse conversations
-- `messaging.conversation.get` — get one conversation summary
-- `messaging.conversation.messages` — read message timeline
-- `messaging.message.search` — keyword-driven message search
-- `messaging.message.preview` — preview message batch (costs 2 credits)
-- `media.uploadUrl` — upload local media for message payloads
-- `messaging.customer.sendMessage` — send outbound messages to a customer
+- `auth_me` — validate session (no `orgId` required)
+- `auth_organizations` — list manageable organizations (no `orgId` required)
+- `messaging_conversation_list` — browse conversations
+- `messaging_conversation_get` — get one conversation summary
+- `messaging_conversation_messages` — read message timeline
+- `messaging_message_search` — keyword-driven message search
+- `messaging_message_preview` — preview message batch (costs 2 credits)
+- `media_upload_url` — upload local media for message payloads
+- `messaging_customer_send_message` — send outbound messages to a customer
 
 ## Workflow
 
-1. Call `auth.me` or `auth.organizations` when session context is not yet trusted.
+1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Conversations** — `messaging.conversation.list`
-   - **Conversation detail** — `messaging.conversation.get` and `messaging.conversation.messages`
-   - **Message search** — `messaging.message.search`
-   - **Send** — build payload, optionally `media.uploadUrl`, then `messaging.message.preview` → confirm → `messaging.customer.sendMessage` by default for rich / quickReply batches; skip preview only when the user explicitly asks
+   - **Conversations** — `messaging_conversation_list`
+   - **Conversation detail** — `messaging_conversation_get` and `messaging_conversation_messages`
+   - **Message search** — `messaging_message_search`
+   - **Send** — build payload, optionally `media_upload_url`, then `messaging_message_preview` → confirm → `messaging_customer_send_message` by default for rich / quickReply batches; skip preview only when the user explicitly asks
 4. Return the MCP response as-is.
 
 ## Example requests

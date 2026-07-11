@@ -11,24 +11,24 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## MCP Tools
 
-- `auth.me` — validate session (no `orgId` required)
-- `auth.organizations` — list manageable organizations (no `orgId` required)
-- `crm.customer.get` — get one customer by id
-- `crm.customer.search` — search customers with public filters
-- `crm.customer.update` — patch supported profile fields
-- `crm.customer.tag.add` — add tags to a customer
-- `crm.customer.tag.remove` — remove tags from a customer
+- `auth_me` — validate session (no `orgId` required)
+- `auth_organizations` — list manageable organizations (no `orgId` required)
+- `crm_customer_get` — get one customer by id
+- `crm_customer_search` — search customers with public filters
+- `crm_customer_update` — patch supported profile fields
+- `crm_customer_tag_add` — add tags to a customer
+- `crm_customer_tag_remove` — remove tags from a customer
 
 ## Workflow
 
-1. Call `auth.me` or `auth.organizations` when the caller's session context is not yet trusted.
+1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped customer tool.
 3. Choose one operational path:
-   - `crm.customer.search` for discovery, filtering, and pagination
-   - `crm.customer.get` for one customer record
-   - `crm.customer.update` for supported public profile changes (confirm first)
-   - `crm.customer.tag.add` to append one or more tags (confirm first)
-   - `crm.customer.tag.remove` to remove one or more tags (confirm first)
+   - `crm_customer_search` for discovery, filtering, and pagination
+   - `crm_customer_get` for one customer record
+   - `crm_customer_update` for supported public profile changes (confirm first)
+   - `crm_customer_tag_add` to append one or more tags (confirm first)
+   - `crm_customer_tag_remove` to remove one or more tags (confirm first)
 4. Return the result grounded in the public developer API response.
 
 ## Example requests

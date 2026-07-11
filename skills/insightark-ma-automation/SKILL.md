@@ -11,23 +11,23 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## MCP Tools
 
-- `ma.procedure.list` — list marketing automation procedures (requires `orgId`; optional `name`, `skip`, `limit`)
-- `ma.procedure.get` — get procedure status summary (requires `orgId`, `procedureId`)
-- `ma.procedure.validate` — validate a journey definition without persisting (requires `orgId`, `payload`)
-- `ma.procedure.create` — create and publish a procedure (requires `orgId`, `payload`)
-- `ma.procedure.start` — publish a draft procedure (requires `orgId`, `procedureId`)
-- `ma.procedure.pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
-- `ma.procedure.trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
+- `ma_procedure_list` — list marketing automation procedures (requires `orgId`; optional `name`, `skip`, `limit`)
+- `ma_procedure_get` — get procedure status summary (requires `orgId`, `procedureId`)
+- `ma_procedure_validate` — validate a journey definition without persisting (requires `orgId`, `payload`)
+- `ma_procedure_create` — create and publish a procedure (requires `orgId`, `payload`)
+- `ma_procedure_start` — publish a draft procedure (requires `orgId`, `procedureId`)
+- `ma_procedure_pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
+- `ma_procedure_trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
 
 ### Locate journeys by customer-provided name
 
-Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish(start) / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma.procedure.list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above.
+Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish(start) / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma_procedure_list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above.
 
 ## Hard rules: no presetting business fields
 
 - **Before the customer states each item explicitly**, do not fill, guess, or substitute "usual defaults" for any **business- or behavior-related** field (e.g. do not silent-pick arbitrary root `templateType` keys, invented schedule bounds, `limits`, platform, trigger rules, message copy, `fbTag`, `oos`).
 - **Procedure root `templateType`:** required for InsightArk MCP persistence and Studio parity; **it is not** "選一張後台現成旅程範本". **從空白畫布建立**：與 MA Studio 一致時通常為 **`all`** — still require the customer to **explicitly confirm** this value (`all` vs another documented key). Separate from **message node** `messages[].templateType` (e.g. `card`, `imagemap`).
-- **Ask and complete the checklist first**, then assemble JSON, then `ma.procedure.validate`, then `ma.procedure.create`. If anything is missing, stay in Q&A: list **what is still missing** and ask with minimal follow-ups.
+- **Ask and complete the checklist first**, then assemble JSON, then `ma_procedure_validate`, then `ma_procedure_create`. If anything is missing, stay in Q&A: list **what is still missing** and ask with minimal follow-ups.
 - Only after the customer has confirmed the overall behavior may you add **non-semantic structure placeholders** (e.g. node `id`, canvas `position`, edge `source` / `target`), and label them as wiring-only in your explanation; **do not** use structure to skip unanswered business choices.
 - Body `orgId` and journey content still require customer confirmation even when org context is known from session.
 - Before calling `validate` or `create`, show the final payload in a compact field table and get explicit customer approval for every business field.
@@ -42,7 +42,7 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 
 ## Pre-create checklist (customer must confirm all rows)
 
-**Do not** call `ma.procedure.validate` or `ma.procedure.create` until **every** row below is explicitly agreed with the customer:
+**Do not** call `ma_procedure_validate` or `ma_procedure_create` until **every** row below is explicitly agreed with the customer:
 
 | Area | Customer must provide |
 |------|------------------------|
@@ -57,7 +57,7 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 | Trigger | Full trigger type and rules. |
 | Content and steps | Copy or template shape per message node; multi-step journeys need step-by-step customer confirmation. |
 | Message step `skipOOS` | Add **only** if the customer explicitly wants that message node to bypass OOS; otherwise **omit** the field. |
-| Switches | `enabled` and whether to publish immediately after create (publish only after explicit customer approval via `ma.procedure.start`). |
+| Switches | `enabled` and whether to publish immediately after create (publish only after explicit customer approval via `ma_procedure_start`). |
 | Final sign-off | Show final payload table and receive explicit customer approval before API calls. |
 
 Phrases like "same as before" or "you decide" are **not** literal values. Keep asking until every item has a **literal, actionable** answer.
@@ -67,11 +67,11 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 1. Run a **gap check** against this checklist; any gap → **questions only, no MCP calls**.
 2. After the customer fills gaps, write the JSON payload (values only from the customer plus meaningless id/coordinates for graph wiring).
 3. Show a compact final field table and get explicit customer sign-off.
-4. Call `ma.procedure.validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON.
-5. After successful validate, confirm with the user, then call `ma.procedure.create` with `orgId` and `payload`; if HTTP **400**, read `data.errors` and relay `path` + `message` to the customer. Cap at **three** validate-fix rounds, each change explainable to the customer.
+4. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON.
+5. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload`; if HTTP **400**, read `data.errors` and relay `path` + `message` to the customer. Cap at **three** validate-fix rounds, each change explainable to the customer.
 6. **Do not** copy names, times, keywords, or copy from sample JSON onto a real customer "to save time."
 
-**Trigger guardrail:** call `ma.procedure.get` first to verify `status` is `progress` before `ma.procedure.trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
+**Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
 ## Prerequisite knowledge (summary)
 

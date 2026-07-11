@@ -11,22 +11,22 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## MCP Tools
 
-- `auth.me` — validate session (no `orgId` required)
-- `auth.organizations` — list manageable organizations (no `orgId` required)
-- `broadcast.list` — browse recent broadcast tasks
-- `broadcast.get` — get one broadcast's status and progress
-- `broadcast.create` — create an async broadcast task
-- `messaging.message.preview` — preview message batch before create (costs 2 credits)
-- `media.uploadUrl` — upload local media for message payloads
+- `auth_me` — validate session (no `orgId` required)
+- `auth_organizations` — list manageable organizations (no `orgId` required)
+- `broadcast_list` — browse recent broadcast tasks
+- `broadcast_get` — get one broadcast's status and progress
+- `broadcast_create` — create an async broadcast task
+- `messaging_message_preview` — preview message batch before create (costs 2 credits)
+- `media_upload_url` — upload local media for message payloads
 
 ## Workflow
 
-1. Call `auth.me` or `auth.organizations` when session context is not yet trusted.
+1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Create** — build payload, optionally `media.uploadUrl`, then `messaging.message.preview` → confirm → `broadcast.create` by default for rich / quickReply batches; skip preview only when the user explicitly asks
-   - **Get** — `broadcast.get`; compare `options.customerNum` to running `success` / `fail`
-   - **List** — `broadcast.list`, optionally filtered by `status`
+   - **Create** — build payload, optionally `media_upload_url`, then `messaging_message_preview` → confirm → `broadcast_create` by default for rich / quickReply batches; skip preview only when the user explicitly asks
+   - **Get** — `broadcast_get`; compare `options.customerNum` to running `success` / `fail`
+   - **List** — `broadcast_list`, optionally filtered by `status`
 4. Return the MCP response as-is.
 
 ## Example requests

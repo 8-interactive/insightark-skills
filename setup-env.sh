@@ -212,7 +212,7 @@ super8_fetch_eligible_orgs() {
       -H 'Accept: application/json, text/event-stream' \
       -H 'Content-Type: application/json' \
       -H "_SessionToken: ${token}" \
-      --data "$(jq -nc '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"auth.organizations",arguments:{}}}')" \
+      --data "$(jq -nc '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"auth_organizations",arguments:{}}}')" \
       "${api_url%/}/mcp"
   )"
 

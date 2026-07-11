@@ -136,17 +136,19 @@ For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
 
 ## Smoke Test
 
+Public InsightArk MCP tool names use lowercase snake_case only (for example `credits_usage`, `messaging_conversation_list`). Legacy dotted names such as `credits.usage` are not accepted.
+
 After connecting, ask the client to call:
 
-1. `auth.me`
-2. `auth.organizations`
-3. `credits.usage` with a known `orgId`
+1. `auth_me`
+2. `auth_organizations`
+3. `credits_usage` with a known `orgId`
 
 Expected result:
 
-- `auth.me` returns the developer user.
-- `auth.organizations` includes the target organization with InsightArk MCP enabled.
-- `credits.usage` returns the current InsightArk MCP credit snapshot.
+- `auth_me` returns the developer user.
+- `auth_organizations` includes the target organization with InsightArk MCP enabled.
+- `credits_usage` returns the current InsightArk MCP credit snapshot.
 
 If org-scoped tools fail, confirm the token owner is the org owner or an InsightArk admin and that InsightArk MCP is not disabled for that organization.
 

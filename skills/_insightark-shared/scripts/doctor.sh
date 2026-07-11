@@ -140,7 +140,7 @@ orgs_file="$(mktemp)"
 orgs_status_file="$(mktemp)"
 trap 'rm -f "$response_file" "$status_file" "$orgs_file" "$orgs_status_file"' EXIT
 
-s8_mcp_tool_call 'auth.me' '{}' "$response_file" "$status_file" || fail 'Failed to reach MCP auth.me'
+s8_mcp_tool_call 'auth_me' '{}' "$response_file" "$status_file" || fail 'Failed to reach MCP auth_me'
 if ! s8_expect_success "$(<"$status_file")" "$response_file" || ! s8_mcp_tool_ok "$response_file"; then
   print_token_onboarding "$(console_base_url_for_api "$S8_API_ROOT")"
   fail 'Current session is not usable'
@@ -156,7 +156,7 @@ printf 'Session token: present\n'
 printf '%s\n' "$auth_payload" | jq -r '"User: " + (.user.email // "unknown")'
 printf 'Installed skill bundle version: %s\n' "$installed_version"
 
-s8_mcp_tool_call 'auth.organizations' '{}' "$orgs_file" "$orgs_status_file" || fail 'Failed to reach MCP auth.organizations'
+s8_mcp_tool_call 'auth_organizations' '{}' "$orgs_file" "$orgs_status_file" || fail 'Failed to reach MCP auth_organizations'
 if s8_expect_success "$(<"$orgs_status_file")" "$orgs_file" && s8_mcp_tool_ok "$orgs_file"; then
   s8_mcp_tool_text_json "$orgs_file" | jq -r '
     (.organizations // []) as $orgs

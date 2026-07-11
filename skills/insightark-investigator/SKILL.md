@@ -11,25 +11,25 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 ## MCP Tools
 
-- `auth.me` — validate session (no `orgId` required)
-- `auth.organizations` — list manageable organizations (no `orgId` required)
-- `messaging.conversation.list` — browse conversations
-- `messaging.conversation.get` — get one conversation summary
-- `messaging.conversation.messages` — read message timeline
-- `messaging.message.search` — keyword-driven message search
+- `auth_me` — validate session (no `orgId` required)
+- `auth_organizations` — list manageable organizations (no `orgId` required)
+- `messaging_conversation_list` — browse conversations
+- `messaging_conversation_get` — get one conversation summary
+- `messaging_conversation_messages` — read message timeline
+- `messaging_message_search` — keyword-driven message search
 
 ## Workflow
 
-1. Call `auth.me` or `auth.organizations` when the caller's session context is not yet trusted.
+1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one operational path:
-   - `messaging.conversation.list` for discovery and pagination
-   - `messaging.conversation.get` and `messaging.conversation.messages` for one conversation and its timeline
-   - `messaging.message.search` for keyword-oriented evidence lookup
+   - `messaging_conversation_list` for discovery and pagination
+   - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
+   - `messaging_message_search` for keyword-oriented evidence lookup
 4. Return a concise read-only investigation result grounded in the public API response.
 
 ## Guardrails
 
-- Do not call write endpoints (`messaging.customer.sendMessage`, `broadcast.create`, CRM mutations, MA mutations).
+- Do not call write endpoints (`messaging_customer_send_message`, `broadcast_create`, CRM mutations, MA mutations).
 - Do not collect credentials or attempt login bootstrap.
 - Do not depend on repository-local code or hidden internal fields.
