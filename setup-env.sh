@@ -22,7 +22,6 @@ console_url_override=""
 api_url_override=""
 project_path=""
 session_token_override=""
-org_id_override=""
 write_client_configs="false"
 skip_doctor="false"
 
@@ -40,7 +39,6 @@ Options:
   --user-only         Same as no options (interactive wizard)
   --no-open-browser   Do not open Console when creating a token
   --session-token T   Session token (non-interactive; skips token prompt)
-  --org-id ID         Organization ID (non-interactive; skips org prompt)
   --write-client-configs  Upsert ~/.cursor/mcp.json and ~/.codex/config.toml
   --skip-doctor       Skip doctor check after writing credentials (harness use)
   --api-url URL       Override API base URL (local dev / cross-environment testing)
@@ -81,13 +79,12 @@ super8_collect_env_targets() {
 super8_write_env_to_targets() {
   local api_url="$1"
   local session_token="$2"
-  local org_id="${3:-}"
   local target
 
   while IFS= read -r target; do
     [ -n "$target" ] || continue
     super8_ensure_directory "$(dirname "$target")"
-    super8_write_env_file "$target" "$api_url" "$session_token" "$org_id"
+    super8_write_env_file "$target" "$api_url" "$session_token"
     printf 'Wrote %s (mode 600)\n' "$(super8_format_display_path "$target")"
   done < <(super8_collect_env_targets)
 }
@@ -195,96 +192,16 @@ super8_prompt_session_token() {
   printf '%s' "$token"
 }
 
-super8_fetch_eligible_orgs() {
-  local api_url="${1%/}"
-  local token="$2"
-  local response_file status_file status
-
-  s8_require_command curl
-  s8_require_command jq
-
-  response_file="$(mktemp)"
-  status_file="$(mktemp)"
-  trap 'rm -f "$response_file" "$status_file"' RETURN
-
-  status="$(
-    curl -sS -o "$response_file" -w '%{http_code}' \
-      -H 'Accept: application/json, text/event-stream' \
-      -H 'Content-Type: application/json' \
-      -H "_SessionToken: ${token}" \
-      --data "$(jq -nc '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"auth_organizations",arguments:{}}}')" \
-      "${api_url%/}/mcp"
-  )"
-
-  if [ "$status" != "200" ]; then
-    printf 'Failed to list organizations via MCP (HTTP %s).\n' "$status" >&2
-    jq '.' "$response_file" >&2 2>/dev/null || cat "$response_file" >&2
-    return 1
-  fi
-
-  jq -c '
-    (.result.content[0].text | fromjson | .organizations // [])
-    | map(select(.insightArkMcpDisabled != true))
-  ' "$response_file"
-}
-
-super8_prompt_org_id_from_api() {
-  local api_url="$1"
-  local token="$2"
-  local orgs_json count choice idx org_id display_name
-  local -a org_ids=()
-  local -a org_names=()
-
-  orgs_json="$(super8_fetch_eligible_orgs "$api_url" "$token")"
-  count="$(printf '%s' "$orgs_json" | jq 'length')"
-
-  if [ "$count" -eq 0 ]; then
-    printf 'No manageable organizations for this account.\n' >&2
-    printf 'Ensure you are an org owner/admin, then retry.\n' >&2
-    return 1
-  fi
-
-  if [ "$count" -eq 1 ]; then
-    org_id="$(printf '%s' "$orgs_json" | jq -r '.[0].id')"
-    display_name="$(printf '%s' "$orgs_json" | jq -r '.[0].displayName // .[0].id')"
-    printf 'Using organization: %s (%s)\n' "$display_name" "$org_id" >&2
-    printf '%s' "$org_id"
-    return 0
-  fi
-
-  printf '\nSelect organization:\n' >&2
-  idx=1
-  while IFS=$'\t' read -r org_id display_name; do
-    org_ids+=("$org_id")
-    org_names+=("$display_name")
-    printf '  %s) %s (%s)\n' "$idx" "$display_name" "$org_id" >&2
-    idx=$((idx + 1))
-  done < <(printf '%s' "$orgs_json" | jq -r '.[] | [.id, (.displayName // .id)] | @tsv')
-
-  printf 'Choice: ' >&2
-  read -r choice
-  if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "$count" ]; then
-    printf 'Invalid choice.\n' >&2
-    return 1
-  fi
-
-  printf '%s' "${org_ids[$((choice - 1))]}"
-}
-
 super8_write_env_file() {
   local target_path="$1"
   local api_url="$2"
   local session_token="$3"
-  local org_id="${4:-}"
   local tmp_file
 
   tmp_file="$(mktemp)"
   {
     printf '%s=%q\n' 'S8_API_URL' "$api_url"
     printf '%s=%q\n' 'S8_SESSION_TOKEN' "$session_token"
-    if [ -n "$org_id" ]; then
-      printf '%s=%q\n' 'S8_ORG_ID' "$org_id"
-    fi
   } >"$tmp_file"
   mv "$tmp_file" "$target_path"
   chmod 600 "$target_path"
@@ -293,7 +210,6 @@ super8_write_env_file() {
 super8_write_repo_env_file() {
   local target_path="$1"
   local api_url="${2:-}"
-  local org_id="${3:-}"
   local tmp_file
 
   tmp_file="$(mktemp)"
@@ -301,12 +217,9 @@ super8_write_repo_env_file() {
   if [ -n "$api_url" ]; then
     printf '%s=%q\n' 'S8_API_URL' "$api_url" >>"$tmp_file"
   fi
-  if [ -n "$org_id" ]; then
-    printf '%s=%q\n' 'S8_ORG_ID' "$org_id" >>"$tmp_file"
-  fi
   if [ ! -s "$tmp_file" ]; then
     rm -f "$tmp_file"
-    printf 'Nothing to write. Provide at least S8_ORG_ID or S8_API_URL for project config.\n' >&2
+    printf 'Nothing to write. Provide S8_API_URL for project config.\n' >&2
     return 1
   fi
   mv "$tmp_file" "$target_path"
@@ -334,10 +247,6 @@ while [ "$#" -gt 0 ]; do
       ;;
     --session-token)
       session_token_override="${2:-}"
-      shift 2
-      ;;
-    --org-id)
-      org_id_override="${2:-}"
       shift 2
       ;;
     --write-client-configs)
@@ -394,32 +303,27 @@ if [ "$mode" = "user" ]; then
   done < <(super8_collect_env_targets)
 
   if [ -n "$existing_target" ]; then
-    printf 'Credential file already exists: %s\n' "$(super8_format_display_path "$existing_target")" >&2
-    printf 'Overwrite? [y/N]: ' >&2
-    read -r confirm
-    case "$confirm" in
-      y | Y | yes | YES) ;;
-      *)
-        printf 'Aborted.\n' >&2
-        exit 0
-        ;;
-    esac
+    # Non-interactive credential write: overwrite without prompt.
+    if [ -n "$session_token_override" ]; then
+      :
+    else
+      printf 'Credential file already exists: %s\n' "$(super8_format_display_path "$existing_target")" >&2
+      printf 'Overwrite? [y/N]: ' >&2
+      read -r confirm
+      case "$confirm" in
+        y | Y | yes | YES) ;;
+        *)
+          printf 'Aborted.\n' >&2
+          exit 0
+          ;;
+      esac
+    fi
   fi
 
   api_url="$(super8_resolve_api_url)"
   session_token="$(super8_prompt_session_token "$api_url")"
-  org_id=""
-  if [ -n "$org_id_override" ]; then
-    org_id="$org_id_override"
-  elif org_id="$(super8_prompt_org_id_from_api "$api_url" "$session_token")"; then
-    :
-  else
-    printf 'Warning: could not select organization. Credentials will be saved without S8_ORG_ID.\n' >&2
-    printf 'Set S8_ORG_ID later or re-run ./setup-env.sh.\n' >&2
-    org_id=""
-  fi
   printf '\n' >&2
-  super8_write_env_to_targets "$api_url" "$session_token" "$org_id"
+  super8_write_env_to_targets "$api_url" "$session_token"
   if [ "$write_client_configs" = "true" ]; then
     super8_merge_client_mcp_configs "$(super8_resolve_mcp_url "$api_url")" "$session_token"
   fi
@@ -442,13 +346,11 @@ elif [ "$mode" = "repo" ]; then
         ;;
     esac
   fi
-  printf 'Project config usually overrides org or stage API URL. Leave blank to skip.\n' >&2
+  printf 'Project config usually overrides stage API URL. Leave blank to skip.\n' >&2
   printf 'S8_API_URL override (optional): ' >&2
   read -r api_url
-  printf 'S8_ORG_ID: ' >&2
-  read -r org_id
   super8_ensure_directory "$project_path"
-  super8_write_repo_env_file "$target" "$api_url" "$org_id"
+  super8_write_repo_env_file "$target" "$api_url"
   printf 'Wrote %s (mode 600). Add this file to .gitignore.\n' "$target"
 fi
 

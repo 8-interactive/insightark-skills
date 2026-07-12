@@ -140,9 +140,7 @@ s8_load_runtime_env || fail 'Runtime environment is not ready'
 
 response_file="$(mktemp)"
 status_file="$(mktemp)"
-orgs_file="$(mktemp)"
-orgs_status_file="$(mktemp)"
-trap 'rm -f "$response_file" "$status_file" "$orgs_file" "$orgs_status_file"' EXIT
+trap 'rm -f "$response_file" "$status_file"' EXIT
 
 s8_mcp_tool_call 'auth_me' '{}' "$response_file" "$status_file" || fail 'Failed to reach MCP auth_me'
 if ! s8_expect_success "$(<"$status_file")" "$response_file" || ! s8_mcp_tool_ok "$response_file"; then
@@ -159,20 +157,5 @@ printf 'MCP endpoint: %s/mcp\n' "${S8_API_ROOT%/}"
 printf 'Session token: present\n'
 printf '%s\n' "$auth_payload" | jq -r '"User: " + (.user.email // "unknown")'
 printf 'Installed skill bundle version: %s\n' "$installed_version"
-
-s8_mcp_tool_call 'auth_organizations' '{}' "$orgs_file" "$orgs_status_file" || fail 'Failed to reach MCP auth_organizations'
-if s8_expect_success "$(<"$orgs_status_file")" "$orgs_file" && s8_mcp_tool_ok "$orgs_file"; then
-  s8_mcp_tool_text_json "$orgs_file" | jq -r '
-    (.organizations // []) as $orgs
-    | "Organizations in account: " + ($orgs | length | tostring)
-    , "InsightArk MCP available (not disabled): " + ([ $orgs[] | select(.insightArkMcpDisabled != true) ] | length | tostring)
-  '
-fi
-
-if [ -n "${S8_ORG_ID:-}" ]; then
-  printf 'Default org: %s\n' "$S8_ORG_ID"
-else
-  printf 'Default org: not set\n'
-fi
 
 printf 'Doctor status: ok\n'

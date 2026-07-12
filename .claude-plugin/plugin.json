@@ -1,7 +1,7 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. After install, run /plugin configure to set S8_SESSION_TOKEN (Console → Account Settings → InsightArk MCP → Create token).",
   "author": {
     "name": "Super8",

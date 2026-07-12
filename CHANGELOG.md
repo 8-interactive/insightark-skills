@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+- Setup is token-only: `setup-env.sh` no longer prompts for or writes `S8_ORG_ID`; `--org-id` is rejected.
+- `--env-hints` documents only `S8_API_URL` and `S8_SESSION_TOKEN`.
+- `doctor.sh` gates setup health on MCP `auth_me` only (no org-list hard-fail / Default org line).
+
 ## 2.0.2
 
 - Bundle hosted MCP with workflow skills for Claude Code, Codex, and Cursor plugins.

@@ -169,9 +169,9 @@ Clone or download from the [GitHub repository](https://github.com/8-interactive/
 | Location         | Path                              | Contents                                      |
 | ---------------- | --------------------------------- | --------------------------------------------- |
 | Install registry | `~/.insightark.config`            | Skills install paths                          |
-| Skills dir       | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`, `S8_API_URL`, `S8_ORG_ID` |
+| Skills dir       | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`, `S8_API_URL` |
 | User (fallback)  | `~/.insightark.env`               | Fallback if install registry is missing       |
-| Project override | `{project}/.insightark.env`       | Optional `S8_ORG_ID` / stage URL override     |
+| Project override | `{project}/.insightark.env`       | Optional stage URL override     |
 
 **Load order:** user file → skills install dir → project file → process environment.
 
@@ -381,9 +381,9 @@ cd insightark-skills
 | 位置           | 路徑                              | 內容                                          |
 | -------------- | --------------------------------- | --------------------------------------------- |
 | 安裝登錄檔     | `~/.insightark.config`            | Skills 安裝路徑                               |
-| Skills 目錄    | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`、`S8_API_URL`、`S8_ORG_ID` |
+| Skills 目錄    | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`、`S8_API_URL` |
 | 使用者（備援） | `~/.insightark.env`               | 找不到安裝登錄檔時的備援                      |
-| 專案覆蓋       | `{project}/.insightark.env`       | 可選的 `S8_ORG_ID` 或測試環境 URL             |
+| 專案覆蓋       | `{project}/.insightark.env`       | 可選的測試環境 URL             |
 
 **載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
 

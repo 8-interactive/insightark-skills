@@ -177,15 +177,13 @@ s8_print_process_env_instructions() {
     fish)
       printf 'Add to %s:\n' "$rc_file"
       printf "  set -gx S8_API_URL 'https://api-next.no8.io'\n"
-      printf "  set -gx S8_SESSION_TOKEN 'r:your-token'\n"
-      printf "  set -gx S8_ORG_ID 'your-org-id'  # optional\n\n"
+      printf "  set -gx S8_SESSION_TOKEN 'r:your-token'\n\n"
       printf 'Then run: source %s\n' "$rc_file"
       ;;
     *)
       printf 'Add to %s:\n' "$rc_file"
       printf "  export S8_API_URL='https://api-next.no8.io'\n"
-      printf "  export S8_SESSION_TOKEN='r:your-token'\n"
-      printf "  export S8_ORG_ID='your-org-id'  # optional\n\n"
+      printf "  export S8_SESSION_TOKEN='r:your-token'\n\n"
       printf 'Then run: source %s\n' "$rc_file"
       printf 'Or for the current terminal session only:\n'
       printf "  export S8_API_URL='https://api-next.no8.io'\n"
