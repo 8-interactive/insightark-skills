@@ -21,9 +21,6 @@ claude plugin marketplace add 8-interactive/insightark-skills
 claude plugin install insightark-skills@insightark-skills
 ```
 
-> **Internal staging:** pin the marketplace catalog to the `staging` branch:
-> `claude plugin marketplace add 8-interactive/insightark-skills@staging`
-
 Claude CLI `install` does **not** reliably prompt for credentials. After install, Claude will report that one required `userConfig` option is not set — you must configure it in Claude Code (or pass it via CLI).
 
 | Variable           | Description                                           |
@@ -57,7 +54,6 @@ Open Claude Code and run:
 Get your token from Console:
 
 - Production: `https://console.no8.io` → Account Settings → InsightArk MCP → Create token
-- Staging: `https://stage-console.no8.io` → Account Settings → InsightArk MCP → Create token
 
 The token starts with `r:` and is shown once.
 
@@ -81,15 +77,19 @@ codex plugin install insightark-skills@insightark-skills
 
 ### 2. Configure credentials
 
-The Codex plugin bundles hosted MCP via `.mcp.json` and prompts for `S8_SESSION_TOKEN` at install time.
-
-If your Codex build does not wire plugin MCP tokens correctly, run `setup-env.sh` to write `~/.insightark.env` and optionally merge client MCP config:
+The Codex plugin installs InsightArk workflow Skills. Register the MCP once with the bundled secure setup command; it prompts for the session token without echoing it and writes the `insightark` MCP registration to `~/.codex/config.toml`:
 
 ```bash
-./setup-env.sh
-# or non-interactive + client config fallback:
-./setup-env.sh --session-token "r:..." --write-client-configs
+./setup-env.sh --write-client-configs
 ```
+
+Restart Codex, then verify the registration:
+
+```bash
+codex mcp list
+```
+
+`insightark` should be enabled. `Auth: Unsupported` is expected during this token-based transition because InsightArk uses the `_SessionToken` header, not Codex OAuth.
 
 | Variable           | Description                                  |
 | ------------------ | -------------------------------------------- |
@@ -150,8 +150,6 @@ cd insightark-skills
 ./setup-env.sh
 ```
 
-> Staging channel: replace `main` with `staging` in the URL above.
-
 ---
 
 ## Manual Install
@@ -171,7 +169,7 @@ Clone or download from the [GitHub repository](https://github.com/8-interactive/
 | Install registry | `~/.insightark.config`            | Skills install paths                          |
 | Skills dir       | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`, `S8_API_URL` |
 | User (fallback)  | `~/.insightark.env`               | Fallback if install registry is missing       |
-| Project override | `{project}/.insightark.env`       | Optional stage URL override     |
+| Project override | `{project}/.insightark.env`       | Optional per-project override    |
 
 **Load order:** user file → skills install dir → project file → process environment.
 
@@ -192,7 +190,6 @@ The hosted InsightArk MCP server is available at:
 | Environment | Endpoint |
 | --- | --- |
 | Production | `https://api-next.no8.io/mcp` |
-| Staging | `https://stage-api-next.no8.io/mcp` |
 
 MCP uses an InsightArk MCP `_SessionToken`. The organization must have InsightArk MCP available (not disabled), and the token owner must be the organization owner or an InsightArk admin.
 
@@ -233,11 +230,7 @@ claude plugin marketplace add 8-interactive/insightark-skills
 claude plugin install insightark-skills@insightark-skills
 ```
 
-> **內部 staging 測試：** 指定 marketplace catalog 的 `staging` branch：
-> `claude plugin marketplace add 8-interactive/insightark-skills@staging`
-
-Hosted MCP endpoint 已在發佈時寫入 plugin（production / staging 依 channel 而定）。但 Claude CLI 的 `install` **不一定會**提示設定 token；你需要在 Claude Code 內完成 `/plugin configure`（或用 CLI `--config` 傳入）。
-Claude CLI 的 `install` **不一定會**提示設定憑證。安裝後通常會看到「尚有 1 個必填 `userConfig` 未設定」，需要你在 Claude Code 內完成設定（或在 CLI 用 `--config` 傳入）。
+Hosted MCP endpoint 已在發佈時寫入 plugin。但 Claude CLI 的 `install` **不一定會**提示設定憑證：安裝後通常會看到「尚有 1 個必填 `userConfig` 未設定」，需要你在 Claude Code 內完成 `/plugin configure`（或在 CLI 用 `--config KEY=VALUE` 傳入）。
 
 | 變數               | 說明                                          |
 | ------------------ | --------------------------------------------- |
@@ -270,7 +263,6 @@ claude plugin enable insightark-skills@insightark-skills
 Token 取得位置：
 
 - Production：`https://console.no8.io` → Account Settings → InsightArk MCP → Create token
-- Staging：`https://stage-console.no8.io` → Account Settings → InsightArk MCP → Create token
 
 Token 以 `r:` 開頭，且只會顯示一次。
 
@@ -294,14 +286,19 @@ codex plugin install insightark-skills@insightark-skills
 
 ### 2. 設定憑證
 
-Codex plugin 透過 `.mcp.json` 內建 hosted MCP，安裝時會提示 `S8_SESSION_TOKEN`。
-
-若你的 Codex 版本無法正確套用 plugin MCP token，請執行 `setup-env.sh` 寫入 `~/.insightark.env`，並可選擇合併 client MCP 設定：
+Codex plugin 會安裝 InsightArk workflow Skills。再執行一次內建的安全設定指令註冊 MCP；它會以不回顯方式要求輸入 session token，並將 `insightark` MCP 寫入 `~/.codex/config.toml`：
 
 ```bash
-./setup-env.sh
-./setup-env.sh --session-token "r:..." --write-client-configs
+./setup-env.sh --write-client-configs
 ```
+
+重新啟動 Codex 後，執行下列指令確認：
+
+```bash
+codex mcp list
+```
+
+`insightark` 應為 enabled。這個 token 過渡期若顯示 `Auth: Unsupported` 屬於預期行為，因為 InsightArk 使用 `_SessionToken` header，而不是 Codex OAuth。
 
 | 變數               | 說明                                         |
 | ------------------ | -------------------------------------------- |
@@ -362,8 +359,6 @@ cd insightark-skills
 ./setup-env.sh
 ```
 
-> Staging channel：將上方 URL 中的 `main` 替換為 `staging` 即可。
-
 ---
 
 ## 手動安裝
@@ -404,7 +399,6 @@ Hosted InsightArk MCP server 位於：
 | 環境 | Endpoint |
 | --- | --- |
 | Production | `https://api-next.no8.io/mcp` |
-| Staging | `https://stage-api-next.no8.io/mcp` |
 
 MCP 使用 InsightArk MCP `_SessionToken`。組織必須可用 InsightArk MCP（未 disable），且 token 所屬使用者必須是該組織 owner 或 InsightArk admin。
 

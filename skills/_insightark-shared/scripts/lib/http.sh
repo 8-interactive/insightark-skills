@@ -13,7 +13,8 @@ s8_api_request() {
   curl_args=(
     -sS
     -X "$method"
-    -H "Accept: application/json"
+    # MCP Streamable HTTP requires both types; JSON-only APIs still accept this.
+    -H "Accept: application/json, text/event-stream"
     -H "_SessionToken: ${S8_SESSION_TOKEN}"
     -o "$response_file"
     -w "%{http_code}"
