@@ -1,18 +1,18 @@
 {
-  "name": "super8-studio",
+  "name": "insightark-skills",
   "owner": {
     "name": "SUPER 8 Studio",
     "email": "sales@no8.io"
   },
   "description": "SUPER 8 Studio InsightArk Skills — developer API plugins for agent workflows.",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "plugins": [
     {
       "name": "insightark-skills",
       "source": "./",
       "displayName": "SUPER 8 Studio InsightArk Skills",
       "description": "SUPER 8 Studio InsightArk Skills for CRM workflows.",
-      "version": "1.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "SUPER 8 Studio",
         "url": "https://www.no8.io"
@@ -21,7 +21,14 @@
       "repository": "https://github.com/8-interactive/insightark-skills",
       "license": "Apache-2.0",
       "category": "Productivity",
-      "keywords": ["super8", "studio", "api", "crm", "skills"]
+      "keywords": [
+        "super8",
+        "studio",
+        "insightark",
+        "api",
+        "crm",
+        "skills"
+      ]
     }
   ]
 }

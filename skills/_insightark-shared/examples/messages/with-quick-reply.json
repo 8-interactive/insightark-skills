@@ -1,0 +1,28 @@
+{
+  "messages": [
+    {
+      "contentType": "text/plain",
+      "data": {
+        "content": "Which topic would you like help with?"
+      }
+    }
+  ],
+  "quickReply": [
+    {
+      "action": "message",
+      "label": "Shipping",
+      "text": "shipping"
+    },
+    {
+      "action": "message",
+      "label": "Returns",
+      "text": "returns"
+    },
+    {
+      "action": "postback",
+      "label": "Talk to agent",
+      "postback": "handoff_agent"
+    }
+  ],
+  "platform": "line"
+}

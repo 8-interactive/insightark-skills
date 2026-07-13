@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/skills/_super8-studio-api-shared/scripts/doctor.js\" --soft-fail"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/skills/_insightark-shared/scripts/doctor.sh --soft-fail"
           }
         ]
       }

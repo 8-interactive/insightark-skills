@@ -555,8 +555,8 @@
               aria-label="Download command for macOS/Linux"
             >
               <pre id="tarball-mac-code">
-curl -LO https://downloads.no8.io/main/releases/skills/insightark-skills-latest.tar.gz
-tar -xzf insightark-skills-latest.tar.gz
+curl -LO https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz
+tar -xzf insightark-skills-v2-latest.tar.gz
 cd insightark-skills</pre
               >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
@@ -568,8 +568,8 @@ cd insightark-skills</pre
               style="display: none"
             >
               <pre id="tarball-win-code">
-Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-latest.tar.gz" -OutFile "insightark-skills-latest.tar.gz"
-tar -xzf insightark-skills-latest.tar.gz
+Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" -OutFile "insightark-skills-v2-latest.tar.gz"
+tar -xzf insightark-skills-v2-latest.tar.gz
 cd insightark-skills</pre
               >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
@@ -588,7 +588,7 @@ cd insightark-skills</pre
           <div id="section-git" style="display: none">
             <div class="code-wrap" aria-label="Git clone command">
               <pre id="git-clone-code">
-git clone https://github.com/8-interactive/insightark-skills.git
+git clone https://github.com/no8io/insightark-skills.git
 cd insightark-skills</pre
               >
               <button class="copy-btn" onclick="copyCode(this)">複製</button>
@@ -723,7 +723,7 @@ cd insightark-skills</pre
                 style="margin-top: 6px; padding-left: 16px; font-size: 0.875rem"
                 id="s3-sec-list"
               >
-                <li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li>
+                <li>請勿將 <code>.insightark.env</code> 提交到版本控制</li>
                 <li>請勿在聊天或 Email 中分享 Token</li>
                 <li>
                   Token 有效期 6 個月，過期請重新執行
@@ -758,7 +758,7 @@ cd insightark-skills</pre
               <span class="step-num">2</span
               ><span id="s3-step2"
                 >自動開啟 Super 8 Console →
-                <strong>Account Settings → Developer API</strong>，建立
+                <strong>Account Settings → InsightArk MCP</strong>，建立
                 Token</span
               >
             </li>
@@ -769,13 +769,13 @@ cd insightark-skills</pre
             <li>
               <span class="step-num">4</span
               ><span id="s3-step4"
-                >精靈列出已啟用 Developer API 的組織，選擇一個</span
+                >精靈列出可用 InsightArk MCP 的組織，選擇一個</span
               >
             </li>
             <li>
               <span class="step-num">5</span
               ><span id="s3-step5"
-                >完成後將憑證寫入 <code>~/.super8-studio.env</code>（權限
+                >完成後將憑證寫入 <code>~/.insightark.env</code>（權限
                 600）</span
               >
             </li>
@@ -805,10 +805,6 @@ cd insightark-skills</pre
             <div>
               <span class="ok">✓</span>
               <span class="label">S8_SESSION_TOKEN </span>set (r:...)
-            </div>
-            <div>
-              <span class="ok">✓</span>
-              <span class="label">S8_ORG_ID </span>org_xxx
             </div>
             <div>
               <span class="ok">✓</span>
@@ -861,7 +857,7 @@ cd insightark-skills</pre
           <div class="callout tip">
             <span class="callout-icon">🎉</span>
             <span id="s4-success-msg"
-              >設定完成！現在可以在你的 AI Agent 中使用 SUPER 8 Studio Skills
+              >設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills
               了。</span
             >
           </div>
@@ -879,7 +875,7 @@ cd insightark-skills</pre
           <div class="callout danger">
             <span class="callout-icon">⚠️</span>
             <span id="s5-danger-note"
-              >解除安裝後，AI Agent 將無法使用 SUPER 8 Studio
+              >解除安裝後，AI Agent 將無法使用 Super 8 Studio
               Skills。如需繼續使用，請重新執行安裝流程。</span
             >
           </div>
@@ -937,7 +933,7 @@ cd insightark-skills</pre
             id="s5-mac-wrap"
             aria-label="Remove credentials macOS/Linux"
           >
-            <pre>rm ~/.super8-studio.env</pre>
+            <pre>rm ~/.insightark.env</pre>
             <button class="copy-btn" onclick="copyCode(this)">複製</button>
           </div>
           <div
@@ -946,7 +942,7 @@ cd insightark-skills</pre
             aria-label="Remove credentials Windows"
             style="display: none"
           >
-            <pre>Remove-Item "$env:USERPROFILE\.super8-studio.env"</pre>
+            <pre>Remove-Item "$env:USERPROFILE\.insightark.env"</pre>
             <button class="copy-btn" onclick="copyCode(this)">複製</button>
           </div>
         </div>
@@ -1017,14 +1013,14 @@ cd insightark-skills</pre
           s3WizardLabel: "精靈執行流程",
           s3Step1: "自動從 <code>RELEASE</code> 檔偵測 API 環境（Production）",
           s3Step2:
-            "自動開啟 Super 8 Console → <strong>Account Settings → Developer API</strong>，建立 Token",
+            "自動開啟 Super 8 Console → <strong>Account Settings → InsightArk MCP</strong>，建立 Token",
           s3Step3: "貼上 Token（僅顯示一次，輸入時遮蔽）",
-          s3Step4: "精靈列出已啟用 Developer API 的組織，選擇一個",
+          s3Step4: "精靈列出可用 InsightArk MCP 的組織，選擇一個",
           s3Step5:
-            "完成後將憑證寫入 <code>~/.super8-studio.env</code>（權限 600）",
+            "完成後將憑證寫入 <code>~/.insightark.env</code>（權限 600）",
           s3SecTitle: "安全注意事項",
           s3SecList:
-            "<li>請勿將 <code>.super8-studio.env</code> 提交到版本控制</li><li>請勿在聊天或 Email 中分享 Token</li><li>Token 有效期 6 個月，過期請重新執行 <code>./setup-env.sh</code></li>",
+            "<li>請勿將 <code>.insightark.env</code> 提交到版本控制</li><li>請勿在聊天或 Email 中分享 Token</li><li>Token 有效期 6 個月，過期請重新執行 <code>./setup-env.sh</code></li>",
           s4Title: "驗證設定",
           s4Desc: "確認憑證正確且 API 可連通。",
           s4SuccessLabel: "成功輸出範例",
@@ -1034,11 +1030,11 @@ cd insightark-skills</pre
           s4Err2Title: "API reachable 失敗",
           s4Err2Desc: "確認 API URL 是否對應正確環境：",
           s4SuccessMsg:
-            "設定完成！現在可以在你的 AI Agent 中使用 SUPER 8 Studio Skills 了。",
+            "設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills 了。",
           s5Title: "解除安裝",
           s5Desc: "移除所有已安裝的 Skills 及憑證設定。",
           s5DangerNote:
-            "解除安裝後，AI Agent 將無法使用 SUPER 8 Studio Skills。如需繼續使用，請重新執行安裝流程。",
+            "解除安裝後，AI Agent 將無法使用 Super 8 Studio Skills。如需繼續使用，請重新執行安裝流程。",
           s5UninstallLabel: "移除 Skills",
           s5WinText:
             "Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準 PowerShell。",
@@ -1094,15 +1090,15 @@ cd insightark-skills</pre
           s3Step1:
             "Detects API environment from the <code>RELEASE</code> file (Production)",
           s3Step2:
-            "Opens Super 8 Console → <strong>Account Settings → Developer API</strong> to create a token",
+            "Opens Super 8 Console → <strong>Account Settings → InsightArk MCP</strong> to create a token",
           s3Step3: "Paste the token (shown once, input is masked)",
           s3Step4:
-            "Lists organizations with Developer API enabled — select one",
+            "Lists organizations with InsightArk MCP enabled — select one",
           s3Step5:
-            "Writes credentials to <code>~/.super8-studio.env</code> with permissions 600",
+            "Writes credentials to <code>~/.insightark.env</code> with permissions 600",
           s3SecTitle: "Security",
           s3SecList:
-            "<li>Never commit <code>.super8-studio.env</code> to version control</li><li>Never share tokens in chat or email</li><li>Tokens expire after 6 months — re-run <code>./setup-env.sh</code> when expired</li>",
+            "<li>Never commit <code>.insightark.env</code> to version control</li><li>Never share tokens in chat or email</li><li>Tokens expire after 6 months — re-run <code>./setup-env.sh</code> when expired</li>",
           s4Title: "Verify Setup",
           s4Desc: "Confirm credentials are valid and the API is reachable.",
           s4SuccessLabel: "Expected successful output",
@@ -1112,11 +1108,11 @@ cd insightark-skills</pre
           s4Err2Title: "API reachable fails",
           s4Err2Desc: "Check that the API URL matches the correct environment:",
           s4SuccessMsg:
-            "Setup complete! You can now use SUPER 8 Studio Skills in your AI agent.",
+            "Setup complete! You can now use Super 8 Studio Skills in your AI agent.",
           s5Title: "Uninstall",
           s5Desc: "Remove all installed Skills and credentials.",
           s5DangerNote:
-            "After uninstalling, your AI agent will no longer have access to SUPER 8 Studio Skills. Reinstall to continue using them.",
+            "After uninstalling, your AI agent will no longer have access to Super 8 Studio Skills. Reinstall to continue using them.",
           s5UninstallLabel: "Remove Skills",
           s5WinText:
             "Windows users must run in Git Bash or WSL — CMD and standard PowerShell are not supported.",

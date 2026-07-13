@@ -1,64 +1,60 @@
 # Skill Authoring Guide
 
-## Structure
+Internal reference for adding or changing a skill in this bundle.
 
-Create one directory per skill:
-
-```text
-skills/super8-studio-example/SKILL.md
-```
-
-Shared scripts belong in:
+## Layout
 
 ```text
-skills/_super8-studio-api-shared/scripts/
+skills/insightark-example/SKILL.md
+skills/insightark-example/scripts/...   # optional, workflow-specific helpers
+skills/_insightark-shared/scripts/      # shared runtime (env, http, formatting)
 ```
 
-**Constraint — one-plugin rule:** All skills must remain inside a single plugin
-installation unit. Shared scripts reference each other via relative paths
-(`../_super8-studio-api-shared/scripts/`). When Claude Code (or Codex) installs
-a plugin, it copies the entire plugin root to a cache directory. Relative paths
-continue to work because the whole tree is copied together.
+Each `skills/<name>/` directory is a self-contained installation unit copied
+verbatim by `install.sh` and by plugin installs (Claude Code / Codex). Shared
+scripts are referenced via relative paths
+(`../_insightark-shared/scripts/...`). Do not add cross-skill relative
+imports between two non-shared skills — each skill folder must remain
+independently copyable.
 
-If you ever split skills into separate plugin packages, these relative paths
-will break — each plugin would be cached independently. In that case, migrate
-shared logic to a bundled MCP server (`skills/_super8-studio-api-shared/` →
-`.mcp.json`) so each plugin can call it over stdio instead of importing shell
-scripts directly.
+## Prefer extending a workflow skill
 
-## Frontmatter
+The bundle intentionally consolidated many narrow, per-endpoint skills into 7
+workflow-oriented skills (see the table in `README.md`). Before adding a new
+skill folder, check whether the operation belongs inside an existing workflow
+skill instead — most InsightArk MCP surface area fits one of the 7.
 
-Every `SKILL.md` starts with frontmatter:
-
-```yaml
----
-name: super8-studio-example
-description: Explain what this skill does and when an agent should choose it.
-when_to_use: Use when the user asks for the exact workflow this skill supports.
-allowed-mcp: false
----
-```
-
-The `name` value must match the folder name.
-
-## Body Sections
-
-Recommended sections:
+## Frontmatter contract
 
 ```markdown
-# Skill: super8-studio-example
+---
+name: insightark-example
+description: Explain what this skill does and when an agent should choose it, in enough detail for `validate-skills.sh` (≥40 chars) and for an agent to route correctly without opening the file.
+---
 
-## Credentials
+# Skill: insightark-example
 
-## Scripts
-
-## Workflow
-
-## Guardrails
-
-## Failure handling
+...
 ```
 
-Write-action skills must state which user confirmation is required before
-mutating customer data, sending messages, creating broadcasts, or triggering
-automation.
+`scripts/validate-skills.sh` checks that:
+
+- `name` in frontmatter matches the folder name.
+- `description` is present and at least 40 characters.
+
+## MCP-first, script fallback
+
+The primary execution path is the hosted InsightArk MCP server — skills
+should describe MCP tool calls first. Where a skill still ships a Node
+script fallback (`node <relative-path>.js`), it must use only the Node 18+
+standard library — zero npm dependencies (see `AGENTS.md`).
+
+## Adding a new skill checklist
+
+1. Create `skills/insightark-<name>/SKILL.md` with valid frontmatter.
+2. If it needs shared helpers, reuse `_insightark-shared/scripts/lib/*` —
+   don't duplicate env/http logic.
+3. Add the skill to the table in `README.md` (English + 中文).
+4. Run `bash scripts/validate-skills.sh` and `node scripts/validate-mcp-skills.js`.
+5. Bump the version (see `docs/implementation/plugin-release-process.md`) and
+   add a `CHANGELOG.md` entry.

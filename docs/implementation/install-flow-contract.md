@@ -1,16 +1,17 @@
 # Multi-Channel Install Flow Contract
 
-This repository has one canonical payload: `skills/`. Every install path should
-make that payload available to the user's agent. Only install paths that execute
-our scripts should record installed skills paths in `~/.super8-studio.config`.
+This repository has one canonical payload: `skills/`. Every install path
+should make that payload available to the user's agent. Only install paths
+that execute `install.sh` reliably record installed skills paths in
+`~/.insightark.config`.
 
 ## Shared State
 
-`installer/install.js` is the source of truth for registry writes. It calls
+`install.sh` is the source of truth for registry writes. It calls
 `super8_write_install_config` from
-`skills/_super8-studio-api-shared/scripts/lib/install-config.js`.
+`skills/_insightark-shared/scripts/lib/install-config.sh`.
 
-The registry stores:
+The registry (`~/.insightark.config`, mode `600`) stores:
 
 ```text
 layout=<direct|per-agent>
@@ -20,39 +21,33 @@ skills_targets=<comma-separated resolved skills folders>
 installed_at=<UTC timestamp>
 ```
 
-`the Node setup (insightark-skills setup)`, `the Node uninstaller`, and runtime credential loading use this registry
-to find installed skill directories when it exists. Marketplace and external
-skills-manager installs may not run repository scripts, so skills must also be
-able to guide users toward `the Node setup (insightark-skills setup)` or a manual env file fallback.
+`setup-env.sh` and skill runtime credential loading use this registry to find
+installed skill directories when it exists. Marketplace and external
+skills-manager installs may not run `install.sh`, so skills must also be able
+to guide users toward `./setup-env.sh` or a manual env file fallback.
 
 ## 1. curl / Tarball
 
-Current flow:
+Current flow (see `README.md` → Tarball Install):
 
 ```bash
-curl -LO https://downloads.no8.io/main/releases/skills/insightark-skills-latest.tar.gz
-tar -xzf insightark-skills-latest.tar.gz
+curl -L https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz \
+  -o insightark-skills-v2-latest.tar.gz
+tar -xzf insightark-skills-v2-latest.tar.gz
 cd insightark-skills
-npx @8-interactive/insightark-skills install
-npx @8-interactive/insightark-skills setup
+./install.sh
+./setup-env.sh
 ```
 
-Recommended bootstrap flow:
-
-1. Download the release tarball.
-2. Verify checksum when available.
-3. Extract to a temporary or user cache directory.
-4. Run `npx @8-interactive/insightark-skills install` with either interactive prompts or passed-through
-   non-interactive options.
-5. Run or instruct the user to run `npx @8-interactive/insightark-skills setup`.
-
-Registry handling: `installer/install.js` writes `~/.super8-studio.config` after resolving
-the target directories.
+Registry handling: `install.sh` writes `~/.insightark.config` after
+resolving the target directories, before copying files.
 
 ## 2. Codex add marketplace
 
-Codex marketplace installation should install the plugin package, but it should
-not silently assume Super 8 credentials are configured.
+```bash
+codex plugin marketplace add 8-interactive/insightark-skills
+codex plugin install insightark-skills@insightark-skills
+```
 
 Codex-specific files:
 
@@ -61,25 +56,28 @@ Codex-specific files:
 .agents/plugins/marketplace.json
 ```
 
-Do not assume Codex marketplace install executes `installer/install.js`. Codex plugin
-installation makes skills available through the plugin system; credential setup
-must be a documented follow-up step or a skill-guided workflow.
+Do not assume the Codex marketplace install runs `install.sh`. Codex plugin
+installation makes skills available through the plugin system; credential
+setup is a documented follow-up step (`./setup-env.sh`), not an install hook.
 
 If users want direct skills copied into a specific local skills directory
 instead of plugin-managed discovery, use:
 
 ```bash
-npx @8-interactive/insightark-skills install --target ~/.agents/skills
-npx @8-interactive/insightark-skills setup
+./install.sh --target ~/.agents/skills
+./setup-env.sh
 ```
 
-Registry handling: Codex marketplace installs may not write
-`~/.super8-studio.config`. Direct installs do.
+Registry handling: Codex marketplace installs do not write
+`~/.insightark.config`. Direct (`./install.sh`) installs do.
 
 ## 3. Claude add marketplace
 
-Claude marketplace installation uses Claude's plugin format and marketplace
-catalog.
+```bash
+claude plugin marketplace add 8-interactive/insightark-skills
+claude plugin install insightark-skills@insightark-skills
+claude plugin enable insightark-skills@insightark-skills
+```
 
 Claude-specific files:
 
@@ -88,70 +86,45 @@ Claude-specific files:
 .claude-plugin/marketplace.json
 ```
 
-Claude Code installs marketplace plugins into its plugin cache. Do not assume
-the install flow can run `installer/install.js`. Use plugin skills, user-facing setup
-instructions, or Claude `userConfig` when a future release supports the exact
-credential shape this package needs.
+Claude Code installs marketplace plugins into its own plugin cache and does
+not run `install.sh`. Credentials are collected through the plugin's
+`userConfig` (`S8_API_URL`, `S8_SESSION_TOKEN` in `.claude-plugin/plugin.json`)
+and stored in the system keychain; the plugin's `SessionStart` hook runs
+`skills/_insightark-shared/scripts/doctor.sh` to surface credential issues.
 
-Registry handling: Claude marketplace installs may not write
-`~/.super8-studio.config`. Direct installs do.
+Registry handling: Claude marketplace installs do not write
+`~/.insightark.config`. Direct (`./install.sh`) installs do.
 
-## 4. Vercel `npx skills add --...`
+## Answering the current flow questions
 
-This path targets the Vercel-style skills installer command:
+### How should `install.sh` be triggered outside curl?
 
-```bash
-npx skills add --...
-```
+Use `install.sh` as the canonical installer only for channels that execute
+our scripts:
 
-Treat this as an external skills-manager path. The exact source syntax and
-lifecycle behavior must be verified against the current CLI before publishing.
+- curl/tarball: call `./install.sh`.
+- Manual clone/download: call `./install.sh` directly.
+- Codex/Claude/Cursor marketplaces: do not assume install-time script execution.
 
-Do not assume `npx skills add --...` executes `installer/install.js`, npm lifecycle
-scripts, or package binaries unless the CLI documentation explicitly guarantees
-that behavior.
+**Retired:** `npx @8-interactive/insightark-skills` / npm registry install. Customers
+use tarball, GitHub mirror, or plugin marketplaces only.
 
-If the CLI can run a follow-up command after copying skills, use:
+### How should `~/.insightark.config` be recorded outside curl?
 
-```bash
-scripts/register-install.js --target <skills-target>
-npx @8-interactive/insightark-skills setup
-```
-
-If it cannot run follow-up commands, rely on `~/.super8-studio.env`, process
-environment variables, or a manual `the Node setup (insightark-skills setup)` run from a downloaded package.
-
-## Answering the Current Flow Questions
-
-### How should `npx @8-interactive/insightark-skills install` be triggered outside curl?
-
-Use `installer/install.js` as the canonical installer only for channels that execute our
-scripts:
-
-- curl/tarball: call `npx @8-interactive/insightark-skills install`.
-- Explicit npm package binary: may call `bash npx @8-interactive/insightark-skills install` if users invoke it.
-- Codex/Claude marketplaces: do not assume install-time script execution.
-- Vercel `npx skills add --...`: verify CLI lifecycle before relying on script
-  execution.
-
-The adapters should not duplicate target resolution logic.
-
-### How should `~/.super8-studio.config` be recorded outside curl?
-
-Do not write the file independently in each channel when `installer/install.js` can run.
-Call `installer/install.js`, because it already writes the registry through
+Do not write the file independently in each channel when `install.sh` can
+run — call `install.sh`, because it already writes the registry through
 `super8_write_install_config`.
 
-If an install platform copies files itself and later exposes a known target path,
-use `scripts/register-install.js --target <dir>` as an optional follow-up. If no
-follow-up command can run, treat the registry as unavailable and rely on env
-fallbacks.
+If an install platform copies files itself and later exposes a known target
+path, use `scripts/register-install.sh --target <dir>` as an optional
+follow-up. If no follow-up command can run, treat the registry as
+unavailable and rely on the env file load order in
+`skills/_insightark-shared/scripts/lib/env.sh`.
 
-## Verification Matrix
+## Verification matrix
 
 | Channel | Must verify |
 | --- | --- |
-| curl/tarball | Tarball extracts, `installer/install.js` copies `skills/`, registry exists, `the Node setup (insightark-skills setup) --check` runs. |
-| Codex marketplace | `.codex-plugin/plugin.json` resolves `../skills/`, `.agents/plugins/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
-| Claude marketplace | `.claude-plugin/plugin.json` resolves `../skills/`, `.claude-plugin/marketplace.json` resolves repository root, setup docs do not assume install hooks. |
-| Vercel skills add | Package includes all runtime files, docs state CLI lifecycle assumptions, registry is optional unless a follow-up target path is available. |
+| curl/tarball | Tarball extracts, `install.sh` copies `skills/`, registry exists, `./setup-env.sh --check` passes. |
+| Codex marketplace | `.codex-plugin/plugin.json` resolves `skills` (`./skills/`) to the repo root, `.agents/plugins/marketplace.json` `source.path` resolves to repo root, setup docs do not assume install hooks. |
+| Claude marketplace | `.claude-plugin/plugin.json` resolves `skills` (`./skills/`) to the repo root, `.claude-plugin/marketplace.json` plugin `source` resolves to repo root, `SessionStart` hook runs `doctor.sh`. |

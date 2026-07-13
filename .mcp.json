@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "insightark": {
+      "type": "http",
+      "url": "https://stage-api-next.no8.io/mcp",
+      "headers": {
+        "_SessionToken": "${user_config.S8_SESSION_TOKEN}"
+      }
+    }
+  }
+}

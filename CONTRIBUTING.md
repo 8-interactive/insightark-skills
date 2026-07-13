@@ -11,34 +11,39 @@ Canonical cross-agent skills live under `skills/`.
 
 ```text
 skills/<skill-name>/SKILL.md
-skills/_super8-studio-api-shared/scripts/
+skills/_insightark-shared/scripts/
 ```
 
-The underscore-prefixed shared directory is runtime support, not a triggerable
-skill. Skill scripts are Node (`.js`) and run with `node <path>` — zero
-dependencies, no bash required.
+The underscore-prefixed shared directory is runtime support, not a
+triggerable skill. Skill scripts are Node (`.js`) invoked as `node <path>`;
+the installer (`install.sh`, `setup-env.sh`, `uninstall.sh`) and shared
+support libraries (`skills/_insightark-shared/scripts/lib/*.sh`) are Bash.
 
-## Skill Rules
+## Workflow Skills
 
-- Folder names and frontmatter `name` values must match.
-- Every skill must include a clear `description`.
-- Read-only skills must stay read-only.
-- Write-action skills must require explicit confirmation before API mutation or
-  outbound messaging.
-- Shared Node helpers belong in `_super8-studio-api-shared/scripts/` (libs in `scripts/lib/`).
+There are 7 workflow-oriented skills (`insightark-session`,
+`insightark-investigator`, `insightark-customer-manager`,
+`insightark-messaging`, `insightark-broadcast-manager`,
+`insightark-conversations`, `insightark-ma-automation`). Each wraps a set of
+related InsightArk MCP operations behind the hosted MCP server.
+Prefer extending an existing workflow skill over adding a new narrowly-scoped
+one — the bundle intentionally consolidated per-endpoint skills into these 7.
 
-## Validation
+- Shared Node helpers belong in `_insightark-shared/scripts/` (libs in
+  `scripts/lib/`).
+- Read/investigate operations should never require user confirmation.
+  Write/outbound operations (send message, mutate customer, trigger
+  broadcast/MA) must confirm intent first — see `SECURITY.md`.
 
-Run these before opening a PR or publishing a package:
+## Before Opening a PR
 
 ```bash
-npm run validate          # node scripts/validate-skills.js
-npm test                  # node test/env-precedence.test.js
+npm run validate   # bash scripts/validate-skills.sh + node scripts/validate-mcp-skills.js
 ```
 
-If the change affects install behavior, test at least one direct install target:
+If your change touches MCP-facing behavior, also run the E2E harness (see
+`docs/implementation/plugin-release-process.md`).
 
-```bash
-node scripts/super8-skills-cli.js install --target /tmp/super8-skills-test
-node scripts/super8-skills-cli.js setup --check
-```
+## Releasing
+
+See `docs/implementation/plugin-release-process.md`.

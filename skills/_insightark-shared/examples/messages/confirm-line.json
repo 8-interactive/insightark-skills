@@ -1,0 +1,31 @@
+{
+  "messages": [
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "confirm",
+        "altText": "Please confirm your choice",
+        "elements": [
+          {
+            "title": "Proceed with this action?",
+            "buttons": [
+              {
+                "type": "postback",
+                "title": "Yes",
+                "data": "confirm_yes",
+                "tags": []
+              },
+              {
+                "type": "postback",
+                "title": "No",
+                "data": "confirm_no",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "platform": "line"
+}
