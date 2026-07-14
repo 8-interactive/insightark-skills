@@ -32,6 +32,8 @@ Discovery:
 | Protected Resource Metadata | `/.well-known/oauth-protected-resource` |
 | Authorization Server Metadata | `/.well-known/oauth-authorization-server` |
 
+Token/revoke endpoints are `/mcp/oauth/token` and `/mcp/oauth/revoke` (not `/oauth/token`) so they coexist with Super8's OIDC IdP mount under `/oauth`. Authorize remains `/oauth/authorize`. Clients must use discovery metadata (or plugin-baked URLs), not hard-coded `/oauth/token`.
+
 Static clients (no Dynamic Client Registration in MVP):
 
 | Client | `client_id` | Primary redirect notes |
