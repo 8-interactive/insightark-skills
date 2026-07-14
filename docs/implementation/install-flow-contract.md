@@ -46,7 +46,7 @@ resolving the target directories, before copying files.
 
 ```bash
 codex plugin marketplace add 8-interactive/insightark-skills
-codex plugin install insightark-skills@insightark-skills
+codex plugin add insightark-skills@insightark-skills
 ```
 
 Codex-specific files:
@@ -126,5 +126,5 @@ unavailable and rely on the env file load order in
 | Channel | Must verify |
 | --- | --- |
 | curl/tarball | Tarball extracts, `install.sh` copies `skills/`, registry exists, `./setup-env.sh --check` passes. |
-| Codex marketplace | `.codex-plugin/plugin.json` resolves `skills` (`./skills/`) to the repo root, `.agents/plugins/marketplace.json` `source.path` resolves to repo root, setup docs do not assume install hooks. |
+| Codex marketplace | `.codex-plugin/plugin.json` resolves `skills` (`./skills/`) to the repo root, `mcpServers` points at Codex-dedicated `./mcp.json` (OAuth bake), `.agents/plugins/marketplace.json` `source.path` resolves to repo root, setup docs do not assume install hooks. |
 | Claude marketplace | `.claude-plugin/plugin.json` resolves `skills` (`./skills/`) to the repo root, `.claude-plugin/marketplace.json` plugin `source` resolves to repo root, `SessionStart` hook runs `doctor.sh`. |

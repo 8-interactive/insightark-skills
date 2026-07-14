@@ -18,16 +18,7 @@
     "skills"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
-  "userConfig": {
-    "S8_SESSION_TOKEN": {
-      "type": "string",
-      "title": "Session token",
-      "description": "InsightArk MCP session token (starts with r:).",
-      "sensitive": true,
-      "required": true
-    }
-  },
+  "mcpServers": "./mcp.json",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "shortDescription": "InsightArk skills and hosted MCP for SUPER 8 Studio.",

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Codex / ChatGPT desktop: bake OAuth (`client_id=insightark-codex`) into `.codex-plugin/mcp.json`; plugin no longer requires `S8_SESSION_TOKEN` for install.
+- Keep root `.mcp.json` SessionToken-primary for Claude; validators assert Codex vs Claude manifests separately.
+- Docs are App-first for Codex; document ChatGPT desktop `redirect_uri` allowlist gate and clean-`CODEX_HOME` install checks.
+- `doctor.sh` warns when Codex config has both OAuth and SessionToken `insightark` registrations.
+
 ## 2.0.3
 
 - Setup is token-only: `setup-env.sh` no longer prompts for or writes `S8_ORG_ID`; `--org-id` is rejected.

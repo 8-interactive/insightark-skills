@@ -10,7 +10,7 @@
 
 It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
 
-Credentials are managed securely through the platform's native keychain on Claude Code, or via an environment config file on Codex. A built-in health check runs automatically at session start to surface credential issues early.
+Credentials are managed securely through the platform's native keychain on Claude Code, OAuth Connect on Codex / ChatGPT desktop, or via an environment config file as fallback. A built-in health check runs automatically at session start to surface credential issues early.
 
 ## Plugin Install (Claude Code)
 
@@ -66,39 +66,44 @@ Tokens expire after six months. Never commit tokens or share them in chat.
 
 ---
 
-## Plugin Install (Codex)
+## Plugin Install (Codex / ChatGPT desktop)
 
-### 1. Add marketplace and install
+**Requires Codex CLI / ChatGPT desktop Codex ≥ 0.144.2** (supports plugin-baked `oauth.client_id`). Codex uses a dedicated MCP manifest (`.codex-plugin/mcp.json`); Claude keeps shared root `.mcp.json` with SessionToken — do not copy Codex OAuth into Claude’s file.
+
+### 1. App-first (ChatGPT desktop)
+
+1. Open **Plugins** / marketplace → install **insightark-skills** (staging or production channel matching your Console).
+2. When prompted, complete **Connect** / Sign in (browser authorize + consent). If Connect does not open on install, open the plugin / MCP settings and start Connect, or use CLI fallback below.
+3. Smoke: ask the agent to call `auth_me` (and `credits_usage` with a known `orgId` if needed).
+
+### 2. CLI marketplace install
 
 ```bash
 codex plugin marketplace add 8-interactive/insightark-skills
-codex plugin install insightark-skills@insightark-skills
+codex plugin add insightark-skills@insightark-skills
 ```
 
-### 2. Configure credentials
+Primary auth is **OAuth** with baked `client_id=insightark-codex` and the channel MCP URL. You should **not** need to paste `S8_SESSION_TOKEN` for the happy path.
 
-**OAuth (when server `oauth.enabled=true`):** static client id `insightark-codex` (see `MCP_CLIENT_SETUP.md`). Host Install alone may not open Connect — use the client MCP login flow when available.
-
-**Token fallback:** The Codex plugin installs InsightArk workflow Skills. Register the MCP once with the bundled secure setup command; it prompts for the session token without echoing it and writes the `insightark` MCP registration to `~/.codex/config.toml`:
+If Connect did not complete after install:
 
 ```bash
-./setup-env.sh --write-client-configs
+codex mcp login insightark
 ```
 
-Restart Codex, then verify the registration:
+Do **not** re-run `codex mcp add --url … --oauth-client-id …` when the plugin already registered `insightark`.
+
+Verify:
 
 ```bash
 codex mcp list
 ```
 
-`insightark` should be enabled. `Auth: Unsupported` is expected during this token-based transition because InsightArk uses the `_SessionToken` header, not Codex OAuth.
+`insightark` should show the hosted URL and OAuth client (not a `_SessionToken` header as primary).
 
-| Variable           | Description                                  |
-| ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
-| `S8_API_URL`       | Optional override in `.insightark.env` only (default URL comes from release channel) |
+**Token fallback (optional):** `./setup-env.sh --write-client-configs` can still write a SessionToken-based `~/.codex/config.toml` entry. Prefer OAuth; remove duplicate manual `mcp_servers.insightark` entries if both exist (see `MCP_CLIENT_SETUP.md`).
 
-### Session token
+### Session token (Claude / fallback only)
 
 1. Console → **Account Settings → InsightArk MCP**
 2. Create a token (shown **once**)
@@ -223,7 +228,7 @@ Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SET
 
 內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
 
-憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex 則透過環境設定檔管理。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
+憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex / ChatGPT desktop 以 OAuth Connect 為主（亦可退回環境設定檔）。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
 
 ## Plugin 安裝（Claude Code）
 
@@ -279,37 +284,44 @@ Token 有效期六個月，請勿提交至版本控制或在對話中分享。
 
 ---
 
-## Plugin 安裝（Codex）
+## Plugin 安裝（Codex / ChatGPT desktop）
 
-### 1. 加入 Marketplace 並安裝
+**需要 Codex CLI / ChatGPT desktop Codex ≥ 0.144.2**（支援 plugin 內建 `oauth.client_id`）。Codex 使用專用 MCP manifest（`.codex-plugin/mcp.json`）；Claude 維持共用 root `.mcp.json`（SessionToken）— 不要把 Codex OAuth 寫進 Claude 的檔案。
+
+### 1. App 優先（ChatGPT desktop）
+
+1. 開啟 **Plugins** / marketplace → 安裝 **insightark-skills**（channel 需對應你的 Console 環境）。
+2. 依提示完成 **Connect** / 登入（瀏覽器 authorize + consent）。若安裝時未自動開啟 Connect，請到 plugin / MCP 設定啟動，或使用下方 CLI fallback。
+3. 煙霧測試：請 agent 呼叫 `auth_me`（必要時再呼叫 `credits_usage` 並帶入 `orgId`）。
+
+### 2. CLI marketplace 安裝
 
 ```bash
 codex plugin marketplace add 8-interactive/insightark-skills
-codex plugin install insightark-skills@insightark-skills
+codex plugin add insightark-skills@insightark-skills
 ```
 
-### 2. 設定憑證
+主要驗證方式為 **OAuth**（內建 `client_id=insightark-codex` 與 channel MCP URL）。Happy path **不需要**貼上 `S8_SESSION_TOKEN`。
 
-Codex plugin 會安裝 InsightArk workflow Skills。再執行一次內建的安全設定指令註冊 MCP；它會以不回顯方式要求輸入 session token，並將 `insightark` MCP 寫入 `~/.codex/config.toml`：
+若安裝後尚未完成 Connect：
 
 ```bash
-./setup-env.sh --write-client-configs
+codex mcp login insightark
 ```
 
-重新啟動 Codex 後，執行下列指令確認：
+plugin 已註冊 `insightark` 時，**不要**再跑 `codex mcp add --url … --oauth-client-id …`。
+
+確認：
 
 ```bash
 codex mcp list
 ```
 
-`insightark` 應為 enabled。這個 token 過渡期若顯示 `Auth: Unsupported` 屬於預期行為，因為 InsightArk 使用 `_SessionToken` header，而不是 Codex OAuth。
+`insightark` 應顯示 hosted URL 與 OAuth client（不是以 `_SessionToken` header 為主）。
 
-| 變數               | 說明                                         |
-| ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
-| `S8_API_URL`       | 僅於 `.insightark.env` 可選覆寫（預設 URL 依 release channel） |
+**Token 後備（可選）：** `./setup-env.sh --write-client-configs` 仍可寫入 SessionToken 版 `~/.codex/config.toml`。請優先使用 OAuth；若同時存在手動與 plugin 註冊，請移除重複項目（見 `MCP_CLIENT_SETUP.md`）。
 
-### Session Token 取得方式
+### Session Token（僅 Claude / 後備）
 
 1. Console → **Account Settings → InsightArk MCP**
 2. 建立 Token（**僅顯示一次**）

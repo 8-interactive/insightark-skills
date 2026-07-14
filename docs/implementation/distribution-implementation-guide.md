@@ -28,6 +28,7 @@ Use one public repository with multiple platform-specific metadata layers.
 .
 ├── skills/                          # Canonical Agent Skills payload
 ├── .codex-plugin/plugin.json        # Codex plugin manifest
+├── .codex-plugin/mcp.json           # Codex OAuth MCP bake (not Claude SessionToken)
 ├── .agents/plugins/marketplace.json # Codex repo marketplace catalog
 ├── .claude-plugin/plugin.json       # Claude plugin manifest
 ├── .claude-plugin/marketplace.json  # Claude marketplace catalog

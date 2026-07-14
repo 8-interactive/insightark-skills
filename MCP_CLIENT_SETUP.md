@@ -7,9 +7,19 @@ The MCP server is hosted by Super 8 Studio. Customers do not install a server lo
 **Auth (preferred when OAuth is enabled on the server):** OAuth 2.1 + PKCE browser login with static client ids (`insightark-cursor`, `insightark-claude-code`, `insightark-codex`).
 **Auth (fallback / always supported):** InsightArk MCP `_SessionToken` from Console.
 
-**Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests (`.mcp.json` / `mcp.json`). Prefer OAuth when the host supports it; otherwise configure `S8_SESSION_TOKEN`. Manual client config below is the **fallback** when plugin-native MCP wiring is unavailable.
+**Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests.
 
-**Important:** Installing a plugin does **not** guarantee the host will open an OAuth Connect UI automatically (especially Codex Desktop). After install you may still need `mcp login` / host MCP settings / token paste.
+| Host | MCP manifest | Primary auth |
+| --- | --- | --- |
+| Claude Code | root `.mcp.json` | `S8_SESSION_TOKEN` / `_SessionToken` |
+| Codex / ChatGPT desktop | `.codex-plugin/mcp.json` (plugin `mcpServers: ./mcp.json`) | OAuth `client_id=insightark-codex` |
+| Cursor | root `mcp.json` | `_SessionToken` (OAuth bake deferred) |
+
+**Codex minimum:** CLI / ChatGPT desktop Codex **≥ 0.144.2** for plugin-baked `oauth.client_id`.
+
+**Important:** Installing a plugin does **not** always auto-open OAuth Connect (especially ChatGPT desktop). After install you may still need in-app Connect or `codex mcp login insightark`. Do not invent a second `mcp add` if the plugin already registered `insightark`.
+
+**Duplicate registration:** If both a plugin OAuth `insightark` and a legacy SessionToken / manual `mcp_servers.insightark` exist, prefer OAuth and remove or disable the duplicate. `doctor.sh` warns when both modes are present under `CODEX_HOME`.
 
 ## Access Requirements
 
@@ -40,13 +50,30 @@ Static clients (no Dynamic Client Registration in MVP):
 | --- | --- | --- |
 | Cursor | `insightark-cursor` | `http://localhost:8787/callback`, Cursor Agents callback, legacy `cursor://…` |
 | Claude Code | `insightark-claude-code` | Prefer `--callback-port 3118` → `http://localhost:3118/callback` |
-| Codex | `insightark-codex` | `codex://oauthandmcp/callback` or loopback `http://127.0.0.1:<port>/callback[/<id>]` (Codex CLI appends a callback id) |
+| Codex | `insightark-codex` | **CLI (verified):** `codex://oauthandmcp/callback`; loopback `http://127.0.0.1:<port>/callback[/<id>]` / `http://localhost:<port>/callback[/<id>]` (`path_prefix`). **ChatGPT desktop App Connect:** capture the authorize `redirect_uri` during GUI E2E and confirm it is allowlisted before sign-off — do not assume CLI-only URIs cover App (see below). |
 
 Scopes: `insightark-mcp:read`, `insightark-mcp:write` (request both for full agent use).
 
 **SSO / Console sign-in:** Organizations with enforced SSO cannot use the API password form. The authorize page sets a short-lived HttpOnly handoff cookie and links to Console login with `redirect={api}/mcp/oauth/handoff/resume`. After Console SSO, the Console SPA **must** call `POST /mcp/oauth/handoff/bind` with the user's `_SessionToken` (and `credentials: 'include'` so the handoff cookie is sent) before redirecting the browser to `/mcp/oauth/handoff/resume`. Bound handoffs are consumed **only** on `/mcp/oauth/handoff/resume` (not on `/mcp/oauth/authorize`). Console allows only the build's `NEXT_API_URL` origin by default; local/stage extras via `VITE_MCP_OAUTH_HANDOFF_EXTRA_ORIGINS`. No `_SessionToken` or `user_id` is placed in URLs or HTML forms.
 
 Residual risk: localhost callbacks can be abused by other local processes even with static `client_id`s; consent shows Super8-configured display names only.
+
+### ChatGPT desktop redirect_uri gate
+
+Before marking App GUI OAuth complete:
+
+1. Start Connect from ChatGPT desktop for plugin-registered `insightark`.
+2. Capture the authorize request’s exact `redirect_uri` query value(s).
+3. Confirm each value matches `insightark-codex` `redirect_uris` or `redirect_uri_patterns` in server config; if not, update config + `mcp_oauth` redirect tests and redeploy staging.
+4. Record verified App URI(s) here after measurement:
+
+| Source | `redirect_uri` | Status |
+| --- | --- | --- |
+| Codex CLI | `codex://oauthandmcp/callback` | Verified |
+| Codex CLI loopback | `http://127.0.0.1:<port>/callback[/<id>]` | Verified (path_prefix) |
+| ChatGPT desktop Connect | _(pending GUI capture)_ | **Blocking for GUI sign-off** |
+
+Desktop Connect variance: Install with `policy.authentication: ON_INSTALL` may still defer the browser until Connect / first tool use — document the actual UI label during staging GUI E2E.
 
 ## Endpoints
 
@@ -97,38 +124,32 @@ claude mcp remove insightark
 
 For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
 
-## Codex (plugin-first)
+## Codex / ChatGPT desktop (plugin-first, OAuth)
 
-Install from marketplace. The Codex plugin references `./.mcp.json` with baked URL and `${user_config.S8_SESSION_TOKEN}` for the `_SessionToken` header.
+Install from marketplace (see `README.md`). The Codex plugin points at **`.codex-plugin/mcp.json`** (not Claude’s root `.mcp.json`) with the channel-baked MCP URL and:
 
-If plugin MCP token substitution does not work on your Codex build, run from the plugin checkout:
+```json
+"oauth": { "client_id": "insightark-codex" }
+```
+
+Happy path:
+
+1. Install plugin (App Plugins or `codex plugin add`).
+2. Complete Connect / Sign in, **or** `codex mcp login insightark` if Connect did not start.
+3. Smoke `auth_me` — **without** a new `codex mcp add --oauth-client-id …` when the plugin already registered the server.
+
+**Clean-home validation tip:** prove marketplace wiring with a fresh `CODEX_HOME` so a leftover top-level `[mcp_servers.insightark]` from a prior manual `mcp add` cannot false-pass.
+
+**Token fallback (optional):** If OAuth is unavailable, `./setup-env.sh --write-client-configs` can still upsert a SessionToken-based entry in `~/.codex/config.toml`. Prefer removing token-mode duplicates once OAuth works.
+
+**Manual operator add** (not the customer happy path):
 
 ```bash
-./setup-env.sh --session-token "r:..." --write-client-configs
+codex mcp add insightark --url https://api-next.no8.io/mcp --oauth-client-id insightark-codex
+codex mcp login insightark
 ```
 
-This upserts `mcp_servers.insightark` in `~/.codex/config.toml` while preserving unrelated servers and top-level settings.
-
-**Manual fallback** — edit `~/.codex/config.toml` directly:
-
-If your Codex build supports remote HTTP MCP directly, configure the hosted URL and `_SessionToken` header using the current Codex MCP schema. If it only supports stdio MCP servers, use `mcp-remote` as a bridge:
-
-```toml
-[mcp_servers.insightark]
-command = "sh"
-args = [
-  "-lc",
-  "npx -y mcp-remote https://api-next.no8.io/mcp --header \"_SessionToken: $S8_SESSION_TOKEN\""
-]
-startup_timeout_sec = 120
-
-[mcp_servers.insightark.env]
-S8_SESSION_TOKEN = "r:replace-with-insightark-mcp-token"
-```
-
-Restart Codex after editing the file. Then ask Codex to list or use the `insightark` MCP tools.
-
-For staging, replace the URL with `https://stage-api-next.no8.io/mcp`.
+For staging, use `https://stage-api-next.no8.io/mcp`.
 
 ## Cursor (plugin + setup-env)
 
@@ -207,5 +228,7 @@ Current workflow skills:
 | InsightArk MCP disabled for the organization | Enable InsightArk MCP for the organization before using MCP. |
 | Rate limit exceeded | MCP quota. Wait for refill or reduce request volume. |
 | Tool exists but requires `orgId` | Pass `orgId` in every org-scoped tool call. |
-| Plugin installed but MCP missing | Run `claude plugin details` (Claude) or `./setup-env.sh --write-client-configs` (Cursor/Codex fallback). |
+| Plugin installed but MCP missing | Claude: `claude plugin details`. Codex: confirm `.codex-plugin/mcp.json` OAuth bake + Connect / `codex mcp login insightark`. Cursor: `./setup-env.sh --write-client-configs`. |
+| Codex tools fail / wrong auth | Remove duplicate `mcp_servers.insightark` (token vs OAuth). Prefer plugin OAuth registration. |
+| ChatGPT desktop OAuth fails at callback | Capture authorize `redirect_uri`; ensure `insightark-codex` allowlist includes it (CLI success ≠ App URI). |
 | Wrong environment URL | Staging marketplace/tarball bakes `stage-api-next`; production bakes `api-next`. |

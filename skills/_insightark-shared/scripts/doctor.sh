@@ -127,7 +127,28 @@ s8_mcp_tool_text_json() {
   jq -r '.result.content[0].text // empty' "$response_file"
 }
 
+warn_codex_duplicate_insightark() {
+  local cfg="${CODEX_HOME:-${HOME:-}/.codex}/config.toml"
+  local has_oauth=0 has_token=0
+  if [ ! -f "$cfg" ]; then
+    return 0
+  fi
+  if grep -Eq '^[[:space:]]*\[mcp_servers\.insightark\.oauth\]' "$cfg" \
+    || grep -Eq '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*"insightark-codex"' "$cfg"; then
+    has_oauth=1
+  fi
+  if grep -Eq '_SessionToken|S8_SESSION_TOKEN' "$cfg" && grep -Eq 'mcp_servers\.insightark' "$cfg"; then
+    has_token=1
+  fi
+  if [ "$has_oauth" -eq 1 ] && [ "$has_token" -eq 1 ]; then
+    printf 'WARNING: Codex config appears to have both OAuth and SessionToken for insightark.\n' >&2
+    printf 'Prefer the plugin OAuth registration; remove the duplicate token-based mcp_servers.insightark entry.\n' >&2
+    printf 'See MCP_CLIENT_SETUP.md (duplicate registration).\n' >&2
+  fi
+}
+
 s8_load_env_files || true
+warn_codex_duplicate_insightark
 if [ -z "${S8_API_URL:-}" ]; then
   S8_API_URL='https://api-next.no8.io'
 fi

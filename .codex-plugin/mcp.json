@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "insightark": {
+      "type": "http",
+      "url": "https://stage-api-next.no8.io/mcp",
+      "oauth": {
+        "client_id": "insightark-codex"
+      }
+    }
+  }
+}
