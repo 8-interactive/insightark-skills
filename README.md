@@ -77,7 +77,9 @@ codex plugin install insightark-skills@insightark-skills
 
 ### 2. Configure credentials
 
-The Codex plugin installs InsightArk workflow Skills. Register the MCP once with the bundled secure setup command; it prompts for the session token without echoing it and writes the `insightark` MCP registration to `~/.codex/config.toml`:
+**OAuth (when server `oauth.enabled=true`):** static client id `insightark-codex` (see `MCP_CLIENT_SETUP.md`). Host Install alone may not open Connect — use the client MCP login flow when available.
+
+**Token fallback:** The Codex plugin installs InsightArk workflow Skills. Register the MCP once with the bundled secure setup command; it prompts for the session token without echoing it and writes the `insightark` MCP registration to `~/.codex/config.toml`:
 
 ```bash
 ./setup-env.sh --write-client-configs
@@ -113,7 +115,9 @@ Install the plugin from the [GitHub mirror](https://github.com/8-interactive/ins
 
 ### 2. Configure credentials and MCP
 
-Run `setup-env.sh` after install. Use `--write-client-configs` to upsert `mcpServers.insightark` in `~/.cursor/mcp.json` with the baked hosted URL and your token:
+**OAuth (when enabled):** static client id `insightark-cursor` with redirects documented in `MCP_CLIENT_SETUP.md` (e.g. `http://localhost:8787/callback`). You can set `auth.CLIENT_ID` in Cursor MCP config when using static OAuth.
+
+**Token fallback:** Run `setup-env.sh` after install. Use `--write-client-configs` to upsert `mcpServers.insightark` in `~/.cursor/mcp.json` with the baked hosted URL and your token:
 
 ```bash
 ./setup-env.sh

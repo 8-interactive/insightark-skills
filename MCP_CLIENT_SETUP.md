@@ -2,21 +2,49 @@
 
 This guide connects an AI agent to the hosted InsightArk MCP server.
 
-The MCP server is hosted by Super 8 Studio. Customers do not install a server locally; they configure their MCP client to call the hosted endpoint with a InsightArk MCP `_SessionToken`.
+The MCP server is hosted by Super 8 Studio. Customers do not install a server locally; they configure their MCP client to call the hosted endpoint.
 
-**Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests (`.mcp.json` / `mcp.json`). Install the plugin, configure `S8_SESSION_TOKEN`, and confirm MCP is connected. Manual client config below is the **fallback** when plugin-native MCP wiring is unavailable.
+**Auth (preferred when OAuth is enabled on the server):** OAuth 2.1 + PKCE browser login with static client ids (`insightark-cursor`, `insightark-claude-code`, `insightark-codex`).
+**Auth (fallback / always supported):** InsightArk MCP `_SessionToken` from Console.
+
+**Plugin-first (v2.0.2+):** Claude Code, Codex, and Cursor plugins ship workflow skills plus baked MCP manifests (`.mcp.json` / `mcp.json`). Prefer OAuth when the host supports it; otherwise configure `S8_SESSION_TOKEN`. Manual client config below is the **fallback** when plugin-native MCP wiring is unavailable.
+
+**Important:** Installing a plugin does **not** guarantee the host will open an OAuth Connect UI automatically (especially Codex Desktop). After install you may still need `mcp login` / host MCP settings / token paste.
 
 ## Access Requirements
 
-MCP uses the InsightArk MCP access model (owner/admin token + org scope).
+MCP uses the InsightArk MCP access model (owner/admin identity + org scope).
 
 - The organization must have InsightArk MCP enabled.
-- The token owner must be the organization owner or an InsightArk admin.
-- The token must be created from Console -> Account Settings → InsightArk MCP.
+- The authenticated user must be the organization owner or an InsightArk admin.
+- For token paste: create a token from Console → Account Settings → InsightArk MCP.
 - Every org-scoped tool call must include `orgId`.
 - MCP uses the org InsightArk MCP monthly credit and RPM quota.
 
 Tokens are shown once when created. Do not commit tokens or paste them into shared chats.
+
+## OAuth (when `insightark_mcp.oauth.enabled=true`)
+
+Discovery:
+
+| Document | Path |
+| --- | --- |
+| Protected Resource Metadata | `/.well-known/oauth-protected-resource` |
+| Authorization Server Metadata | `/.well-known/oauth-authorization-server` |
+
+Static clients (no Dynamic Client Registration in MVP):
+
+| Client | `client_id` | Primary redirect notes |
+| --- | --- | --- |
+| Cursor | `insightark-cursor` | `http://localhost:8787/callback`, Cursor Agents callback, legacy `cursor://…` |
+| Claude Code | `insightark-claude-code` | Prefer `--callback-port 3118` → `http://localhost:3118/callback` |
+| Codex | `insightark-codex` | `codex://oauthandmcp/callback` or documented localhost callback |
+
+Scopes: `insightark-mcp:read`, `insightark-mcp:write` (request both for full agent use).
+
+**SSO / Console sign-in:** Organizations with enforced SSO cannot use the API password form. The authorize page sets a short-lived HttpOnly handoff cookie and links to Console login with `redirect={api}/oauth/handoff/resume`. After Console SSO, the Console SPA **must** call `POST /oauth/handoff/bind` with the user's `_SessionToken` (and `credentials: 'include'` so the handoff cookie is sent) before redirecting the browser to `/oauth/handoff/resume`. Bound handoffs are consumed **only** on `/oauth/handoff/resume` (not on `/oauth/authorize`). Console allows only the build's `NEXT_API_URL` origin by default; local/stage extras via `VITE_MCP_OAUTH_HANDOFF_EXTRA_ORIGINS`. No `_SessionToken` or `user_id` is placed in URLs or HTML forms.
+
+Residual risk: localhost callbacks can be abused by other local processes even with static `client_id`s; consent shows Super8-configured display names only.
 
 ## Endpoints
 
