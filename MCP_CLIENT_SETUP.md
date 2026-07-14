@@ -32,7 +32,7 @@ Discovery:
 | Protected Resource Metadata | `/.well-known/oauth-protected-resource` |
 | Authorization Server Metadata | `/.well-known/oauth-authorization-server` |
 
-Token/revoke endpoints are `/mcp/oauth/token` and `/mcp/oauth/revoke` (not `/oauth/token`) so they coexist with Super8's OIDC IdP mount under `/oauth`. Authorize remains `/oauth/authorize`. Clients must use discovery metadata (or plugin-baked URLs), not hard-coded `/oauth/token`.
+All MCP OAuth endpoints live under `/mcp/oauth/*` (`authorize`, `handoff/*`, `token`, `revoke`) so they coexist with Super8's OIDC IdP mount under `/oauth`. Clients must use discovery metadata (or plugin-baked URLs), not hard-coded paths.
 
 Static clients (no Dynamic Client Registration in MVP):
 
@@ -44,7 +44,7 @@ Static clients (no Dynamic Client Registration in MVP):
 
 Scopes: `insightark-mcp:read`, `insightark-mcp:write` (request both for full agent use).
 
-**SSO / Console sign-in:** Organizations with enforced SSO cannot use the API password form. The authorize page sets a short-lived HttpOnly handoff cookie and links to Console login with `redirect={api}/oauth/handoff/resume`. After Console SSO, the Console SPA **must** call `POST /oauth/handoff/bind` with the user's `_SessionToken` (and `credentials: 'include'` so the handoff cookie is sent) before redirecting the browser to `/oauth/handoff/resume`. Bound handoffs are consumed **only** on `/oauth/handoff/resume` (not on `/oauth/authorize`). Console allows only the build's `NEXT_API_URL` origin by default; local/stage extras via `VITE_MCP_OAUTH_HANDOFF_EXTRA_ORIGINS`. No `_SessionToken` or `user_id` is placed in URLs or HTML forms.
+**SSO / Console sign-in:** Organizations with enforced SSO cannot use the API password form. The authorize page sets a short-lived HttpOnly handoff cookie and links to Console login with `redirect={api}/mcp/oauth/handoff/resume`. After Console SSO, the Console SPA **must** call `POST /mcp/oauth/handoff/bind` with the user's `_SessionToken` (and `credentials: 'include'` so the handoff cookie is sent) before redirecting the browser to `/mcp/oauth/handoff/resume`. Bound handoffs are consumed **only** on `/mcp/oauth/handoff/resume` (not on `/mcp/oauth/authorize`). Console allows only the build's `NEXT_API_URL` origin by default; local/stage extras via `VITE_MCP_OAUTH_HANDOFF_EXTRA_ORIGINS`. No `_SessionToken` or `user_id` is placed in URLs or HTML forms.
 
 Residual risk: localhost callbacks can be abused by other local processes even with static `client_id`s; consent shows Super8-configured display names only.
 
