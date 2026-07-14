@@ -38,7 +38,7 @@ Static clients (no Dynamic Client Registration in MVP):
 | --- | --- | --- |
 | Cursor | `insightark-cursor` | `http://localhost:8787/callback`, Cursor Agents callback, legacy `cursor://…` |
 | Claude Code | `insightark-claude-code` | Prefer `--callback-port 3118` → `http://localhost:3118/callback` |
-| Codex | `insightark-codex` | `codex://oauthandmcp/callback` or documented localhost callback |
+| Codex | `insightark-codex` | `codex://oauthandmcp/callback` or loopback `http://127.0.0.1:<port>/callback[/<id>]` (Codex CLI appends a callback id) |
 
 Scopes: `insightark-mcp:read`, `insightark-mcp:write` (request both for full agent use).
 
