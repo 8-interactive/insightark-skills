@@ -1,32 +1,21 @@
-# Security Policy
+# Security
+
+## Authentication
+
+Production InsightArk plugins authenticate with host-managed MCP OAuth only. The packaged manifests supply a static public client id per host and a channel-baked MCP URL. Customers do not paste SessionTokens, write local credential files, or export OAuth access/refresh tokens from the host credential store.
+
+Server-side `/mcp` may still accept `_SessionToken` for non-plugin consumers. That transport compatibility is not part of the marketplace plugin customer contract.
+
+## Credentials and revocation
+
+- OAuth access and refresh tokens are stored by the host.
+- Revoke a connected app from SUPER 8 Console → Connected Apps when a device or integration should lose access.
+- Host logout / clear-auth clears local credentials; marketplace plugin removal removes the package. Do not assume one action implies the other unless verified for that host version.
+
+## Release integrity
+
+Customer release trees contain only allowlisted plugin metadata, MCP manifests, skills, assets, and customer docs. Release/CI tooling, contributor docs, and hooks are excluded from the published package.
 
 ## Reporting
 
-Report suspected security issues through the private SUPER 8 Studio engineering
-support channel or the approved internal incident process. Do not open public
-issues with tokens, customer data, request logs, or exploit details.
-
-## Token Handling
-
-- Never commit `.insightark.env`, `_SessionToken`, or `S8_SESSION_TOKEN`.
-- Never paste InsightArk MCP tokens into chat, email, screenshots, or tickets.
-- `./setup-env.sh` writes credential files (project `.insightark.env`, user
-  `~/.insightark.env`) with mode `600`.
-- `install.sh` writes the install registry (`~/.insightark.config`) with mode
-  `600`. The registry records install targets and layout only — never a token.
-- Rotate a token immediately if it may have been exposed.
-
-## Skill Behavior
-
-Skills must not ask for passwords, TOTP codes, browser session cookies, or any
-credential other than a SUPER 8 Studio InsightArk MCP token. Skills read
-credentials only through the shared resolver
-(`skills/_insightark-shared/scripts/lib/env.sh`), which checks process
-environment variables, then `.insightark.env` (project, then skills-directory,
-then `~/.insightark.env`) in that order.
-
-## Destructive Actions
-
-Skills that send messages, mutate customer data, or trigger broadcasts /
-marketing-automation runs must confirm intent with the user before calling a
-write endpoint. Read-only investigation must never require confirmation.
+Report security issues through your SUPER 8 Studio support channel.

@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-ma-automation
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
 
@@ -76,7 +76,7 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 ## Prerequisite knowledge (summary)
 
 - **Graph**: `nodes[]` + `edges[]` are the editor graph; `transformToProcedure` derives runtime `trigger` / `start` / `steps` from edges. Missing `message.data` (and similar) can break the console editor.
-- **Message**: `text/plain` needs `data.content`; `application/x-template` needs `data.templateType` and related fields.
+- **Message**: `text/plain` needs `data.content`. For `application/x-template` or other rich LINE payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` rather than duplicating schema here.
 
 ## Example JSON (shape only)
 
@@ -149,3 +149,4 @@ The block below illustrates **structure only**. **Do not** copy `orgId`, root `t
 - Routes require organization owner/admin; **business fields in the body must come from explicit customer input**, not silent presets.
 - If you change the payload after customer sign-off, get renewed approval when business meaning changes.
 - Do not paste internal Mongo procedure documents; use only the public Developer request shape.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

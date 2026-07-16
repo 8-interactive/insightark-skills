@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-investigator
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
 
 ## MCP Tools
 
@@ -32,4 +32,5 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 - Do not call write endpoints (`messaging_customer_send_message`, `broadcast_create`, CRM mutations, MA mutations).
 - Do not collect credentials or attempt login bootstrap.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.
 - Do not depend on repository-local code or hidden internal fields.

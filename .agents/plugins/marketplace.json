@@ -1,11 +1,13 @@
 {
   "name": "insightark-skills",
+  "version": "2.1.0",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills"
   },
   "plugins": [
     {
       "name": "insightark-skills",
+      "version": "2.1.0",
       "source": {
         "source": "local",
         "path": "./"

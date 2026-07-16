@@ -2,8 +2,8 @@
   "mcpServers": {
     "insightark": {
       "url": "https://stage-api-next.no8.io/mcp",
-      "headers": {
-        "_SessionToken": "${S8_SESSION_TOKEN}"
+      "auth": {
+        "CLIENT_ID": "insightark-cursor"
       }
     }
   }

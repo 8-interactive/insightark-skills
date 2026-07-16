@@ -5,14 +5,14 @@
     "email": "sales@no8.io"
   },
   "description": "SUPER 8 Studio InsightArk Skills — developer API plugins for agent workflows.",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "plugins": [
     {
       "name": "insightark-skills",
       "source": "./",
       "displayName": "SUPER 8 Studio InsightArk Skills",
       "description": "SUPER 8 Studio InsightArk Skills for CRM workflows.",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "author": {
         "name": "SUPER 8 Studio",
         "url": "https://www.no8.io"

@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-customer-manager
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
 
@@ -44,3 +44,4 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 - Treat update and tag operations as explicit write actions.
 - Do not perform a write unless the target customer id and intended field or tag changes are explicit.
 - Stay within the published public customer schema and developer API routes.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

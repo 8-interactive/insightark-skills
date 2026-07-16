@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-conversations
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument.
 
 ## MCP Tools
 
@@ -28,3 +28,4 @@ Optional arguments: `customerId`, `platform`, `inbox` (`unassigned`, `done`, `pr
 - Stay within the published read-side developer API surface.
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance). Use `messaging_message_search` when the user asks for keyword evidence across messages.
 - Do not assume a conversation id until it is returned by the API.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

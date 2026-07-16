@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-messaging
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
 
@@ -32,6 +32,10 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
    - **Send** — build payload, optionally `media_upload_url`, then `messaging_message_preview` → confirm → `messaging_customer_send_message` by default for rich / quickReply batches; skip preview only when the user explicitly asks
 4. Return the MCP response as-is.
 
+## Rich / template authoring (load on demand)
+
+When building `application/x-template` or other rich LINE payloads, load `references/TEMPLATE_GUIDELINES.md` and start from `references/examples/messages/`. Ordinary text/image send paths do not need that reference. Broadcast and MA skills hand rich message construction here rather than duplicating schema.
+
 ## Example requests
 
 - `Validate my InsightArk MCP session and show conversations in org org_demo_001 from the past 24 hours.`
@@ -44,3 +48,4 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 - Treat send as a write operation; confirm inferred customer id or content before dispatch.
 - Read operations stay within published API schemas.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

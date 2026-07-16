@@ -7,7 +7,7 @@ allowed-mcp: true
 
 # Skill: insightark-broadcast-manager
 
-This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
 
@@ -24,7 +24,7 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Create** — build payload, optionally `media_upload_url`, then `messaging_message_preview` → confirm → `broadcast_create` by default for rich / quickReply batches; skip preview only when the user explicitly asks
+   - **Create** — for rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`, then `messaging_message_preview` → confirm → `broadcast_create` by default for rich / quickReply batches; skip preview only when the user explicitly asks
    - **Get** — `broadcast_get`; compare `options.customerNum` to running `success` / `fail`
    - **List** — `broadcast_list`, optionally filtered by `status`
 4. Return the MCP response as-is.
@@ -40,3 +40,4 @@ This skill uses the InsightArk MCP server. Authentication uses `_SessionToken`. 
 
 - Treat broadcast create as a write operation at scale; confirm inferred platform, recipients, or content.
 - One platform per broadcast task; split multi-platform audiences.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

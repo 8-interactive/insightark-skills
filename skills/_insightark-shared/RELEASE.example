@@ -1,7 +1,0 @@
-# Example only — real RELEASE is injected when CI publishes the tarball.
-# Local git checkouts omit this file; ./setup-env.sh then prompts for API environment.
-
-channel=staging
-api_url=https://stage-api-next.no8.io
-console_url=https://stage-console.no8.io
-built_from_branch=staging

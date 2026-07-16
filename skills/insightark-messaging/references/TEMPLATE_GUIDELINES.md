@@ -1,8 +1,10 @@
 # Super 8 Studio — LINE template message guidelines
 
-Agents **must** follow these shapes when authoring `application/x-template` messages. Copy from `examples/messages/*.json` and edit — do not invent fields from other chat platforms.
+Agents **must** follow these shapes when authoring `application/x-template` messages. Copy from `references/examples/messages/*.json` and edit — do not invent fields from other chat platforms.
 
-Run `messages_validate.sh --messages-file PATH --platform line` before preview or send. The API enforces the same rules (mixed carousel ratios → `400 error/invalid-carousel-aspect-ratio`).
+Load this reference only when building rich / `application/x-template` payloads. Ordinary text/image send workflows do not need it.
+
+Validate shape against the tables below, then call MCP `messaging_message_preview` before send or broadcast. The API enforces the same rules (mixed carousel ratios → `400 error/invalid-carousel-aspect-ratio`).
 
 ## General
 
@@ -10,7 +12,7 @@ Run `messages_validate.sh --messages-file PATH --platform line` before preview o
 |------|--------|
 | Wrapper | `{ "platform": "line", "messages": [ ... ], "quickReply": [...] }` |
 | Template message | `contentType: "application/x-template"`, `data.templateType` required |
-| Media URLs | Prefer `https://assets.no8.io/...` from `media_upload_url.sh`; external HTTPS URLs may work but are not guaranteed |
+| Media URLs | Prefer `https://assets.no8.io/...` from MCP `media_upload_url`; external HTTPS URLs may work but are not guaranteed |
 | Variables | Customer display name in `text/plain` `content` or template `altText`: use EJS `<%= name %>` (same as Super 8 Console). **Do not use `{{name}}`** — it is sent literally. Preview: set `sampleCustomer.displayName` or `originalDisplayName`. Send/broadcast: uses each recipient's `originalDisplayName` (falls back to `displayName`). |
 | LINE-only types | `carousel`, `imagemap` — rejected on facebook / instagram / whatsapp |
 
@@ -113,7 +115,7 @@ Run `messages_validate.sh --messages-file PATH --platform line` before preview o
 
 **Use when:** one image with multiple rectangular tap regions (menu, map-style layout).
 
-See `examples/messages/imagemap-line.json`. Typically **one** element with `size`, `aspectRatio`, `messageTemplateType`, and multiple `buttons` with `%` coordinates.
+See `references/examples/messages/imagemap-line.json`. Typically **one** element with `size`, `aspectRatio`, `messageTemplateType`, and multiple `buttons` with `%` coordinates.
 
 | Rule | Detail |
 |------|--------|
@@ -125,13 +127,13 @@ See `examples/messages/imagemap-line.json`. Typically **one** element with `size
 
 ## `confirm` — 確認型（標題 + 兩個按鈕）
 
-See `examples/messages/confirm-line.json`. One element, `title`, exactly two `postback` or `url` buttons.
+See `references/examples/messages/confirm-line.json`. One element, `title`, exactly two `postback` or `url` buttons.
 
 ---
 
 ## `richvideo` — 影片訊息
 
-See `examples/messages/richvideo-line.json`. One element with `videoUrl`, `previewImageUrl`, `aspectRatio`, optional `buttons`.
+See `references/examples/messages/richvideo-line.json`. One element with `videoUrl`, `previewImageUrl`, `aspectRatio`, optional `buttons`.
 
 ---
 
@@ -144,8 +146,8 @@ Same **uniform `aspectRatio`** rule as `carousel`. Each element is a full-image 
 ## Workflow checklist (agents)
 
 1. Pick the template type from this doc — do not blend card and carousel shapes.
-2. Start from the matching file in `examples/messages/`.
-3. Upload local images via `media_upload_url.sh`; patch URLs into the scratch JSON.
-4. `messages_validate.sh --messages-file ... --platform line`
-5. `preview_create.sh` → user confirms (~4h link, 2 credits)
-6. `customer_send_message.sh` or `broadcast_create.sh` with the **same file**
+2. Start from the matching file in `references/examples/messages/`.
+3. Upload local images via MCP `media_upload_url`; patch returned HTTPS URLs into the payload.
+4. Check the payload against the tables in this reference (uniform carousel ratios, required fields).
+5. Call MCP `messaging_message_preview` → user confirms (~4h link, 2 credits).
+6. Dispatch with the **same payload** via MCP `messaging_customer_send_message` or `broadcast_create` (broadcast/MA skills hand rich authoring to this reference).
