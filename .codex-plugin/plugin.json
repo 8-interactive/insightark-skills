@@ -32,14 +32,14 @@
     "websiteURL": "https://www.no8.io",
     "privacyPolicyURL": "https://www.no8.io/privacy",
     "termsOfServiceURL": "https://www.no8.io/terms",
-    "brandColor": "#5E00FF",
+    "brandColor": "#FF6A00",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "Use insightark-session to validate my InsightArk MCP setup.",
-      "Use insightark-investigator to investigate recent conversations.",
-      "Use insightark-customer-manager to search and update customers.",
-      "Use insightark-broadcast-manager to create and monitor a broadcast."
+      "使用 insightark-session 驗證我的 InsightArk MCP 設定。確認可用後，請摘要你能幫我做哪些 InsightArk 工作流程與操作。",
+      "使用 insightark-investigator 調查最近的對話。",
+      "使用 insightark-customer-manager 搜尋與更新客戶。",
+      "使用 insightark-broadcast-manager 建立並追蹤廣播。"
     ]
   }
 }
