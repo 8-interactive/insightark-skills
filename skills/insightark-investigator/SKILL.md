@@ -34,3 +34,27 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - Do not collect credentials or attempt login bootstrap.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.
 - Do not depend on repository-local code or hidden internal fields.
+- Prefer `messaging_message_search` for analysis. Do not rebuild Excel via repeated MCP search; human downloads use Console CS export.
+- Page sizes: search／conversation_messages max 1000; conversation_list max 100.
+
+## Message search sender filters (important)
+
+Default search (omit `senderType` / `senderTypes`) returns **Customer only**. Staff `userName` / `userEmail` only appear on `_User` rows.
+
+| Goal | Args |
+|---|---|
+| Customer messages | `senderType: "Customer"` (or omit) |
+| Staff / CS replies | `senderType: "_User"` |
+| Full dialogue | `senderTypes: ["Customer", "_User"]` (one call; do not pass both `senderType` and `senderTypes`) |
+
+Prefer `senderTypes` for customer+staff so you do not pay two search credits. Narrow with `conversationId` and a small time window when possible.
+
+## Message search timeout (`error.code = message_search_timeout`)
+
+When search returns structured `message_search_timeout` (`isError: true`):
+
+1. Never blind-retry identical args (credits are still charged).
+2. Halve `startAt`/`endAt` and search sequentially; reduce `limit` if needed.
+3. Use only published filters: `keyword`, `conversationId`, `platform`, `senderType` / `senderTypes`, `senderIds`.
+4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
+5. Do not invent unsupported message-type / `contentType` filters.
