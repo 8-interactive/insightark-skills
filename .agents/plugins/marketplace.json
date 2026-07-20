@@ -2,7 +2,14 @@
   "name": "insightark-skills",
   "version": "2.1.0",
   "interface": {
-    "displayName": "SUPER 8 Studio InsightArk Skills"
+    "displayName": "SUPER 8 Studio InsightArk Skills",
+    "logo": "./assets/logo.png",
+    "defaultPrompt": [
+      "使用 insightark-session 驗證我的 InsightArk MCP 設定。確認可用後，請摘要你能幫我做哪些 InsightArk 工作流程與操作。",
+      "使用 insightark-investigator 調查最近的對話。",
+      "使用 insightark-customer-manager 搜尋與更新客戶。",
+      "使用 insightark-broadcast-manager 建立並追蹤廣播。"
+    ]
   },
   "plugins": [
     {

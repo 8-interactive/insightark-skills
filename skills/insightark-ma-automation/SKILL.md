@@ -1,6 +1,6 @@
 ---
 name: insightark-ma-automation
-description: Create, publish, pause, inspect, and manually trigger Marketing Automation procedures via InsightArk MCP (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON.
+description: Create draft Marketing Automation procedures, then publish/start, pause, inspect status, and manually trigger via InsightArk MCP (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON. Create alone does not publish.
 when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via InsightArk MCP.
 allowed-mcp: true
 ---
@@ -12,12 +12,14 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 ## MCP Tools
 
 - `ma_procedure_list` — list marketing automation procedures (requires `orgId`; optional `name`, `skip`, `limit`)
-- `ma_procedure_get` — get procedure status summary (requires `orgId`, `procedureId`)
+- `ma_procedure_get` — get procedure **status summary** only (requires `orgId`, `procedureId`); does **not** return `editor.nodes` / `editor.edges`
 - `ma_procedure_validate` — validate a journey definition without persisting (requires `orgId`, `payload`)
-- `ma_procedure_create` — create and publish a procedure (requires `orgId`, `payload`)
-- `ma_procedure_start` — publish a draft procedure (requires `orgId`, `procedureId`)
+- `ma_procedure_create` — create a **draft** procedure (requires `orgId`, `payload`); does **not** publish
+- `ma_procedure_start` — **publish/start** a draft procedure (requires `orgId`, `procedureId`)
 - `ma_procedure_pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
 - `ma_procedure_trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
+
+There is currently **no** MCP tool to fetch a full Studio graph, update an existing procedure, or clone one. Treat this skill as **create-from-fixture / create-from-customer-input**, not retrieve→modify→reuse of existing Studio journeys.
 
 ### Locate journeys by customer-provided name
 
@@ -65,22 +67,55 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 ## Mandatory agent workflow
 
 1. Run a **gap check** against this checklist; any gap → **questions only, no MCP calls**.
-2. After the customer fills gaps, write the JSON payload (values only from the customer plus meaningless id/coordinates for graph wiring).
+2. After the customer fills gaps, assemble the JSON payload:
+   - Values only from the customer, plus wiring-only ids/positions.
+   - **If the journey needs template card button branching (or tag trigger + button branch):** **clone** `references/fixtures/ma-tag-trigger-click-branch-skeleton.json` first, then replace customer fields. Do **not** invent a condition DSL.
 3. Show a compact final field table and get explicit customer sign-off.
-4. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON.
-5. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload`; if HTTP **400**, read `data.errors` and relay `path` + `message` to the customer. Cap at **three** validate-fix rounds, each change explainable to the customer.
+4. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON. See **Validate error remediation** below for graph/condition codes.
+5. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload`; if the tool returns a payload-invalid error, read `data.errors` and relay `path` + `message` to the customer. Cap at **three** validate-fix rounds, each change explainable to the customer.
 6. **Do not** copy names, times, keywords, or copy from sample JSON onto a real customer "to save time."
 
 **Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
 ## Prerequisite knowledge (summary)
 
-- **Graph**: `nodes[]` + `edges[]` are the editor graph; `transformToProcedure` derives runtime `trigger` / `start` / `steps` from edges. Missing `message.data` (and similar) can break the console editor.
+- **Graph**: `nodes[]` + `edges[]` are the editor graph; server `transformToProcedure` derives runtime `trigger` / `start` / `steps` from edges. Missing `message.data` (and similar) can break the console editor.
 - **Message**: `text/plain` needs `data.content`. For `application/x-template` or other rich LINE payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` rather than duplicating schema here.
+- **Button click branches (Studio only):** use a `group` (`data.type: "click"`) plus **one `condition` node per branch** (`click` or `n-click`). Each condition MUST have **exactly one** outgoing edge. Named `click` conditions list `data.buttons[].id` as `` `${messages[].template}_elements.${elementIndex}.buttons.${buttonIndex}` ``. You MUST set a stable client-supplied `messages[].template` on the source card **before** wiring those ids (server-generated template ids cannot be predicted). Eligible buttons exclude phone, location, and non-http(s) URL buttons. `n-click` has **no** `buttons`. `clickType: "any"` does not need named button ids / `message.template` membership.
+- **Forbidden:** `condition.data.event`, `branches`, `sourceMessageNodeId`, or one condition with multiple `sourceHandle` outgoing edges (skill-invented DSL). Validate will reject these.
 
-## Example JSON (shape only)
+## Structural fixture (clone for button branches)
 
-The block below illustrates **structure only**. **Do not** copy `orgId`, root `templateType`, schedule, `limits`, triggers, or body copy before the customer confirms each field.
+Canonical wiring: [`references/fixtures/ma-tag-trigger-click-branch-skeleton.json`](references/fixtures/ma-tag-trigger-click-branch-skeleton.json) — LINE **tag trigger** + card + `group` + named `click` / `n-click` conditions.
+
+**Structure only may be kept as-is** (node/edge topology, `clickType: "button"`, `timeType: "minute"`, `messages[].template` wiring id `tplCard001`, button id strings).
+
+### Clone MUST replace (fail-until-replaced)
+
+Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confirmed literal before `ma_procedure_validate`. Unreplaced placeholders fail validate (placeholder policy). At minimum replace:
+
+| Path | Why |
+|------|-----|
+| `orgId`, `name`, root `templateType`, `platform` | Identity / channel |
+| `enabled` | Whether journey is enabled when later published |
+| `startTime`, `endTime` | Schedule |
+| `limits.*` | Quotas |
+| `oos.*` | Off-hours policy (do not keep fixture OOS numbers) |
+| trigger `event` / `match` / `tags[]` | Tag trigger rule (add vs remove; all vs any; which tags) |
+| message `name`, `waitTime`, card title/subtitle/imageUrl | Content / delay |
+| button `title` / `data` | Customer-facing labels and postback payloads |
+| button `tags` | Optional; empty `[]` on the skeleton means "no auto-tags" wiring only — replace if the customer wants button-applied tags |
+| group `time` | Timeout seconds for n-click |
+| group `allowMulti` | Whether multiple clicks are allowed |
+| follow-up message text | Branch content |
+
+Do **not** tell the customer a journey is published after `ma_procedure_create` alone — call `ma_procedure_start` only after explicit approval.
+
+Linear journeys without button branches may use the minimal shape below.
+
+## Example JSON (linear shape only)
+
+The block below illustrates **structure only** for journeys **without** button branches. **Do not** copy business fields before the customer confirms each field. For button branches, clone the fixture above instead.
 
 ```json
 {
@@ -128,6 +163,62 @@ The block below illustrates **structure only**. **Do not** copy `orgId`, root `t
 }
 ```
 
+## Validate error remediation
+
+Group related codes; fix **wiring**, not copy, unless the code is clearly about content.
+
+### Shape / type
+
+| Code | What to do |
+|------|------------|
+| `error/ma-payload-unsupported-condition-shape` | Remove `event` / `branches` / `sourceMessageNodeId`; clone Studio fixture |
+| `error/ma-payload-unsupported-condition-type` | Use allowlisted `data.type` (`click` / `n-click` / keyword / sticker variants) |
+
+### Group + timing
+
+| Code | What to do |
+|------|------------|
+| `error/ma-payload-condition-group-missing` | Point `groupId` at an existing `group` node |
+| `error/ma-payload-condition-group-type` | That group must have `data.type: "click"` |
+| `error/ma-payload-condition-group-click-type` | Set `clickType` to `any` or `button` |
+| `error/ma-payload-condition-group-time-type` | Set `timeType` to `day` \| `hour` \| `minute` |
+| `error/ma-payload-condition-group-time` | Set finite non-negative `time` (customer-confirmed timeout) |
+
+### Source + edges
+
+| Code | What to do |
+|------|------------|
+| `error/ma-payload-condition-source-missing` | Set non-empty `condition.data.source` and `group.data.source` to a message node |
+| `error/ma-payload-condition-source-mismatch` | Set `condition.data.source` equal to `group.data.source` |
+| `error/ma-payload-condition-source-edge` | Exactly one incoming edge from that source message |
+| `error/ma-payload-condition-edge-cardinality` | Exactly one outgoing edge per click/n-click condition |
+
+### Sibling cardinality
+
+| Code | What to do |
+|------|------------|
+| `error/ma-payload-condition-nclick-cardinality` | Exactly one `n-click` per click group |
+| `error/ma-payload-condition-any-click-cardinality` | `clickType: any` → exactly one `click` |
+| `error/ma-payload-condition-named-click-cardinality` | `clickType: button` → at least one named `click` |
+
+### Buttons / template
+
+| Code | What to do |
+|------|------------|
+| `error/ma-payload-missing-message-template` | Set stable `messages[].template`, then recompute button ids |
+| `error/ma-payload-condition-buttons-empty` | Named click needs ≥1 button id |
+| `error/ma-payload-condition-button-not-eligible` | Id must exist on source card (Studio eligibility) |
+| `error/ma-payload-condition-button-duplicate` | Each button id owned by one sibling click only |
+
+### Post-transform
+
+| Code | What to do |
+|------|------------|
+| `error/ma-runtime-condition-not-executable` | Fix group/`groupId`/source/timing so transform fills condition `data` |
+| `error/ma-runtime-condition-topology` | One edge per condition; end-target → `end`, else `children: [target]` |
+
+Do **not** try to fix these by only editing message copy.
+
 ## Field reference (create / validate body)
 
 | Field | Role |
@@ -146,7 +237,8 @@ The block below illustrates **structure only**. **Do not** copy `orgId`, root `t
 
 ## Guardrails
 
-- Routes require organization owner/admin; **business fields in the body must come from explicit customer input**, not silent presets.
+- Org-scoped MCP tools require organization owner/admin; **business fields in the body must come from explicit customer input**, not silent presets.
 - If you change the payload after customer sign-off, get renewed approval when business meaning changes.
-- Do not paste internal Mongo procedure documents; use only the public Developer request shape.
+- Do not paste internal Mongo procedure documents; use the MCP / shared MA procedure payload shape only.
+- Never invent `template_button_click` / `branches` condition nodes; never fan out multiple `sourceHandle` edges from one condition.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

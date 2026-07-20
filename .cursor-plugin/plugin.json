@@ -18,5 +18,9 @@
     "crm",
     "skills"
   ],
-  "skills": "./skills/"
+  "category": "Productivity",
+  "logo": "assets/logo.png",
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "mcpServers": "./mcp.json"
 }

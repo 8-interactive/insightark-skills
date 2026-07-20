@@ -22,6 +22,7 @@ Minimum tested version: record during staging verification (task 4.3).
 
 - Static client: `insightark-cursor`
 - Manifest: root `mcp.json` (`auth.CLIENT_ID`)
+- Plugin pin: `.cursor-plugin/plugin.json` must set `"mcpServers": "./mcp.json"` so Cursor does not load Claude's `.mcp.json` or fall back to DCR
 - Typical path: Customize → Tools & MCP → Connect / Authenticate `insightark`
 
 Minimum tested version: record during staging verification (task 4.3).

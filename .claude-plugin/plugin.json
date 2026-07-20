@@ -23,5 +23,6 @@
     "skills"
   ],
   "skills": "./skills/",
+  "commands": "./commands/",
   "defaultEnabled": false
 }

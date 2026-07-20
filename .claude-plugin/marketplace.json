@@ -11,7 +11,7 @@
       "name": "insightark-skills",
       "source": "./",
       "displayName": "SUPER 8 Studio InsightArk Skills",
-      "description": "SUPER 8 Studio InsightArk Skills for CRM workflows.",
+      "description": "SUPER 8 Studio InsightArk Skills for CRM workflows. 安裝後請先用 validate-insightark-setup 驗證 MCP，再依需要調查對話、管理客戶或建立廣播。",
       "version": "2.1.0",
       "author": {
         "name": "SUPER 8 Studio",
@@ -21,6 +21,7 @@
       "repository": "https://github.com/8-interactive/insightark-skills",
       "license": "Apache-2.0",
       "category": "Productivity",
+      "commands": "./commands/",
       "keywords": [
         "super8",
         "studio",
