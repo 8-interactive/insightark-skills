@@ -11,6 +11,8 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 ## MCP Tools
 
+- `ma_template_list` — list agent-ready MA templates for an organization (requires `orgId`; optional `intent`, `platform`, `includeUnavailable`)
+- `ma_template_get` — retrieve one available agent-ready template metadata + skeleton (requires `orgId`, `templateId`); **runtime source of truth** for catalog-backed creation
 - `ma_procedure_list` — list marketing automation procedures (requires `orgId`; optional `name`, `skip`, `limit`)
 - `ma_procedure_get` — get procedure **status summary** only (requires `orgId`, `procedureId`); does **not** return `editor.nodes` / `editor.edges`
 - `ma_procedure_validate` — validate a journey definition without persisting (requires `orgId`, `payload`)
@@ -19,7 +21,30 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `ma_procedure_pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
 - `ma_procedure_trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
 
-There is currently **no** MCP tool to fetch a full Studio graph, update an existing procedure, or clone one. Treat this skill as **create-from-fixture / create-from-customer-input**, not retrieve→modify→reuse of existing Studio journeys.
+There is currently **no** MCP tool to fetch a full existing Studio graph, update an existing procedure, or clone one from an already-created journey. Catalog-backed authoring uses `ma_template_list` → `ma_template_get`. Packaged files under `references/fixtures/` are documentation / golden / drift copies only — **do not** clone them as the runtime source of truth.
+
+### Catalog template discovery (required for catalog-backed creation)
+
+For **every** catalog template (including capability-neutral LINE archetypes), resolve the confirmed `orgId`, then:
+
+1. Call `ma_template_list` (default = available only). Use `includeUnavailable: true` only when explaining upgrade/conditional options.
+2. Select an **available** entry; disclose its `templateId` + `version` to the customer.
+3. Call `ma_template_get` for that id; replace every `requiredInputs` / `<REQUIRED_FROM_CUSTOMER…>` value.
+4. Show the final business-field summary, get approval, `ma_procedure_validate`, then confirm again before `ma_procedure_create` (draft). Publish only via `ma_procedure_start` after separate approval.
+
+**Blank canvas:** only when the customer explicitly chooses blank-canvas authoring (no catalog template) may you skip list/get; still run the normal checklist → validate → create-draft → optional publish flow.
+
+**Do not** infer GA4 / EC / sticker / channel entitlement from the user description, a static fixture, a configured GA4 domain alone, or Console template names. Relay discovery unavailableReasons in customer language (feature_not_enabled includes featureKey such as ma_sticker).
+
+**Namespaces (never conflate):**
+
+| Id | Meaning |
+|----|---------|
+| Catalog `templateId` | Server catalog entry only (e.g. `line-tag-follow-up`) |
+| Payload root `templateType` | Customer-confirmed Studio procedure field (blank canvas often `all`) |
+| `messages[].template` / message `templateType` | Message wiring ids / card types |
+
+Never copy catalog `templateId` into root `templateType`.
 
 ### Locate journeys by customer-provided name
 
@@ -66,14 +91,15 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 
 ## Mandatory agent workflow
 
-1. Run a **gap check** against this checklist; any gap → **questions only, no MCP calls**.
-2. After the customer fills gaps, assemble the JSON payload:
+1. Confirm `orgId`. For catalog-backed creation: `ma_template_list` → pick available → `ma_template_get` (never clone packaged fixtures as runtime source). Blank canvas may skip discovery.
+2. Run a **gap check** against this checklist (plus any `requiredInputs` from `ma_template_get`); any gap → **questions only, no write MCP calls**.
+3. After the customer fills gaps, assemble the JSON payload from the retrieved skeleton (or blank-canvas assembly):
    - Values only from the customer, plus wiring-only ids/positions.
-   - **If the journey needs template card button branching (or tag trigger + button branch):** **clone** `references/fixtures/ma-tag-trigger-click-branch-skeleton.json` first, then replace customer fields. Do **not** invent a condition DSL.
-3. Show a compact final field table and get explicit customer sign-off.
-4. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message }`) and **逐條用客戶語言說明缺哪個欄位或哪個規則未滿足**，請客戶補齊後再改 JSON. See **Validate error remediation** below for graph/condition codes.
-5. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload`; if the tool returns a payload-invalid error, read `data.errors` and relay `path` + `message` to the customer. Cap at **three** validate-fix rounds, each change explainable to the customer.
-6. **Do not** copy names, times, keywords, or copy from sample JSON onto a real customer "to save time."
+   - Preserve catalog `templateId`/`version` in your explanation for drift diagnosis.
+4. Show a compact final field table and get explicit customer sign-off.
+5. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
+6. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload` (**draft only**). Cap at **three** validate-fix rounds.
+7. Publish only with explicit approval via `ma_procedure_start`.
 
 **Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
@@ -84,15 +110,24 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 - **Button click branches (Studio only):** use a `group` (`data.type: "click"`) plus **one `condition` node per branch** (`click` or `n-click`). Each condition MUST have **exactly one** outgoing edge. Named `click` conditions list `data.buttons[].id` as `` `${messages[].template}_elements.${elementIndex}.buttons.${buttonIndex}` ``. You MUST set a stable client-supplied `messages[].template` on the source card **before** wiring those ids (server-generated template ids cannot be predicted). Eligible buttons exclude phone, location, and non-http(s) URL buttons. `n-click` has **no** `buttons`. `clickType: "any"` does not need named button ids / `message.template` membership.
 - **Forbidden:** `condition.data.event`, `branches`, `sourceMessageNodeId`, or one condition with multiple `sourceHandle` outgoing edges (skill-invented DSL). Validate will reject these.
 
-## Structural fixture (clone for button branches)
+## Structural fixtures (docs / drift only)
 
-Canonical wiring: [`references/fixtures/ma-tag-trigger-click-branch-skeleton.json`](references/fixtures/ma-tag-trigger-click-branch-skeleton.json) — LINE **tag trigger** + card + `group` + named `click` / `n-click` conditions.
+Packaged copies under [`references/fixtures/`](references/fixtures/) mirror server catalog skeletons for documentation and CI drift checks:
 
-**Structure only may be kept as-is** (node/edge topology, `clickType: "button"`, `timeType: "minute"`, `messages[].template` wiring id `tplCard001`, button id strings).
+| Catalog `templateId` | Fixture file |
+|----------------------|--------------|
+| `line-linear-message` | `line-linear-message.json` |
+| `line-join-welcome` | `line-join-welcome.json` |
+| `line-tag-follow-up` | `line-tag-follow-up.json` |
+| `line-tag-click-branch` | `ma-tag-trigger-click-branch-skeleton.json` |
 
-### Clone MUST replace (fail-until-replaced)
+**Runtime:** always `ma_template_get`. Do not treat these files as live clone sources.
 
-Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confirmed literal before `ma_procedure_validate`. Unreplaced placeholders fail validate (placeholder policy). At minimum replace:
+**Structure only may be kept as-is** after retrieval (node/edge topology, Studio discriminators, stable wiring ids such as `tplCard001`). Recompute derived button ids if message `template` or nested structure changes.
+
+### Retrieved skeleton MUST replace (fail-until-replaced)
+
+Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confirmed literal before `ma_procedure_validate`. Unreplaced placeholders fail validate. At minimum replace:
 
 | Path | Why |
 |------|-----|
@@ -100,22 +135,16 @@ Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confi
 | `enabled` | Whether journey is enabled when later published |
 | `startTime`, `endTime` | Schedule |
 | `limits.*` | Quotas |
-| `oos.*` | Off-hours policy (do not keep fixture OOS numbers) |
-| trigger `event` / `match` / `tags[]` | Tag trigger rule (add vs remove; all vs any; which tags) |
-| message `name`, `waitTime`, card title/subtitle/imageUrl | Content / delay |
-| button `title` / `data` | Customer-facing labels and postback payloads |
-| button `tags` | Optional; empty `[]` on the skeleton means "no auto-tags" wiring only — replace if the customer wants button-applied tags |
-| group `time` | Timeout seconds for n-click |
-| group `allowMulti` | Whether multiple clicks are allowed |
-| follow-up message text | Branch content |
+| `oos.*` | Off-hours policy |
+| trigger rules / tags | Trigger semantics |
+| message copy, waits, URLs, buttons | Content / behavior |
+| group timeouts / allowMulti | Branch timing |
 
 Do **not** tell the customer a journey is published after `ma_procedure_create` alone — call `ma_procedure_start` only after explicit approval.
 
-Linear journeys without button branches may use the minimal shape below.
-
 ## Example JSON (linear shape only)
 
-The block below illustrates **structure only** for journeys **without** button branches. **Do not** copy business fields before the customer confirms each field. For button branches, clone the fixture above instead.
+The block below illustrates **structure only** for blank-canvas journeys **without** button branches. Prefer `ma_template_get` for catalog archetypes. **Do not** copy business fields before the customer confirms each field.
 
 ```json
 {
@@ -162,6 +191,20 @@ The block below illustrates **structure only** for journeys **without** button b
   ]
 }
 ```
+
+## Template discovery error remediation
+
+| Situation | What to do |
+|-----------|------------|
+| `error/ma-template-not-available` without reasons | Unknown or non-agent-ready id — re-run `ma_template_list`; offer an available LINE archetype or blank canvas |
+| `error/ma-template-not-available` with `unavailableReasons` | Explain reasons in customer language; do not call get/create for that template; offer available alternative |
+| `platform_not_integrated` | Channel not connected for this org |
+| `ga4_service_not_enabled` / `ga4_domain_not_configured` | GA4 entitlement and/or domain missing — do not treat domain alone as enough |
+| `ec_not_enabled` / `ec_provider_not_enabled` | EC / provider not enabled |
+| feature_not_enabled + featureKey | Missing feature (for example featureKey=ma_sticker) — name that feature to the customer |
+| Discovery code ma_not_available | Marketing Automation product not available for the org |
+| Validate after discovery succeeds but capability changed | Trust current validate/create errors; discovery was advisory — re-list or fall back to available archetype / blank canvas |
+| `error/ma-studio-ga4-service-not-enabled` / `error/ma-studio-feature-not-enabled` | Same facts as discovery; `featureKey` may be present on feature errors |
 
 ## Validate error remediation
 

@@ -39,6 +39,15 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `Use insightark-customer-manager to add tags "vip" and "newsletter" to customer cus_123 in org org_demo_001.`
 - `Use insightark-customer-manager to remove tag "inactive" from customer cus_123 in org org_demo_001.`
 
+## Constrained `customerInfo` (situational)
+
+Exact editable fields and enum values come from the `crm_customer_update` MCP tool schema description.
+
+- Patch only published public fields (displayName, cellPhone, email, birthday, gender, language, …).
+- `gender` / `language` must match the schema allowlists when set.
+- `email` must be a valid email; `birthday` must be ISO 8601.
+- Unsupported or empty patches fail before credit charge — fix args rather than retrying identical payloads.
+
 ## Guardrails
 
 - Treat update and tag operations as explicit write actions.

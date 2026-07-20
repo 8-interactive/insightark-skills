@@ -36,6 +36,15 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `Show status of broadcast 65f0c8a1b2c3d4e5f6a7b8c9 in org org_demo_001.`
 - `List the last 20 broadcasts in org org_demo_001 with status working or scheduled.`
 
+## Constrained parameters (situational)
+
+Exact allowed strings come from the MCP tool schema.
+
+- `broadcast_create.platform` — one platform per task (`line` / `facebook` / `instagram` / `whatsapp` per schema enum). Split multi-platform audiences into separate tasks.
+- `broadcast_list.status` — single token or comma-separated list (e.g. `working,done`). Allowed tokens are listed in the tool description; invalid tokens are rejected at runtime (no scalar `enum` on the param).
+- `broadcast_create.messageTag` — useful for Facebook/Instagram when Meta’s 24h messaging window requires a tag. Schema lists allowed tag values. Do not invent server rejection for tags on other platforms unless the published schema/runtime already enforces it.
+- `media_upload_url.purpose` × `contentType` — match purpose to allowed MIME types from the tool description (image purposes → image MIME; `file` → PDF).
+
 ## Guardrails
 
 - Treat broadcast create as a write operation at scale; confirm inferred platform, recipients, or content.

@@ -39,15 +39,20 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 ## Message search sender filters (important)
 
-Default search (omit `senderType` / `senderTypes`) returns **Customer only**. Staff `userName` / `userEmail` only appear on `_User` rows.
+Use only `senderTypes` (string array). Exact allowed class strings come from the MCP tool schema `senderTypes.items.enum`.
+
+Default (omit `senderTypes`) returns **Customer only**. Staff `userName` / `userEmail` only appear on `_User` rows.
 
 | Goal | Args |
 |---|---|
-| Customer messages | `senderType: "Customer"` (or omit) |
-| Staff / CS replies | `senderType: "_User"` |
-| Full dialogue | `senderTypes: ["Customer", "_User"]` (one call; do not pass both `senderType` and `senderTypes`) |
+| Customer messages | omit `senderTypes`, or `senderTypes: ["Customer"]` |
+| Staff / CS replies | `senderTypes: ["_User"]` |
+| Full dialogue | `senderTypes: ["Customer", "_User"]` — one tool call, one normal 20-credit charge |
+| AddOn / extension messages | `senderTypes: ["AddOn"]` |
+| Brand / org-originated (e.g. broadcast) | `senderTypes: ["Organization"]` |
+| External bot messages | `senderTypes: ["ForeignBot"]` |
 
-Prefer `senderTypes` for customer+staff so you do not pay two search credits. Narrow with `conversationId` and a small time window when possible.
+Never pass singular `senderType`. Prefer one multi-class call over two searches. Narrow with `conversationId` and a small time window when possible.
 
 ## Message search timeout (`error.code = message_search_timeout`)
 
@@ -55,6 +60,6 @@ When search returns structured `message_search_timeout` (`isError: true`):
 
 1. Never blind-retry identical args (credits are still charged).
 2. Halve `startAt`/`endAt` and search sequentially; reduce `limit` if needed.
-3. Use only published filters: `keyword`, `conversationId`, `platform`, `senderType` / `senderTypes`, `senderIds`.
+3. Use only published filters: `keyword`, `conversationId`, `platform`, `senderTypes`, `senderIds`.
 4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
 5. Do not invent unsupported message-type / `contentType` filters.

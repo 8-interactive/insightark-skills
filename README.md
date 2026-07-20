@@ -4,7 +4,7 @@ InsightArk workflow skills plus a bundled hosted MCP server for SUPER 8 Studio C
 
 **Production customer path:** install the plugin from an approved host marketplace → Connect the bundled `insightark` MCP server through host OAuth → validate with `insightark-session` (`auth_me`) → use skills via MCP tools.
 
-Version `2.1.0` is the first supported marketplace + OAuth release.
+Version `2.2.0` is the first supported marketplace + OAuth release.
 
 ## Quick start
 
@@ -74,7 +74,7 @@ InsightArk 工作流 skills 與 bundled hosted MCP，用於 SUPER 8 Studio CRM �
 
 **正式顧客流程：** 從核准的 host marketplace 安裝 plugin → 透過 host OAuth Connect bundled `insightark` MCP → 以 `insightark-session`（`auth_me`）驗證 → 以 MCP tools 使用 skills。
 
-`2.1.0` 是第一個支援的 marketplace + OAuth 正式版。
+`2.2.0` 是第一個支援的 marketplace + OAuth 正式版。
 
 ## 快速開始
 

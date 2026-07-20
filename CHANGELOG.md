@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0 — MCP schema contract hardening (skills)
+
+- Message search skills use `senderTypes` only (singular `senderType` removed); document all five published sender classes.
+- Broadcast / customer / conversations skills add situational notes for closed params; exact enums defer to MCP schema.
+- Clarify multi-class search as one tool call / one normal 20-credit charge vs two searches.
+
 ## 2.1.0 — First supported marketplace + OAuth release
 
 - Deliver Claude Code, Cursor, and Codex/ChatGPT desktop plugins with host-specific static OAuth MCP manifests.

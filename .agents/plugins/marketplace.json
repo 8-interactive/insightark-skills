@@ -1,20 +1,20 @@
 {
   "name": "insightark-skills",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "使用 insightark-session 驗證我的 InsightArk MCP 設定。確認可用後，請摘要你能幫我做哪些 InsightArk 工作流程與操作。",
-      "使用 insightark-investigator 調查最近的對話。",
-      "使用 insightark-customer-manager 搜尋與更新客戶。",
-      "使用 insightark-broadcast-manager 建立並追蹤廣播。"
+      "\u4f7f\u7528 insightark-session \u9a57\u8b49\u6211\u7684 InsightArk MCP \u8a2d\u5b9a\u3002\u78ba\u8a8d\u53ef\u7528\u5f8c\uff0c\u8acb\u6458\u8981\u4f60\u80fd\u5e6b\u6211\u505a\u54ea\u4e9b InsightArk \u5de5\u4f5c\u6d41\u7a0b\u8207\u64cd\u4f5c\u3002",
+      "\u4f7f\u7528 insightark-investigator \u8abf\u67e5\u6700\u8fd1\u7684\u5c0d\u8a71\u3002",
+      "\u4f7f\u7528 insightark-customer-manager \u641c\u5c0b\u8207\u66f4\u65b0\u5ba2\u6236\u3002",
+      "\u4f7f\u7528 insightark-broadcast-manager \u5efa\u7acb\u4e26\u8ffd\u8e64\u5ee3\u64ad\u3002"
     ]
   },
   "plugins": [
     {
       "name": "insightark-skills",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "source": {
         "source": "local",
         "path": "./"

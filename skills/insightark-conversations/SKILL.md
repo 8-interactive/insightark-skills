@@ -14,7 +14,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `messaging_conversation_list` — list conversations ordered by latest activity (requires `orgId`)
 - `messaging_conversation_get` — open one conversation summary (requires `orgId`, `conversationId`)
 
-Optional arguments: `customerId`, `platform`, `inbox` (`unassigned`, `done`, `private`, `bot`, `spam`), `limit`.
+Optional arguments: `customerId`, `platform`, `inbox`, `limit`. Exact `inbox` tokens come from the MCP tool schema enum.
 
 ## Workflow
 
@@ -26,6 +26,8 @@ Optional arguments: `customerId`, `platform`, `inbox` (`unassigned`, `done`, `pr
 ## Guardrails
 
 - Stay within the published read-side developer API surface.
+- `inbox` must be a published schema value (e.g. unassigned / done / private / bot / spam — confirm against schema).
+- `platform` is a Super8 channel id string (e.g. line, facebook); do not invent channels.
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance). Use `messaging_message_search` when the user asks for keyword evidence across messages.
 - Do not assume a conversation id until it is returned by the API.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

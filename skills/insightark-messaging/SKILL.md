@@ -54,16 +54,21 @@ When building `application/x-template` or other rich LINE payloads, load `refere
 
 ## Message search sender filters (important)
 
-Default `messaging_message_search` (omit both `senderType` and `senderTypes`) returns **Customer only**. Staff fields (`userName` / `userEmail`) only appear on `_User` rows — you must request staff senders explicitly.
+Use only `senderTypes` (string array). Exact allowed class strings come from the MCP tool schema `senderTypes.items.enum`.
+
+Default (omit `senderTypes`) returns **Customer only**. Staff fields (`userName` / `userEmail`) only appear on `_User` rows — request staff senders explicitly.
 
 | Goal | Args |
 |---|---|
-| Customer messages | `senderType: "Customer"` (or omit — same default) |
-| Staff / CS replies | `senderType: "_User"` |
-| Full dialogue (customer + staff) | `senderTypes: ["Customer", "_User"]` — preferred; one call, interleaved by `createdAt` |
+| Customer messages | omit `senderTypes`, or `senderTypes: ["Customer"]` |
+| Staff / CS replies | `senderTypes: ["_User"]` |
+| Full dialogue (customer + staff) | `senderTypes: ["Customer", "_User"]` — one tool call, interleaved by `createdAt`, one normal 20-credit charge |
+| AddOn / extension messages | `senderTypes: ["AddOn"]` |
+| Brand / org-originated (e.g. broadcast) | `senderTypes: ["Organization"]` |
+| External bot messages | `senderTypes: ["ForeignBot"]` |
 
-- Do **not** pass `senderType` and `senderTypes` together.
-- Prefer `senderTypes` when more than one sender class is needed (avoids two searches / two credit charges).
+- Never pass singular `senderType` (removed from the MCP schema).
+- Prefer one multi-class `senderTypes` call over two searches (one call / one 20-credit charge vs two charges).
 - Still narrow with `conversationId` and a tight `startAt`/`endAt` when possible.
 
 ## Message search timeout (`error.code = message_search_timeout`)
@@ -73,6 +78,6 @@ When `messaging_message_search` fails with structured tool error `code: message_
 1. Do **not** retry with the exact same parameters (timeout still consumes the tool's credit cost; there is no refund).
 2. Prefer splitting `startAt`/`endAt` in half and searching sequentially.
 3. Reduce `limit` when helpful.
-4. Add supported filters only: `keyword`, `conversationId`, `platform`, `senderType` / `senderTypes`, `senderIds`.
+4. Add supported filters only: `keyword`, `conversationId`, `platform`, `senderTypes`, `senderIds`.
 5. Cap automatic split/retry attempts (e.g. a few halvings); if still timing out, stop and tell the user the range is too large — suggest more filters or Console search.
 6. Do **not** invent unsupported filters such as `contentType` / message-type unless the published tool schema includes them.

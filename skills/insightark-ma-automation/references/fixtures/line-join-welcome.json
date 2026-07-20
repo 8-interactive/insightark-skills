@@ -1,0 +1,62 @@
+{
+  "orgId": "<REQUIRED_FROM_CUSTOMER>",
+  "templateType": "<REQUIRED_FROM_CUSTOMER_ROOT_TEMPLATE_TYPE>",
+  "name": "<REQUIRED_FROM_CUSTOMER>",
+  "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+  "platform": "<REQUIRED_FROM_CUSTOMER_PLATFORM>",
+  "startTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "endTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "limits": {
+    "message": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>",
+    "per_customer": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>"
+  },
+  "oos": {
+    "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+    "hour": "<REQUIRED_FROM_CUSTOMER_OOS_HOUR>",
+    "minute": "<REQUIRED_FROM_CUSTOMER_OOS_MINUTE>",
+    "duration": "<REQUIRED_FROM_CUSTOMER_OOS_DURATION_SECONDS>"
+  },
+  "nodes": [
+    {
+      "id": "start_1",
+      "type": "start",
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "trigger_join",
+      "type": "trigger",
+      "data": {
+        "type": "join"
+      },
+      "position": { "x": 120, "y": 0 }
+    },
+    {
+      "id": "message_welcome",
+      "type": "message",
+      "data": {
+        "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
+        "waitTime": "<REQUIRED_FROM_CUSTOMER_WAIT_SECONDS>",
+        "messages": [
+          {
+            "index": 0,
+            "contentType": "text/plain",
+            "data": {
+              "content": "<REQUIRED_FROM_CUSTOMER_MESSAGE_TEXT>"
+            }
+          }
+        ]
+      },
+      "position": { "x": 280, "y": 0 }
+    },
+    {
+      "id": "end_1",
+      "type": "end",
+      "position": { "x": 440, "y": 0 }
+    }
+  ],
+  "edges": [
+    { "source": "start_1", "target": "trigger_join" },
+    { "source": "trigger_join", "target": "message_welcome" },
+    { "source": "message_welcome", "target": "end_1" }
+  ]
+}
