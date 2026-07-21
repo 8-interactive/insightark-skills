@@ -1,10 +1,40 @@
 # Changelog
 
-## 2.2.0 — MCP schema contract hardening (skills)
+## 2.3.0 — MA template discovery + universal workflow policy hierarchy
+
+MA template discovery (server + skill):
+
+- Catalog agent-ready entries expose `defaultRootTemplateType` (agent-ready default `all`); `ma_template_get` materializes root `templateType` from the selected catalog entry.
+- Blank-canvas omit of `templateType` defaults to `all` only when `authoringSource: "blank-canvas"`; catalog clones keep the materialized type.
+- Supported create/validate root types: `all`, `default`, and catalog `defaultRootTemplateType` values — not console-only keys.
+- Skill fixtures and MA workflow guidance consume the materialized `templateType` (no client-side ID/`consoleKey` derivation).
+
+Universal workflow policy hierarchy (skills):
+
+- Add policy skill `insightark-universal-workflow` (Rich Preview Gate + write lifecycle) with catalog `role` / `prerequisites`.
+- Seven workflow skills link the Prerequisite; messaging / broadcast / MA delegate rich-preview and write-lifecycle rules.
+- Validators enforce hierarchy behavior, release-tree policy skill presence, and reject treating credit `0` as unlimited.
+
+## 2.2.0 — Investigator qualitative analysis lenses + MCP schema contract hardening
+
+Qualitative detection & analysis lenses (investigator):
+
+- Add `insightark-investigator/references/QUALITATIVE_DETECTION.md`: an on-demand playbook for batch qualitative intent/sentiment/complaint detection using only existing read-only MCP tools.
+- Document two detection paths — tag-segmented (`crm_customer_search` → `messaging_conversation_list` → `messaging_conversation_messages`) and time-window/keyword (`messaging_message_search`) — with a selection rule.
+- Add hard cost/sample guardrails (`credits_usage` before/after, default sample caps, no blind retry, stop-and-report) and traceable, non-fabricated, human-reviewable reading rules.
+- Add `insightark-investigator/references/ROOT_CAUSE_ANALYSIS.md` (US-2): a complaint root-cause / theme-categorisation lens — theme buckets, per-theme root cause + improvement direction, and traceable representative cases.
+- Add `insightark-investigator/references/OPPORTUNITY_DISCOVERY.md` (US-3): a positive-intent / opportunity-discovery lens — signal types, keyword seeds, and an explicit "keep runs separate from complaint analysis" rule.
+- Add `insightark-investigator/references/CS_QUALITY_REVIEW.md` (US-6): a per-agent CS reply-quality lens — evaluates the staff responder, discovers agents from `_User` message identity (no roster tool), groups by `sender` objectId, and compiles traceable exemplary / needs-improvement cases. Runs on Strategy A because staff identity is returned only by `messaging_message_search`.
+- All three lenses reuse the `QUALITATIVE_DETECTION.md` shared layer (Strategy A/B path selection, credit/sample guardrails, traceable non-fabricated reading rules) — no duplication of the data path.
+- `SKILL.md` gains an "Analysis lenses" pointer; README investigator entry (EN + 中文) notes all three lenses.
+
+MCP schema contract hardening (skills):
 
 - Message search skills use `senderTypes` only (singular `senderType` removed); document all five published sender classes.
 - Broadcast / customer / conversations skills add situational notes for closed params; exact enums defer to MCP schema.
 - Clarify multi-class search as one tool call / one normal 20-credit charge vs two searches.
+
+- No new MCP tool and no new skill; still exactly 7 workflow skills. Server backend and `tools/message-preview/` untouched.
 
 ## 2.1.0 — First supported marketplace + OAuth release
 

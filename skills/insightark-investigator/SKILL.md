@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-investigator
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
 
 ## MCP Tools
@@ -27,6 +29,39 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
    - `messaging_message_search` for keyword-oriented evidence lookup
 4. Return a concise read-only investigation result grounded in the public API response.
+
+## Qualitative detection (intent / sentiment / complaint)
+
+For batch qualitative reading — judging customer intent, sentiment, or complaints
+across a set of conversations rather than a single lookup — load
+`references/QUALITATIVE_DETECTION.md` on demand and follow it. It covers:
+
+- **Path selection**: tag-segmented audiences use `crm_customer_search` →
+  `messaging_conversation_list` → `messaging_conversation_messages` (the only
+  tag-aware path); time-window / keyword audiences use `messaging_message_search`.
+- **Cost guardrails**: measure with `credits_usage` before/after (it does not
+  consume credits), respect hard sample caps, and never blind-retry — batch reads
+  cost more than the nominal per-call rate.
+- **Reading rules**: findings must cite specific messages, must not fabricate
+  complaints, and are human-reviewable signals, not authoritative labels.
+
+### Analysis lenses (same tools, same guardrails)
+
+`QUALITATIVE_DETECTION.md` is the shared foundation (path selection + cost
+guardrails + reading rules). Two focused lenses build on it — load the one that
+matches the ask, then follow the shared Strategy A/B and sample/credit caps:
+
+- **Complaint root cause / theme categorisation** → `references/ROOT_CAUSE_ANALYSIS.md`.
+  Use when the ask is not just "how many complaints" but "which themes, why, and
+  how to improve", with traceable representative cases.
+- **Opportunity discovery / positive intent** → `references/OPPORTUNITY_DISCOVERY.md`.
+  Use for product / marketing / service opportunities (suggestions, recurring
+  questions, purchase intent, unmet needs). Run it as a **separate scoped pass**
+  from complaint analysis — do not share one broad pull for both.
+- **CS reply-quality review / per-agent training material** → `references/CS_QUALITY_REVIEW.md`.
+  Use to evaluate the **staff responder** (not the customer) and compile
+  exemplary / needs-improvement cases per agent. Runs on Strategy A
+  (`messaging_message_search`) because staff identity is returned only there.
 
 ## Guardrails
 

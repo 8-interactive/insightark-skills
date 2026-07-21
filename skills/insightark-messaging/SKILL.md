@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-messaging
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
@@ -29,7 +31,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - **Conversations** — `messaging_conversation_list`
    - **Conversation detail** — `messaging_conversation_get` and `messaging_conversation_messages`
    - **Message search** — `messaging_message_search`
-   - **Send** — build payload, optionally `media_upload_url`, then `messaging_message_preview` → confirm → `messaging_customer_send_message` by default for rich / quickReply batches; skip preview only when the user explicitly asks
+   - **Send** — build payload; optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required (non-`text/plain` or quick replies) → disclose 2-credit cost → `messaging_message_preview` → approval → `messaging_customer_send_message`; text-only without quick replies → confirmation only (no preview); skip preview only when the user explicitly asks
 4. Return the MCP response as-is.
 
 ## Rich / template authoring (load on demand)

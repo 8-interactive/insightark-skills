@@ -7,7 +7,9 @@ allowed-mcp: true
 
 # Skill: insightark-session
 
-This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate).
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
+This skill uses the InsightArk MCP server. Authentication is managed by the agent through MCP OAuth during plugin installation or reauthorization.
 
 ## MCP Tools
 
@@ -23,18 +25,17 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 ## OAuth recovery (when MCP needs authentication)
 
-If `auth_me` fails because authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required for the bundled `insightark` MCP server, **do not** ask for a SessionToken, run setup scripts, or manually add the MCP URL/client id. Direct the user to the host-specific recovery action below, wait for OAuth to complete, then call `auth_me` again.
+If `auth_me` fails because authentication is missing, expired, revoked, or the agent reports `401` / `403` / authentication-required for the bundled `insightark` MCP server, **do not** ask for a SessionToken, run setup scripts, manually add the MCP URL/client id, or use standalone MCP login commands. Direct the user to the agent-specific recovery action below, wait for OAuth to complete, then call `auth_me` again.
 
-Do **not** treat network errors, timeouts, MCP unavailable, or `5xx` responses as OAuth failures — diagnose connectivity / host MCP availability first rather than Reauthorize.
+Do **not** treat network errors, timeouts, MCP unavailable, or `5xx` responses as OAuth failures — diagnose connectivity / agent MCP availability first rather than reauthorize.
 
-| Host | Recovery action |
+| Agent | Recovery action |
 |---|---|
-| Claude Code | Run `/mcp` and Connect / Re-authenticate the plugin-registered `insightark` server |
-| Cursor | Open **Customize → Tools & MCP** and Connect / Re-authenticate `insightark` |
-| Codex CLI | Run `codex mcp login insightark` for the already plugin-registered server (no new `mcp add`) |
-| ChatGPT desktop (Codex in App) | Use the App/plugin UI **Connect** or **Reauthorize** for `insightark`; Codex CLI is not required |
+| ChatGPT desktop / Codex | Uninstall the InsightArk plugin, then install it again from the marketplace. Installation starts OAuth automatically. |
+| Claude Code | Uninstall the InsightArk plugin, then install it again. Installation starts OAuth automatically. |
+| Cursor | Open the InsightArk plugin details page → **MCPs** → select `insightark` → **Environments** → **Logout** → return to the details page and select **Authenticate** next to `insightark`. |
 
-After the user completes host OAuth, retry `auth_me` before continuing other InsightArk work.
+After the user completes OAuth, retry `auth_me` before continuing other InsightArk work.
 
 ## Guardrails
 

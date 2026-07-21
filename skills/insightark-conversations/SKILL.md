@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-conversations
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument.
 
 ## MCP Tools
@@ -25,7 +27,7 @@ Optional arguments: `customerId`, `platform`, `inbox`, `limit`. Exact `inbox` to
 
 ## Guardrails
 
-- Stay within the published read-side developer API surface.
+- Stay within the published read-side InsightArk MCP / public schema surface.
 - `inbox` must be a published schema value (e.g. unassigned / done / private / bot / spam — confirm against schema).
 - `platform` is a Super8 channel id string (e.g. line, facebook); do not invent channels.
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance). Use `messaging_message_search` when the user asks for keyword evidence across messages.

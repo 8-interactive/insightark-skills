@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-ma-automation
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
@@ -41,10 +43,10 @@ For **every** catalog template (including capability-neutral LINE archetypes), r
 | Id | Meaning |
 |----|---------|
 | Catalog `templateId` | Server catalog entry only (e.g. `line-tag-follow-up`) |
-| Payload root `templateType` | Customer-confirmed Studio procedure field (blank canvas often `all`) |
+| Payload root `templateType` | Studio procedure wiring. Catalog-backed: already set on the `ma_template_get` skeleton from `defaultRootTemplateType` — **consume it; do not ask the customer**. Blank canvas: set `authoringSource: "blank-canvas"` and omit → server defaults to `all`. |
 | `messages[].template` / message `templateType` | Message wiring ids / card types |
 
-Never copy catalog `templateId` into root `templateType`.
+Never copy catalog `templateId` or `consoleKey` into root `templateType`. Never ask the customer to name root `templateType` unless they request API/schema detail.
 
 ### Locate journeys by customer-provided name
 
@@ -52,9 +54,9 @@ Customers usually refer to **`name`**, not **`procedureId`**. For query status /
 
 ## Hard rules: no presetting business fields
 
-- **Before the customer states each item explicitly**, do not fill, guess, or substitute "usual defaults" for any **business- or behavior-related** field (e.g. do not silent-pick arbitrary root `templateType` keys, invented schedule bounds, `limits`, platform, trigger rules, message copy, `fbTag`, `oos`).
-- **Procedure root `templateType`:** required for InsightArk MCP persistence and Studio parity; **it is not** "選一張後台現成旅程範本". **從空白畫布建立**：與 MA Studio 一致時通常為 **`all`** — still require the customer to **explicitly confirm** this value (`all` vs another documented key). Separate from **message node** `messages[].templateType` (e.g. `card`, `imagemap`).
-- **Ask and complete the checklist first**, then assemble JSON, then `ma_procedure_validate`, then `ma_procedure_create`. If anything is missing, stay in Q&A: list **what is still missing** and ask with minimal follow-ups.
+- **Before the customer states each item explicitly**, do not fill, guess, or substitute "usual defaults" for any **business- or behavior-related** field (e.g. do not silent-pick invented schedule bounds, `limits`, platform, trigger rules, message copy, `fbTag`, `oos`).
+- **Procedure root `templateType`:** wiring only. Catalog-backed journeys keep the concrete value from `ma_template_get` (materialized from catalog `defaultRootTemplateType`) and SHOULD send `authoringSource: "catalog"` (or omit the marker while keeping the concrete type). Blank-canvas journeys MUST set `authoringSource: "blank-canvas"` when omitting root `templateType` (server applies `all`). **Do not** ask the customer to choose this field in normal flows; disclose it only if they request API/schema detail. Separate from **message node** `messages[].templateType` (e.g. `card`, `imagemap`).
+- **Ask and complete the checklist first**, then assemble JSON, then apply the Rich Preview Gate for any rich/quick-reply steps, then `ma_procedure_validate`, then `ma_procedure_create`. If anything is missing, stay in Q&A: list **what is still missing** and ask with minimal follow-ups.
 - Only after the customer has confirmed the overall behavior may you add **non-semantic structure placeholders** (e.g. node `id`, canvas `position`, edge `source` / `target`), and label them as wiring-only in your explanation; **do not** use structure to skip unanswered business choices.
 - Body `orgId` and journey content still require customer confirmation even when org context is known from session.
 - Before calling `validate` or `create`, show the final payload in a compact field table and get explicit customer approval for every business field.
@@ -75,10 +77,9 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 |------|------------------------|
 | Organization | Target `orgId` (must be manageable by the current session). |
 | Journey name | `name`. |
-| Procedure **`templateType` (payload root)** | Non-empty **procedure-level** string for Studio/editor compatibility. **从零 / 空白畫布**： usually **`all`**, aligned with MA Studio defaults; obtain **literal customer confirmation**. |
 | Platform (發送平台) | `platform` — **必填**（如 line、facebook、instagram、whatsapp、livechat）；由客戶指定。 |
 | Schedule (旅程期間) | `startTime`, `endTime` — **必填**；具體日期時間與時區（ISO 8601）；不得用「預設區間」代替客戶表述。 |
-| Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 |
+| Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 Explain what each limit controls before asking. **Do not** describe numeric `0` as unlimited (`per_customer: 0` is a hard stop). Unlimited is not defined by this skill. |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
 | Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則使用 `oos: { "enabled": false, ... }`；**若 `enabled: true`**，必須與客戶確認並填寫 `hour`、`minute`、`duration`（秒）。 |
 | Trigger | Full trigger type and rules. |
@@ -95,11 +96,13 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 2. Run a **gap check** against this checklist (plus any `requiredInputs` from `ma_template_get`); any gap → **questions only, no write MCP calls**.
 3. After the customer fills gaps, assemble the JSON payload from the retrieved skeleton (or blank-canvas assembly):
    - Values only from the customer, plus wiring-only ids/positions.
+   - Keep catalog-materialized root `templateType` as returned; for blank canvas, set `authoringSource: "blank-canvas"` and omit (or use `all`).
    - Preserve catalog `templateId`/`version` in your explanation for drift diagnosis.
 4. Show a compact final field table and get explicit customer sign-off.
-5. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
-6. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload` (**draft only**). Cap at **three** validate-fix rounds.
-7. Publish only with explicit approval via `ma_procedure_start`.
+5. For any preview-required message step (non-`text/plain` or quick replies), follow `skills/insightark-universal-workflow/references/rich-preview-gate.md` (disclose 2-credit cost, preview + journey timing, wait for approval). Text-only steps without quick replies need confirmation only.
+6. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
+7. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload` (**draft only**). Cap at **three** validate-fix rounds.
+8. Publish only with explicit approval via `ma_procedure_start`.
 
 **Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
@@ -131,7 +134,8 @@ Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confi
 
 | Path | Why |
 |------|-----|
-| `orgId`, `name`, root `templateType`, `platform` | Identity / channel |
+| `orgId`, `name`, `platform` | Identity / channel |
+| root `templateType` | Wiring — already set from catalog get, or blank-canvas `all`; **not** a customer checklist item |
 | `enabled` | Whether journey is enabled when later published |
 | `startTime`, `endTime` | Schedule |
 | `limits.*` | Quotas |
@@ -148,8 +152,8 @@ The block below illustrates **structure only** for blank-canvas journeys **witho
 
 ```json
 {
+  "authoringSource": "blank-canvas",
   "orgId": "<REQUIRED_FROM_CUSTOMER>",
-  "templateType": "<REQUIRED_FROM_CUSTOMER root field; scratch builds often explicitly confirm all>",
   "name": "<REQUIRED_FROM_CUSTOMER>",
   "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
   "platform": "<REQUIRED_FROM_CUSTOMER>",
@@ -267,13 +271,13 @@ Do **not** try to fix these by only editing message copy.
 | Field | Role |
 |--------|------|
 | `orgId` | Target org (customer-specified; must match session authority). |
-| `templateType` (root) | Procedure-level Studio field (customer-confirmed); **scratch / blank canvas** usually **`all`**. Separate from **`messages[].templateType`**. |
+| `templateType` (root) | Studio wiring. Catalog-backed: consume `ma_template_get` value (`defaultRootTemplateType`). Blank canvas: `authoringSource: "blank-canvas"` + omit → server `all`. Not a normal customer prompt. Separate from **`messages[].templateType`**. |
 | `type` | Procedure type; often derived server-side — ask if the customer or template requires an explicit value. |
 | `name` | Display name from the customer. |
 | `enabled` | Whether the customer wants it enabled. |
 | `platform` | Channel confirmed by the customer. |
 | `startTime` / `endTime` | Schedule bounds confirmed by the customer. |
-| `limits` | Total / per-customer caps; when set, **`message` and `per_customer` must be non-negative integers**. |
+| `limits` | Total / per-customer caps; **`message` and `per_customer` must be non-negative integers**, or `per_customer: "onceByDay"`. Do **not** call `0` unlimited. |
 | `fbTag` | Meta-related tag policy (customer-confirmed). |
 | `oos` | Off-hours / OOS settings confirmed by the customer. |
 | `nodes` / `edges` | Graph shape; business content from the customer; ids/positions may be wiring-only. |

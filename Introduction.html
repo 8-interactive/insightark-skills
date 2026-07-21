@@ -471,7 +471,7 @@
       <nav class="steps-nav" aria-label="Setup steps">
         <button class="step-item active" onclick="goToStep(0)" id="step-nav-0" aria-current="step">
           <div class="step-circle">1</div>
-          <div class="step-label" id="step-nav-label-0">選擇 Host</div>
+          <div class="step-label" id="step-nav-label-0">選擇 Agent</div>
         </button>
         <div class="step-connector" id="connector-0"></div>
         <button class="step-item" onclick="goToStep(1)" id="step-nav-1">
@@ -481,7 +481,7 @@
         <div class="step-connector" id="connector-1"></div>
         <button class="step-item" onclick="goToStep(2)" id="step-nav-2">
           <div class="step-circle">3</div>
-          <div class="step-label" id="step-nav-label-2">Connect OAuth</div>
+          <div class="step-label" id="step-nav-label-2">OAuth 授權</div>
         </button>
         <div class="step-connector" id="connector-2"></div>
         <button class="step-item" onclick="goToStep(3)" id="step-nav-3">
@@ -491,34 +491,34 @@
         <div class="step-connector" id="connector-3"></div>
         <button class="step-item" onclick="goToStep(4)" id="step-nav-4">
           <div class="step-circle">5</div>
-          <div class="step-label" id="step-nav-label-4">登出／卸載</div>
+          <div class="step-label" id="step-nav-label-4">重新授權／卸載</div>
         </button>
       </nav>
 
-      <!-- Step 1: Choose host -->
+      <!-- Step 1: Choose agent -->
       <div class="step-panel active" id="panel-0">
         <div class="step-card">
-          <h2 class="step-heading" id="s1-title">選擇 Host</h2>
+          <h2 class="step-heading" id="s1-title">選擇 Agent</h2>
           <p class="step-description" id="s1-desc">
-            InsightArk 透過各 AI host 的 plugin marketplace 安裝。請選擇你使用的 host。
+            InsightArk 透過各 AI agent 的 plugin marketplace 安裝。完整逐步說明請見 <code>README.md</code>。
           </p>
           <table class="agent-table">
             <thead>
               <tr>
-                <th id="th-host">Host</th>
-                <th id="th-client">Static OAuth client</th>
-                <th id="th-manifest">MCP manifest</th>
+                <th id="th-host">Agent</th>
+                <th id="th-client">安裝入口</th>
+                <th id="th-manifest">OAuth 時機</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Claude Code</td><td><code>insightark-claude-code</code></td><td><code>.mcp.json</code></td></tr>
-              <tr><td>Cursor</td><td><code>insightark-cursor</code></td><td><code>mcp.json</code></td></tr>
-              <tr><td>Codex CLI / ChatGPT desktop</td><td><code>insightark-codex</code></td><td><code>codex.mcp.json</code></td></tr>
+              <tr><td>ChatGPT / Codex</td><td>Plugins / Codex CLI marketplace</td><td>安裝 plugin 時自動開啟</td></tr>
+              <tr><td>Claude Code</td><td>Desktop Plugins 或 terminal <code>/plugin</code></td><td>安裝 plugin 時自動開啟</td></tr>
+              <tr><td>Cursor</td><td>Customize → Browse Marketplace</td><td>Plugin 詳情 MCPs → Authenticate</td></tr>
             </tbody>
           </table>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
-            <span id="s1-tip">支援的顧客流程是<strong>安裝 host plugin</strong>後以 OAuth Connect。無需貼 SessionToken，也無需手動輸入 MCP URL。</span>
+            <span id="s1-tip">正式顧客流程是<strong>從 marketplace 安裝 plugin</strong>後完成 OAuth。請勿手動新增 MCP server。</span>
           </div>
         </div>
       </div>
@@ -528,35 +528,39 @@
         <div class="step-card">
           <h2 class="step-heading" id="s2-title">安裝 Plugin</h2>
           <p class="step-description" id="s2-desc">
-            從 host marketplace 安裝 InsightArk plugin。安裝後會一併提供 workflow skills 與 bundled <code>insightark</code> MCP。
+            從 agent marketplace 安裝 <strong>SUPER 8 Studio InsightArk Skills</strong>。Marketplace 來源：
           </p>
+          <div class="code-wrap" aria-label="Marketplace source">
+            <pre>https://github.com/8-interactive/insightark-skills</pre>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
           <ol class="steps-list">
-            <li><span class="step-num">1</span><span id="s2-step1">開啟 Claude Code / Cursor / Codex 或 ChatGPT desktop 的 plugin marketplace</span></li>
-            <li><span class="step-num">2</span><span id="s2-step2">搜尋並安裝 <strong>InsightArk Skills</strong>（或 SUPER 8 Studio InsightArk Skills）</span></li>
-            <li><span class="step-num">3</span><span id="s2-step3">確認 plugin 已啟用，且 MCP server 名稱為 <code>insightark</code></span></li>
+            <li><span class="step-num">1</span><span id="s2-step1"><strong>ChatGPT / Codex</strong>：外掛程式 → 新增市集 → 個人 tab → Install；或 Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code></span></li>
+            <li><span class="step-num">2</span><span id="s2-step2"><strong>Claude Code</strong>：Desktop Plugins，或 terminal <code>/plugin marketplace add</code> / <code>/plugin install</code></span></li>
+            <li><span class="step-num">3</span><span id="s2-step3"><strong>Cursor</strong>：Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add</span></li>
           </ol>
           <div class="callout tip">
             <span class="callout-icon">✅</span>
-            <span id="s2-note">Channel 會 bake MCP URL（staging / production）。顧客不需選擇 API 環境。</span>
+            <span id="s2-note">逐步點擊說明以 <code>README.md</code> 為準。Plugin 會自動設定內建的 <code>insightark</code> MCP server。</span>
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Connect OAuth -->
+      <!-- Step 3: OAuth -->
       <div class="step-panel" id="panel-2">
         <div class="step-card">
-          <h2 class="step-heading" id="s3-title">Connect / Authenticate</h2>
-          <p class="step-description" id="s3-desc">透過 host UI 完成瀏覽器 OAuth（靜態 public client，無需 DCR）。</p>
-          <div class="sub-label" id="s3-wizard-label">各 Host 操作</div>
+          <h2 class="step-heading" id="s3-title">完成 OAuth 授權</h2>
+          <p class="step-description" id="s3-desc">安裝或認證時，agent 會開啟 InsightArk 登入頁面。登入後確認 <code>insightark-mcp:read</code> 與 <code>insightark-mcp:write</code>，再按允許。</p>
+          <div class="sub-label" id="s3-wizard-label">各 Agent 操作</div>
           <ol class="steps-list">
-            <li><span class="step-num">1</span><span id="s3-step1"><strong>Claude Code</strong>：使用 <code>/mcp</code> 並 Connect / Re-authenticate <code>insightark</code></span></li>
-            <li><span class="step-num">2</span><span id="s3-step2"><strong>Cursor</strong>：Customize → Tools &amp; MCP → Connect</span></li>
-            <li><span class="step-num">3</span><span id="s3-step3"><strong>Codex CLI</strong>：必要時 <code>codex mcp login insightark</code>（已由 plugin 註冊，勿再 mcp add）</span></li>
-            <li><span class="step-num">4</span><span id="s3-step4"><strong>ChatGPT desktop</strong>：App/plugin UI Connect / Reauthorize；不需 CLI</span></li>
+            <li><span class="step-num">1</span><span id="s3-step1"><strong>ChatGPT / Codex</strong>：安裝 plugin 時自動開啟 OAuth；完成後開啟新的 Codex Work 對話</span></li>
+            <li><span class="step-num">2</span><span id="s3-step2"><strong>Claude Code</strong>：安裝 plugin 時自動開啟 OAuth</span></li>
+            <li><span class="step-num">3</span><span id="s3-step3"><strong>Cursor</strong>：plugin 詳情 → MCPs → <code>insightark</code> 右側 Authenticate</span></li>
+            <li><span class="step-num">4</span><span id="s3-step4">請勿使用獨立的 MCP login 指令，也不要另外手動新增 MCP server</span></li>
           </ol>
           <div class="callout tip">
             <span class="callout-icon">🔒</span>
-            <span id="s3-auto-note">完成瀏覽器授權後，host 會保存 OAuth credential。請勿在聊天中貼任何 token。</span>
+            <span id="s3-auto-note">完成授權後，agent 會保存 OAuth credential。請勿在聊天中貼任何 token。</span>
           </div>
         </div>
       </div>
@@ -582,7 +586,7 @@
             <div>
               <strong id="s4-err1-title">需要認證（401 / 403 / authentication-required）</strong>
               <p id="s4-err1-desc" style="margin-top: 4px; font-size: 0.875rem">
-                使用 host Connect / Re-authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題，請先檢查連線與 host MCP 狀態。
+                ChatGPT / Codex 與 Claude Code：解除安裝後重新安裝。Cursor：MCPs → insightark → Logout，再按 Authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題。
               </p>
             </div>
           </div>
@@ -602,19 +606,19 @@
         </div>
       </div>
 
-      <!-- Step 5: Logout / revoke / uninstall -->
+      <!-- Step 5: Reauth / revoke / uninstall -->
       <div class="step-panel" id="panel-4">
         <div class="step-card">
-          <h2 class="step-heading" id="s5-title">登出、撤銷與卸載</h2>
-          <p class="step-description" id="s5-desc">這三件事不同，請分別處理。</p>
+          <h2 class="step-heading" id="s5-title">重新授權、撤銷與卸載</h2>
+          <p class="step-description" id="s5-desc">重新授權方式依 agent 而異；撤銷伺服器授權請到 Console。</p>
           <ol class="steps-list">
-            <li><span class="step-num">1</span><span id="s5-step1"><strong>Host logout / clear-auth</strong>：清除本機 OAuth；之後需重新 Connect</span></li>
-            <li><span class="step-num">2</span><span id="s5-step2"><strong>Console Connected Apps revoke</strong>：撤銷伺服器 refresh token family（plugin uninstall 不一定會做）</span></li>
-            <li><span class="step-num">3</span><span id="s5-step3"><strong>Plugin uninstall</strong>：從 host marketplace / plugin manager 移除 plugin</span></li>
+            <li><span class="step-num">1</span><span id="s5-step1"><strong>ChatGPT / Codex、Claude Code</strong>：解除安裝 plugin 後再安裝，安裝時會重新走 OAuth</span></li>
+            <li><span class="step-num">2</span><span id="s5-step2"><strong>Cursor</strong>：plugin 詳情 → MCPs → insightark → Environments → Logout → Authenticate</span></li>
+            <li><span class="step-num">3</span><span id="s5-step3"><strong>Console Connected Apps</strong>：左下角頭像 → 使用者資訊 → 已連接的應用程式，可撤銷授權</span></li>
           </ol>
           <div class="callout danger">
             <span class="callout-icon">⚠️</span>
-            <span id="s5-danger-note">不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console Connected Apps。</span>
+            <span id="s5-danger-note">不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console 已連接的應用程式。</span>
           </div>
         </div>
       </div>
@@ -646,88 +650,88 @@
       const S = {
         zh: {
           headerSubtitle: "安裝設定指南",
-          steps: ["選擇 Host", "安裝 Plugin", "Connect OAuth", "驗證", "登出／卸載"],
+          steps: ["選擇 Agent", "安裝 Plugin", "OAuth 授權", "驗證", "重新授權／卸載"],
           btnPrev: "上一步",
           btnNext: "下一步 →",
           btnDone: "完成 🎉",
-          s1Title: "選擇 Host",
-          s1Desc: "InsightArk 透過各 AI host 的 plugin marketplace 安裝。請選擇你使用的 host。",
-          s1Tip: "支援的顧客流程是<strong>安裝 host plugin</strong>後以 OAuth Connect。無需貼 SessionToken，也無需手動輸入 MCP URL。",
-          thHost: "Host",
-          thClient: "Static OAuth client",
-          thManifest: "MCP manifest",
+          s1Title: "選擇 Agent",
+          s1Desc: "InsightArk 透過各 AI agent 的 plugin marketplace 安裝。完整逐步說明請見 <code>README.md</code>。",
+          s1Tip: "正式顧客流程是<strong>從 marketplace 安裝 plugin</strong>後完成 OAuth。請勿手動新增 MCP server。",
+          thHost: "Agent",
+          thClient: "安裝入口",
+          thManifest: "OAuth 時機",
           s2Title: "安裝 Plugin",
-          s2Desc: "從 host marketplace 安裝 InsightArk plugin。安裝後會一併提供 workflow skills 與 bundled <code>insightark</code> MCP。",
-          s2Step1: "開啟 Claude Code / Cursor / Codex 或 ChatGPT desktop 的 plugin marketplace",
-          s2Step2: "搜尋並安裝 <strong>InsightArk Skills</strong>（或 SUPER 8 Studio InsightArk Skills）",
-          s2Step3: "確認 plugin 已啟用，且 MCP server 名稱為 <code>insightark</code>",
-          s2Note: "Channel 會 bake MCP URL（staging / production）。顧客不需選擇 API 環境。",
-          s3Title: "Connect / Authenticate",
-          s3Desc: "透過 host UI 完成瀏覽器 OAuth（靜態 public client，無需 DCR）。",
-          s3WizardLabel: "各 Host 操作",
-          s3Step1: "<strong>Claude Code</strong>：使用 <code>/mcp</code> 並 Connect / Re-authenticate <code>insightark</code>",
-          s3Step2: "<strong>Cursor</strong>：Customize → Tools &amp; MCP → Connect",
-          s3Step3: "<strong>Codex CLI</strong>：必要時 <code>codex mcp login insightark</code>（已由 plugin 註冊，勿再 mcp add）",
-          s3Step4: "<strong>ChatGPT desktop</strong>：App/plugin UI Connect / Reauthorize；不需 CLI",
-          s3AutoNote: "完成瀏覽器授權後，host 會保存 OAuth credential。請勿在聊天中貼任何 token。",
+          s2Desc: "從 agent marketplace 安裝 <strong>SUPER 8 Studio InsightArk Skills</strong>。Marketplace 來源：",
+          s2Step1: "<strong>ChatGPT / Codex</strong>：外掛程式 → 新增市集 → 個人 tab → Install；或 Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code>",
+          s2Step2: "<strong>Claude Code</strong>：Desktop Plugins，或 terminal <code>/plugin marketplace add</code> / <code>/plugin install</code>",
+          s2Step3: "<strong>Cursor</strong>：Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add",
+          s2Note: "逐步點擊說明以 <code>README.md</code> 為準。Plugin 會自動設定內建的 <code>insightark</code> MCP server。",
+          s3Title: "完成 OAuth 授權",
+          s3Desc: "安裝或認證時，agent 會開啟 InsightArk 登入頁面。登入後確認 <code>insightark-mcp:read</code> 與 <code>insightark-mcp:write</code>，再按允許。",
+          s3WizardLabel: "各 Agent 操作",
+          s3Step1: "<strong>ChatGPT / Codex</strong>：安裝 plugin 時自動開啟 OAuth；完成後開啟新的 Codex Work 對話",
+          s3Step2: "<strong>Claude Code</strong>：安裝 plugin 時自動開啟 OAuth",
+          s3Step3: "<strong>Cursor</strong>：plugin 詳情 → MCPs → <code>insightark</code> 右側 Authenticate",
+          s3Step4: "請勿使用獨立的 MCP login 指令，也不要另外手動新增 MCP server",
+          s3AutoNote: "完成授權後，agent 會保存 OAuth credential。請勿在聊天中貼任何 token。",
           s4Title: "驗證設定",
           s4Desc: "請 agent 使用 <code>insightark-session</code> skill，呼叫 MCP <code>auth_me</code>。",
           s4SuccessLabel: "成功指標",
           s4FailLabel: "疑難排解",
           s4Err1Title: "需要認證（401 / 403 / authentication-required）",
-          s4Err1Desc: "使用 host Connect / Re-authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題，請先檢查連線與 host MCP 狀態。",
+          s4Err1Desc: "ChatGPT / Codex 與 Claude Code：解除安裝後重新安裝。Cursor：MCPs → insightark → Logout，再按 Authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題。",
           s4Err2Title: "錯誤環境",
           s4Err2Desc: "從正確的 release channel 重新安裝 plugin（staging / production URL 已 bake）。",
           s4SuccessMsg: "設定完成！可以開始使用 InsightArk skills。",
-          s5Title: "登出、撤銷與卸載",
-          s5Desc: "這三件事不同，請分別處理。",
-          s5Step1: "<strong>Host logout / clear-auth</strong>：清除本機 OAuth；之後需重新 Connect",
-          s5Step2: "<strong>Console Connected Apps revoke</strong>：撤銷伺服器 refresh token family（plugin uninstall 不一定會做）",
-          s5Step3: "<strong>Plugin uninstall</strong>：從 host marketplace / plugin manager 移除 plugin",
-          s5DangerNote: "不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console Connected Apps。",
+          s5Title: "重新授權、撤銷與卸載",
+          s5Desc: "重新授權方式依 agent 而異；撤銷伺服器授權請到 Console。",
+          s5Step1: "<strong>ChatGPT / Codex、Claude Code</strong>：解除安裝 plugin 後再安裝，安裝時會重新走 OAuth",
+          s5Step2: "<strong>Cursor</strong>：plugin 詳情 → MCPs → insightark → Environments → Logout → Authenticate",
+          s5Step3: "<strong>Console Connected Apps</strong>：左下角頭像 → 使用者資訊 → 已連接的應用程式，可撤銷授權",
+          s5DangerNote: "不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console 已連接的應用程式。",
           copy: "複製",
           copied: "已複製！",
         },
         en: {
           headerSubtitle: "Setup Guide",
-          steps: ["Choose Host", "Install Plugin", "Connect OAuth", "Validate", "Logout / Uninstall"],
+          steps: ["Choose Agent", "Install Plugin", "OAuth", "Validate", "Reauthorize / Uninstall"],
           btnPrev: "Previous",
           btnNext: "Next →",
           btnDone: "Done 🎉",
-          s1Title: "Choose your host",
-          s1Desc: "InsightArk installs from each AI host's plugin marketplace. Pick the host you use.",
-          s1Tip: "The supported customer path is <strong>host plugin install</strong> then OAuth Connect. No SessionToken paste and no manual MCP URL.",
-          thHost: "Host",
-          thClient: "Static OAuth client",
-          thManifest: "MCP manifest",
+          s1Title: "Choose your agent",
+          s1Desc: "InsightArk installs from each AI agent's plugin marketplace. See <code>README.md</code> for full step-by-step instructions.",
+          s1Tip: "The supported customer path is <strong>marketplace plugin install</strong>, then OAuth. Do not add the MCP server manually.",
+          thHost: "Agent",
+          thClient: "Install entry",
+          thManifest: "OAuth timing",
           s2Title: "Install the plugin",
-          s2Desc: "Install InsightArk from the host marketplace. The plugin delivers workflow skills plus the bundled <code>insightark</code> MCP.",
-          s2Step1: "Open the plugin marketplace in Claude Code, Cursor, Codex, or ChatGPT desktop",
-          s2Step2: "Search for and install <strong>InsightArk Skills</strong> (or SUPER 8 Studio InsightArk Skills)",
-          s2Step3: "Confirm the plugin is enabled and the MCP server name is <code>insightark</code>",
-          s2Note: "Release channels bake the MCP URL (staging / production). Customers do not select an API environment.",
-          s3Title: "Connect / Authenticate",
-          s3Desc: "Complete browser OAuth through the host UI (static public clients; no DCR).",
-          s3WizardLabel: "Host-specific actions",
-          s3Step1: "<strong>Claude Code</strong>: run <code>/mcp</code> and Connect / Re-authenticate <code>insightark</code>",
-          s3Step2: "<strong>Cursor</strong>: Customize → Tools &amp; MCP → Connect",
-          s3Step3: "<strong>Codex CLI</strong>: if needed, <code>codex mcp login insightark</code> (already plugin-registered; do not <code>mcp add</code> again)",
-          s3Step4: "<strong>ChatGPT desktop</strong>: App/plugin UI Connect / Reauthorize; CLI not required",
-          s3AutoNote: "After browser authorize, the host stores the OAuth credential. Never paste tokens in chat.",
+          s2Desc: "Install <strong>SUPER 8 Studio InsightArk Skills</strong> from the agent marketplace. Marketplace source:",
+          s2Step1: "<strong>ChatGPT / Codex</strong>: Plugins → Add marketplace → Personal tab → Install; or Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code>",
+          s2Step2: "<strong>Claude Code</strong>: Desktop Plugins, or terminal <code>/plugin marketplace add</code> / <code>/plugin install</code>",
+          s2Step3: "<strong>Cursor</strong>: Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add",
+          s2Note: "Use <code>README.md</code> for click-by-click detail. The plugin configures the bundled <code>insightark</code> MCP server automatically.",
+          s3Title: "Complete OAuth authorization",
+          s3Desc: "During install or authentication, the agent opens the InsightArk sign-in page. After sign-in, review <code>insightark-mcp:read</code> and <code>insightark-mcp:write</code>, then select Allow.",
+          s3WizardLabel: "Agent-specific actions",
+          s3Step1: "<strong>ChatGPT / Codex</strong>: OAuth opens automatically during plugin install; then start a new Codex Work conversation",
+          s3Step2: "<strong>Claude Code</strong>: OAuth opens automatically during plugin install",
+          s3Step3: "<strong>Cursor</strong>: plugin details → MCPs → Authenticate next to <code>insightark</code>",
+          s3Step4: "Do not use standalone MCP login commands, and do not add the MCP server manually",
+          s3AutoNote: "After authorization, the agent stores the OAuth credential. Never paste tokens in chat.",
           s4Title: "Validate setup",
           s4Desc: "Ask your agent to use the <code>insightark-session</code> skill and call MCP <code>auth_me</code>.",
           s4SuccessLabel: "Success indicators",
           s4FailLabel: "Troubleshooting",
           s4Err1Title: "Authentication required (401 / 403 / authentication-required)",
-          s4Err1Desc: "Use host Connect / Re-authenticate. Network errors, timeouts, MCP unavailable, or 5xx are not OAuth failures — check connectivity and host MCP status first.",
+          s4Err1Desc: "ChatGPT / Codex and Claude Code: uninstall, then reinstall. Cursor: MCPs → insightark → Logout, then Authenticate. Network errors, timeouts, MCP unavailable, or 5xx are not OAuth failures.",
           s4Err2Title: "Wrong environment",
           s4Err2Desc: "Reinstall the plugin from the correct release channel (staging / production URLs are baked).",
           s4SuccessMsg: "Setup complete! You can use InsightArk skills.",
-          s5Title: "Logout, revoke, and uninstall",
-          s5Desc: "These are different actions — handle them separately.",
-          s5Step1: "<strong>Host logout / clear-auth</strong>: clears local OAuth; Connect again afterward",
-          s5Step2: "<strong>Console Connected Apps revoke</strong>: revokes the server refresh-token family (plugin uninstall may not do this)",
-          s5Step3: "<strong>Plugin uninstall</strong>: remove the plugin from the host marketplace / plugin manager",
+          s5Title: "Reauthorize, revoke, and uninstall",
+          s5Desc: "Reauthorization differs by agent. Revoke server-side access in Console.",
+          s5Step1: "<strong>ChatGPT / Codex, Claude Code</strong>: uninstall the plugin, then install again to restart OAuth",
+          s5Step2: "<strong>Cursor</strong>: plugin details → MCPs → insightark → Environments → Logout → Authenticate",
+          s5Step3: "<strong>Console Connected Apps</strong>: avatar (lower left) → User Information → Connected Apps to revoke authorization",
           s5DangerNote: "Do not assume plugin uninstall revokes Console OAuth. Revoke server credentials in Console Connected Apps when needed.",
           copy: "Copy",
           copied: "Copied!",

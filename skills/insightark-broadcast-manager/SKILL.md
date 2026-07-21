@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-broadcast-manager
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
@@ -24,7 +26,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Create** — for rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`, then `messaging_message_preview` → confirm → `broadcast_create` by default for rich / quickReply batches; skip preview only when the user explicitly asks
+   - **Create** — for rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → disclose 2-credit cost → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks
    - **Get** — `broadcast_get`; compare `options.customerNum` to running `success` / `fail`
    - **List** — `broadcast_list`, optionally filtered by `status`
 4. Return the MCP response as-is.

@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-customer-manager
 
+**Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
+
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.
 
 ## MCP Tools
@@ -29,7 +31,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - `crm_customer_update` for supported public profile changes (confirm first)
    - `crm_customer_tag_add` to append one or more tags (confirm first)
    - `crm_customer_tag_remove` to remove one or more tags (confirm first)
-4. Return the result grounded in the public developer API response.
+4. Return the result grounded in the published MCP / public customer schema response.
 
 ## Example requests
 
@@ -52,5 +54,5 @@ Exact editable fields and enum values come from the `crm_customer_update` MCP to
 
 - Treat update and tag operations as explicit write actions.
 - Do not perform a write unless the target customer id and intended field or tag changes are explicit.
-- Stay within the published public customer schema and developer API routes.
+- Stay within the published public customer schema and InsightArk MCP tools.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.
