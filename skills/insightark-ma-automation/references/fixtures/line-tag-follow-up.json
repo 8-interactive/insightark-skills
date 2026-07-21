@@ -20,18 +20,25 @@
     {
       "id": "start_1",
       "type": "start",
-      "position": { "x": 0, "y": 0 }
+      "position": {
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "id": "trigger_tag",
       "type": "trigger",
       "data": {
         "type": "tag",
-        "event": "<REQUIRED_FROM_CUSTOMER_TAG_EVENT>",
         "match": "<REQUIRED_FROM_CUSTOMER_TAG_MATCH>",
-        "tags": ["<REQUIRED_FROM_CUSTOMER_TAG>"]
+        "tags": [
+          "<REQUIRED_FROM_CUSTOMER_TAG>"
+        ]
       },
-      "position": { "x": 120, "y": 0 }
+      "position": {
+        "x": 120,
+        "y": 0
+      }
     },
     {
       "id": "message_follow_up",
@@ -49,17 +56,32 @@
           }
         ]
       },
-      "position": { "x": 280, "y": 0 }
+      "position": {
+        "x": 280,
+        "y": 0
+      }
     },
     {
       "id": "end_1",
       "type": "end",
-      "position": { "x": 440, "y": 0 }
+      "position": {
+        "x": 440,
+        "y": 0
+      }
     }
   ],
   "edges": [
-    { "source": "start_1", "target": "trigger_tag" },
-    { "source": "trigger_tag", "target": "message_follow_up" },
-    { "source": "message_follow_up", "target": "end_1" }
+    {
+      "source": "start_1",
+      "target": "trigger_tag"
+    },
+    {
+      "source": "trigger_tag",
+      "target": "message_follow_up"
+    },
+    {
+      "source": "message_follow_up",
+      "target": "end_1"
+    }
   ]
 }

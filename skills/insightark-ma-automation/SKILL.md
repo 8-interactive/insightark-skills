@@ -140,7 +140,7 @@ Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confi
 | `startTime`, `endTime` | Schedule |
 | `limits.*` | Quotas |
 | `oos.*` | Off-hours policy |
-| trigger rules / tags | Trigger semantics |
+| trigger rules / tags | Tag triggers: `match` (`any`\|`all`) + `tags` only — never a tag `event` |
 | message copy, waits, URLs, buttons | Content / behavior |
 | group timeouts / allowMulti | Branch timing |
 

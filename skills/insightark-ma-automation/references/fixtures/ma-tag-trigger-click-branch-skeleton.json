@@ -20,18 +20,25 @@
     {
       "id": "start_1",
       "type": "start",
-      "position": { "x": 0, "y": 0 }
+      "position": {
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "id": "trigger_tag",
       "type": "trigger",
       "data": {
         "type": "tag",
-        "event": "<REQUIRED_FROM_CUSTOMER_TAG_EVENT>",
         "match": "<REQUIRED_FROM_CUSTOMER_TAG_MATCH>",
-        "tags": ["<REQUIRED_FROM_CUSTOMER_TAG>"]
+        "tags": [
+          "<REQUIRED_FROM_CUSTOMER_TAG>"
+        ]
       },
-      "position": { "x": 120, "y": 0 }
+      "position": {
+        "x": 120,
+        "y": 0
+      }
     },
     {
       "id": "message_card",
@@ -72,7 +79,10 @@
           }
         ]
       },
-      "position": { "x": 280, "y": 0 }
+      "position": {
+        "x": 280,
+        "y": 0
+      }
     },
     {
       "id": "group_click",
@@ -85,7 +95,10 @@
         "time": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_SECONDS>",
         "allowMulti": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>"
       },
-      "position": { "x": 440, "y": 0 }
+      "position": {
+        "x": 440,
+        "y": 0
+      }
     },
     {
       "id": "cond_yes",
@@ -95,10 +108,16 @@
         "source": "message_card",
         "type": "click",
         "buttons": [
-          { "index": 1, "id": "tplCard001_elements.0.buttons.0" }
+          {
+            "index": 1,
+            "id": "tplCard001_elements.0.buttons.0"
+          }
         ]
       },
-      "position": { "x": 600, "y": -80 }
+      "position": {
+        "x": 600,
+        "y": -80
+      }
     },
     {
       "id": "cond_no",
@@ -108,10 +127,16 @@
         "source": "message_card",
         "type": "click",
         "buttons": [
-          { "index": 2, "id": "tplCard001_elements.0.buttons.1" }
+          {
+            "index": 2,
+            "id": "tplCard001_elements.0.buttons.1"
+          }
         ]
       },
-      "position": { "x": 600, "y": 40 }
+      "position": {
+        "x": 600,
+        "y": 40
+      }
     },
     {
       "id": "cond_timeout",
@@ -121,7 +146,10 @@
         "source": "message_card",
         "type": "n-click"
       },
-      "position": { "x": 600, "y": 160 }
+      "position": {
+        "x": 600,
+        "y": 160
+      }
     },
     {
       "id": "msg_yes",
@@ -139,33 +167,72 @@
           }
         ]
       },
-      "position": { "x": 820, "y": -80 }
+      "position": {
+        "x": 820,
+        "y": -80
+      }
     },
     {
       "id": "end_yes",
       "type": "end",
-      "position": { "x": 1000, "y": -80 }
+      "position": {
+        "x": 1000,
+        "y": -80
+      }
     },
     {
       "id": "end_no",
       "type": "end",
-      "position": { "x": 820, "y": 40 }
+      "position": {
+        "x": 820,
+        "y": 40
+      }
     },
     {
       "id": "end_timeout",
       "type": "end",
-      "position": { "x": 820, "y": 160 }
+      "position": {
+        "x": 820,
+        "y": 160
+      }
     }
   ],
   "edges": [
-    { "source": "start_1", "target": "trigger_tag" },
-    { "source": "trigger_tag", "target": "message_card" },
-    { "source": "message_card", "target": "cond_yes" },
-    { "source": "message_card", "target": "cond_no" },
-    { "source": "message_card", "target": "cond_timeout" },
-    { "source": "cond_yes", "target": "msg_yes" },
-    { "source": "msg_yes", "target": "end_yes" },
-    { "source": "cond_no", "target": "end_no" },
-    { "source": "cond_timeout", "target": "end_timeout" }
+    {
+      "source": "start_1",
+      "target": "trigger_tag"
+    },
+    {
+      "source": "trigger_tag",
+      "target": "message_card"
+    },
+    {
+      "source": "message_card",
+      "target": "cond_yes"
+    },
+    {
+      "source": "message_card",
+      "target": "cond_no"
+    },
+    {
+      "source": "message_card",
+      "target": "cond_timeout"
+    },
+    {
+      "source": "cond_yes",
+      "target": "msg_yes"
+    },
+    {
+      "source": "msg_yes",
+      "target": "end_yes"
+    },
+    {
+      "source": "cond_no",
+      "target": "end_no"
+    },
+    {
+      "source": "cond_timeout",
+      "target": "end_timeout"
+    }
   ]
 }
