@@ -71,6 +71,7 @@ Default (omit `senderTypes`) returns **Customer only**. Staff fields (`userName`
 
 - Never pass singular `senderType` (removed from the MCP schema).
 - Prefer one multi-class `senderTypes` call over two searches (one call / one 20-credit charge vs two charges).
+- Time window is always applied: omit `startAt`/`endAt` → last **14 days**; explicit range max **90 days**. When the user asks for a specific period, always pass matching `startAt`/`endAt` — do not rely on the 14-day default.
 - Still narrow with `conversationId` and a tight `startAt`/`endAt` when possible.
 
 ## Message search timeout (`error.code = message_search_timeout`)

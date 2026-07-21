@@ -89,6 +89,18 @@ Default (omit `senderTypes`) returns **Customer only**. Staff `userName` / `user
 
 Never pass singular `senderType`. Prefer one multi-class call over two searches. Narrow with `conversationId` and a small time window when possible.
 
+## Message search time window (important)
+
+Server **always** applies a time window on `messaging_message_search`:
+
+| Args | Effective window |
+|---|---|
+| omit both `startAt` and `endAt` | **last 14 days** ending now |
+| only one side | missing side filled by the same rules |
+| both provided | that range, **max 90 days** (larger → `error/date-range-too-large`) |
+
+**Do not rely on the 14-day default when the user asks for a specific period.** If the user says "last 30 days" / "this month" / a date range, always pass explicit `startAt` and `endAt` matching that ask. Omitting them silently truncates the sample to 14 days and under-covers the request.
+
 ## Message search timeout (`error.code = message_search_timeout`)
 
 When search returns structured `message_search_timeout` (`isError: true`):

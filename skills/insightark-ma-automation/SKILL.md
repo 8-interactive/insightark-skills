@@ -142,7 +142,7 @@ Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confi
 | `oos.*` | Off-hours policy |
 | trigger rules / tags | Tag triggers: `match` (`any`\|`all`) + `tags` only — never a tag `event` |
 | message copy, waits, URLs, buttons | Content / behavior |
-| group timeouts / allowMulti | Branch timing |
+| group `timeout.value` + `timeout.unit` (`minute`\|`hour`\|`day`), allowMulti | Branch timing — collect value and unit; **never** calculate or author `time` / `timeType` seconds |
 
 Do **not** tell the customer a journey is published after `ma_procedure_create` alone — call `ma_procedure_start` only after explicit approval.
 
@@ -228,8 +228,13 @@ Group related codes; fix **wiring**, not copy, unless the code is clearly about 
 | `error/ma-payload-condition-group-missing` | Point `groupId` at an existing `group` node |
 | `error/ma-payload-condition-group-type` | That group must have `data.type: "click"` |
 | `error/ma-payload-condition-group-click-type` | Set `clickType` to `any` or `button` |
-| `error/ma-payload-condition-group-time-type` | Set `timeType` to `day` \| `hour` \| `minute` |
-| `error/ma-payload-condition-group-time` | Set finite non-negative `time` (customer-confirmed timeout) |
+| `error/ma-payload-condition-group-duration-shape` | Use only `data.timeout: { value, unit }`; remove raw `time` / `timeType` |
+| `error/ma-payload-condition-group-timeout-value` | Set `timeout.value` to a customer-confirmed positive whole number |
+| `error/ma-payload-condition-group-timeout-unit` | Set `timeout.unit` to `minute` \| `hour` \| `day` |
+| `error/ma-payload-condition-group-time-type` | Internal/prepared only — do not author `timeType` on MCP; repair via `timeout.unit` |
+| `error/ma-payload-condition-group-time` | Internal/prepared only — do not author seconds on MCP; repair via `timeout.value` / `unit` |
+
+**Duration authoring:** ask the customer for a positive whole value and one unit (`minute` / `hour` / `day`). Write `group.data.timeout`. Never calculate seconds and never fall back to `time` / `timeType`.
 
 ### Source + edges
 

@@ -91,8 +91,10 @@
         "source": "message_card",
         "type": "click",
         "clickType": "button",
-        "timeType": "minute",
-        "time": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_SECONDS>",
+        "timeout": {
+          "value": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_VALUE>",
+          "unit": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_UNIT>"
+        },
         "allowMulti": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>"
       },
       "position": {

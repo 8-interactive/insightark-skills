@@ -41,6 +41,9 @@ keyword" across the whole org, with **no tag constraint**.
 - Default sender filter (omit `senderType`/`senderTypes`) is **Customer only**.
   For full customer+staff dialogue pass `senderTypes: ["Customer","_User"]` in a
   single call — do not pass both `senderType` and `senderTypes`.
+- Time window is **always** applied server-side: omit both dates → last **14 days**;
+  explicit range max **90 days**. If the user asks for a specific period (e.g. 30
+  days), pass matching `startAt`/`endAt` — do not rely on the 14-day default.
 - `limit` default 20, max **1000**; page with `skip`.
 
 ### Choosing a path
