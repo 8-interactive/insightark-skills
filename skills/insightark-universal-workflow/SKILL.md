@@ -22,6 +22,7 @@ This is a **policy** skill, not an operational workflow. It does not own a write
 
 - **Rich / quick-reply content** → read `references/rich-preview-gate.md` before send, broadcast create, or MA validate/create for that step.
 - **Any write path** → read `references/write-lifecycle.md` for confirmation and invalidation rules.
+- **Scheduling write fields** (`broadcast_create.scheduleAt`, MA `startTime` / `endTime`) → read `references/timezone-policy.md` before assembling or confirming those values.
 
 ## What this skill does not do
 

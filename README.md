@@ -27,7 +27,7 @@ For example:
 
 | Skill | Capability |
 |---|---|
-| `insightark-universal-workflow` | Shared policy (customer guidance, rich preview, write lifecycle) — prerequisite for all workflows |
+| `insightark-universal-workflow` | Shared policy (customer guidance, rich preview, write lifecycle, scheduling timezone) — prerequisite for all workflows |
 | `insightark-session` | Validate access and inspect the authenticated identity, organizations, and credit balance |
 | `insightark-investigator` | Investigate conversations and messages in read-only mode |
 | `insightark-conversations` | List and retrieve conversations and messages |
