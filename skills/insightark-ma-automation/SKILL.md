@@ -78,7 +78,7 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 | Organization | Target `orgId` (must be manageable by the current session). |
 | Journey name | `name`. |
 | Platform (發送平台) | `platform` — **必填**（如 line、facebook、instagram、whatsapp、livechat）；由客戶指定。 |
-| Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。客戶給牆上時間但未指定時區 → 依 `skills/insightark-universal-workflow/references/timezone-policy.md` 解讀為 Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
+| Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
 | Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 Explain what each limit controls before asking. **Do not** describe numeric `0` as unlimited (`per_customer: 0` is a hard stop). Unlimited is not defined by this skill. |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
 | Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則使用 `oos: { "enabled": false, ... }`；**若 `enabled: true`**，必須與客戶確認並填寫 `hour`、`minute`、`duration`（秒）。 |
@@ -98,7 +98,7 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
    - Values only from the customer, plus wiring-only ids/positions.
    - Keep catalog-materialized root `templateType` as returned; for blank canvas, set `authoringSource: "blank-canvas"` and omit (or use `all`).
    - Preserve catalog `templateId`/`version` in your explanation for drift diagnosis.
-   - For `startTime` / `endTime`, follow `skills/insightark-universal-workflow/references/timezone-policy.md` (default Asia/Taipei when timezone omitted; never invent date-only clock bounds).
+   - For customer-derived `startTime` / `endTime` instants, follow `skills/insightark-universal-workflow/references/timezone-policy.md` (default Asia/Taipei when timezone omitted; never invent date-only clock bounds).
 4. Show a compact final field table and get explicit customer sign-off. For schedule fields include **customer intent** and **MCP input** (and note equivalent UTC storage when helpful).
 5. For any preview-required message step (non-`text/plain` or quick replies), follow `skills/insightark-universal-workflow/references/rich-preview-gate.md` (disclose 2-credit cost, preview + journey timing, wait for approval). Text-only steps without quick replies need confirmation only.
 6. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
@@ -282,7 +282,7 @@ Do **not** try to fix these by only editing message copy.
 | `name` | Display name from the customer. |
 | `enabled` | Whether the customer wants it enabled. |
 | `platform` | Channel confirmed by the customer. |
-| `startTime` / `endTime` | Schedule bounds from the customer; encode per timezone-policy (default Asia/Taipei when timezone omitted). Confirm **customer intent** + **MCP input** before validate/create. |
+| `startTime` / `endTime` | Schedule bounds from the customer; encode customer-derived instants per timezone-policy (default Asia/Taipei when timezone omitted). Confirm **customer intent** + **MCP input** before validate/create. |
 | `limits` | Total / per-customer caps; **`message` and `per_customer` must be non-negative integers**, or `per_customer: "onceByDay"`. Do **not** call `0` unlimited. |
 | `fbTag` | Meta-related tag policy (customer-confirmed). |
 | `oos` | Off-hours / OOS settings confirmed by the customer. |

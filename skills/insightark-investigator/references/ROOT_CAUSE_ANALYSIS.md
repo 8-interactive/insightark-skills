@@ -45,7 +45,8 @@ both, or cost and quality both suffer.
 - **No tag, want a period or keyword sweep** → Strategy A,
   `messaging_message_search` with a complaint-leaning `keyword` (退款 / 退貨 / 出貨
   / 到貨 / 客訴 / 投訴 / 沒收到 / 錯 / 壞 / 慢 / 態度 …), a bounded `startAt`/`endAt`,
-  and `platform` if the ask is channel-specific.
+  and `platform` if the ask is channel-specific. Follow the canonical Strategy A
+  time-window rules in [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
 - Read the **full conversation timeline** (`messaging_conversation_messages`, or
   `senderTypes: ["Customer","_User"]` on search) so a root cause is judged from
   the exchange, not one line in isolation.

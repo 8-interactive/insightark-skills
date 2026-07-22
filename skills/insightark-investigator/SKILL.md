@@ -96,10 +96,13 @@ Server **always** applies a time window on `messaging_message_search`:
 | Args | Effective window |
 |---|---|
 | omit both `startAt` and `endAt` | **last 14 days** ending now |
-| only one side | missing side filled by the same rules |
+| only `startAt` | `endAt = now` |
+| only `endAt` | `startAt = endAt − 14 days` |
 | both provided | that range, **max 90 days** (larger → `error/date-range-too-large`) |
 
 **Do not rely on the 14-day default when the user asks for a specific period.** If the user says "last 30 days" / "this month" / a date range, always pass explicit `startAt` and `endAt` matching that ask. Omitting them silently truncates the sample to 14 days and under-covers the request.
+
+When customer time language becomes `startAt`/`endAt` instant boundaries, follow `skills/insightark-universal-workflow/references/timezone-policy.md` and disclose the effective timezone. Date-only two-sided ranges need confirmed clocks; one-sided date-only endpoints need a confirmed clock, disclosure of the server-derived opposite bound (`endAt=now` or `startAt=endAt−14d`), and a ≤90-day check — never silently invent midnight. Analysis lenses reuse the canonical Strategy A rules in `references/QUALITATIVE_DETECTION.md`.
 
 ## Message search timeout (`error.code = message_search_timeout`)
 

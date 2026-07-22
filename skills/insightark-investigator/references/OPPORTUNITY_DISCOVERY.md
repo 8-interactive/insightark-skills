@@ -47,7 +47,9 @@ Classify each candidate into what the customer is actually signalling:
 - **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → Strategy B.
 - **Sweep by period / keyword** → Strategy A with positive-intent `keyword`
   seeds above, a bounded `startAt`/`endAt`, and `platform` if channel-specific.
-- Prefer reading the **customer turns** (`senderType: "Customer"` / omit) for
+  Follow the canonical Strategy A time-window rules in
+  [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
+- Prefer reading the **customer turns** (`senderTypes: ["Customer"]` / omit) for
   raw voice-of-customer; pull staff replies only when the response context
   matters for judging the opportunity. Keep within the shared sample caps.
 

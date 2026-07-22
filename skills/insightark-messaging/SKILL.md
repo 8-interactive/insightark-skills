@@ -71,7 +71,8 @@ Default (omit `senderTypes`) returns **Customer only**. Staff fields (`userName`
 
 - Never pass singular `senderType` (removed from the MCP schema).
 - Prefer one multi-class `senderTypes` call over two searches (one call / one 20-credit charge vs two charges).
-- Time window is always applied: omit `startAt`/`endAt` → last **14 days**; explicit range max **90 days**. When the user asks for a specific period, always pass matching `startAt`/`endAt` — do not rely on the 14-day default.
+- Time window is always applied: omit `startAt`/`endAt` → last **14 days**; only `startAt` → `endAt = now`; only `endAt` → `startAt = endAt − 14 days`; both provided → max **90 days**. When the user asks for a specific period, always pass matching `startAt`/`endAt` — do not rely on the 14-day default.
+- When customer time language becomes `startAt`/`endAt` instant boundaries, follow `skills/insightark-universal-workflow/references/timezone-policy.md` and disclose the effective timezone. Date-only two-sided ranges need confirmed clocks; one-sided date-only endpoints need a confirmed clock plus disclosure of the server-derived opposite bound, and must stay ≤ 90 days — never silently invent midnight.
 - Still narrow with `conversationId` and a tight `startAt`/`endAt` when possible.
 
 ## Message search timeout (`error.code = message_search_timeout`)

@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased — Default Asia/Taipei for scheduling writes
+## 2.4.0 — Generic instant timezone policy (query windows included)
 
-- Add universal `references/timezone-policy.md`: when customers omit a timezone on **scheduling write** fields (`broadcast_create.scheduleAt`, MA `startTime` / `endTime`), interpret as Asia/Taipei (`+08:00`); date-only ranges still require explicit clock bounds.
-- Relative dates (“tomorrow”, …) resolve on the **customer-specified timezone calendar** when present; Asia/Taipei only when unspecified. Confirmation shows absolute date + timezone used for resolution.
-- Broadcast / MA skills confirm **customer intent**, **MCP input**, and equivalent UTC storage/return; broadcast schedule example uses `+08:00` (not `Z`).
-- Hierarchy + release-tree validators require the new reference and the relative-date / explicit-timezone contract; “no bare datetime / no default Z” is agent policy (broadcast API still only `new Date()`-validates).
+- Apply universal `timezone-policy.md` whenever customer temporal language becomes an MCP input representing a specific instant or interval boundary; no current tool/field allowlist is required.
+- Unspecified customer wall-clock → Asia/Taipei (`+08:00`); honor explicit timezone / `Z` / offset. Exclude calendar dates, recurring wall-clock settings, durations, cursors, and returned timestamps.
+- Keep message-search date-only / one-sided defaults and ≤90-day limit in messaging and canonical investigator Strategy A guidance; downstream analysis lenses reuse Strategy A.
+- `CS_QUALITY_REVIEW.md`: replace singular `senderType` with `senderTypes: ["_User"]`.
+- Hierarchy validators assert semantic policy ownership, canonical domain guidance, and CS `senderTypes`-only.
 
 ## 2.3.0 — MA template discovery + universal workflow policy hierarchy
 

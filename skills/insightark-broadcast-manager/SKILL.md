@@ -26,7 +26,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Create** — for rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → disclose 2-credit cost → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks. When setting `scheduleAt`, follow `skills/insightark-universal-workflow/references/timezone-policy.md`.
+   - **Create** — for rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → disclose 2-credit cost → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks. When customer time language becomes the schedule instant, apply `skills/insightark-universal-workflow/references/timezone-policy.md`.
    - **Get** — `broadcast_get`; compare `options.customerNum` to running `success` / `fail`
    - **List** — `broadcast_list`, optionally filtered by `status`
 4. Return the MCP response as-is.
@@ -43,7 +43,8 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 Exact allowed strings come from the MCP tool schema.
 
 - `broadcast_create.platform` — one platform per task (`line` / `facebook` / `instagram` / `whatsapp` per schema enum). Split multi-platform audiences into separate tasks.
-- `broadcast_create.scheduleAt` — ISO 8601. Follow timezone-policy: unspecified wall-clock → Asia/Taipei (`+08:00`); customer-named timezone / `Z` / offset → honor it. Before create, confirm **customer intent**, **MCP input**, and that the system may **return/store** the equivalent UTC instant.
+- `broadcast_create.scheduleAt` — ISO 8601 schedule instant. Follow timezone-policy: unspecified wall-clock → Asia/Taipei (`+08:00`); customer-named timezone / `Z` / offset → honor it. Before create, confirm **customer intent**, **MCP input**, and that the system may **return/store** the equivalent UTC instant.
+  The server parses the input into a `Date` and may persist/return canonical UTC via `.toISOString()`: `2026-07-23T09:00:00+08:00` and `2026-07-23T01:00:00.000Z` are the same instant. This normalization does not change the customer's intended Taipei wall-clock time.
 - `broadcast_list.status` — single token or comma-separated list (e.g. `working,done`). Allowed tokens are listed in the tool description; invalid tokens are rejected at runtime (no scalar `enum` on the param).
 - `broadcast_create.messageTag` — useful for Facebook/Instagram when Meta’s 24h messaging window requires a tag. Schema lists allowed tag values. Do not invent server rejection for tags on other platforms unless the published schema/runtime already enforces it.
 - `media_upload_url.purpose` × `contentType` — match purpose to allowed MIME types from the tool description (image purposes → image MIME; `file` → PDF).

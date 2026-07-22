@@ -1,44 +1,42 @@
-# Timezone policy (scheduling writes)
+# Timezone policy for instant-valued MCP inputs
 
-Apply this policy **only** when assembling or confirming these **write payload** fields:
+Use this policy when **all** of the following are true:
 
-- `broadcast_create.scheduleAt`
-- Marketing Automation `startTime`
-- Marketing Automation `endTime`
+1. The value comes from customer-provided temporal language.
+2. The agent will place the value in an MCP input.
+3. The input represents a **specific instant** or an **interval boundary parsed as an instant**.
 
-Do **not** apply this policy to query time windows (for example message-search `startAt` / `endAt`) or other fields that happen to be named `startTime` / `endTime`.
+This is a semantic rule, not a tool or field-name allowlist. Future instant-valued MCP inputs inherit it automatically.
 
-## Default
+## Do not apply to semantic non-instants
 
-1. If the customer gives a **wall-clock time** and does **not** specify a timezone → interpret as **Asia/Taipei (UTC+8)** and encode ISO 8601 with offset **`+08:00`**  
-   (example: `2026-07-23T09:00:00+08:00`).
-2. If the customer explicitly names UTC / another timezone, or already provides `Z` or an offset → **honor that**; do not rewrite to Taipei.
-3. Relative dates (“tomorrow”, “next Friday”) → resolve on the calendar of the **timezone in effect for this request**:
-   - customer named a timezone / offset / `Z` → resolve relative dates in **that** timezone’s calendar;
-   - timezone omitted → resolve in **Asia/Taipei**.
-   Then show the **resolved absolute date** and the **timezone used for resolution** in the confirmation table before writing.  
-   Example failure mode to avoid: when Taipei has already crossed midnight but UTC has not, “tomorrow 09:00 UTC” must use the UTC calendar day, not Taipei’s.
-4. **Date-only** ranges (for example “7/1–7/31”) → **do not** invent start/end clock boundaries. Ask whether the intended bounds are Taipei time such as `07/01 00:00:00+08:00` through `07/31 23:59:59+08:00` (or another explicit pair in the customer’s timezone). Only after the customer confirms may you validate/create.  
-   Timezone default only interprets an **already explicit** wall-clock time; it does **not** replace MA’s rule against guessing schedule bounds.
-5. Agent policy (not a broadcast API guarantee): do **not** default to `Z`, and do **not** submit a bare datetime without offset for these scheduling fields when the customer did not specify a timezone.  
-   Broadcast `scheduleAt` is only validated with `new Date()` today and may accept bare datetimes; agents must still send an explicit `+08:00` (or a customer-specified offset).
+Do **not** apply instant timezone encoding solely because a value looks date- or time-related:
 
-## How broadcast persistence works
+| Semantic class | Examples | Why |
+|----------------|----------|-----|
+| Calendar date | Birthday or anniversary | Identifies a day, not a moment |
+| Recurring wall-clock setting | Daily off-hours clock | Repeats in an owning timezone |
+| Relative duration | Wait or timeout length | Measures elapsed time |
+| Cursor / opaque token | Pagination state | Not customer temporal language |
+| Returned timestamp | A time reported by a tool | Not an MCP input assembled by the agent |
 
-`broadcast_create` parses the input into a `Date` and may persist via `.toISOString()`.  
-So MCP input `2026-07-23T09:00:00+08:00` is the same instant as stored/returned UTC `2026-07-23T01:00:00.000Z`. That is expected; it does not mean the customer asked for UTC wall-clock 09:00.
+Follow the owning workflow or tool contract for these values.
 
-MA validate/create still require an ISO timezone suffix (`Z` or `±HH:MM`). When the customer omitted a timezone, supply **`+08:00`**, not `Z`.
+## Conversion rules
 
-## Confirmation table (extend existing write confirm)
+1. If the customer gives a **wall-clock time** without a timezone, interpret it as **Asia/Taipei (UTC+8)** and encode it with explicit offset **`+08:00`**.
+2. If the customer names a timezone or supplies `Z` / an offset, **honor that timezone**; do not rewrite it to Taipei.
+3. Resolve relative calendar language (for example “tomorrow” or “next Friday”) on the calendar of the **effective timezone**:
+   - customer named a timezone / offset / `Z` → use that timezone;
+   - timezone omitted → use Asia/Taipei.
+4. When an MCP input requires an instant but the customer supplied only a **date**, ask for the intended clock boundary. Do not silently invent midnight, end-of-day, or another clock.
+5. Customer-derived wall-clock instants must carry an explicit timezone suffix. Do not default an omitted customer timezone to `Z`.
 
-Before calling the write tool, include at least:
+System-derived instants such as the execution-time `now` may use canonical UTC because they do not interpret a customer wall-clock timezone.
 
-| Field | Example |
-|-------|---------|
-| Customer intent | `明天 09:00 UTC` → resolved `2026-07-23 09:00（UTC）` |
-| Timezone used for resolution | `UTC` (explicit) — or `Asia/Taipei` when unspecified |
-| MCP input | `2026-07-23T09:00:00Z` |
-| System may return/store | equivalent UTC `2026-07-23T09:00:00.000Z` |
+## Confirmation and disclosure
 
-When timezone was omitted, state in customer language that scheduling uses Taiwan time (UTC+8). When the customer named another timezone, show that timezone and the absolute date resolved on its calendar.
+- **Writes:** Follow the owning write lifecycle. Show the customer intent, effective timezone, and encoded MCP input before writing; include persistence/display conversion when the owning workflow requires it.
+- **Reads:** When customer wall-clock language is encoded, disclose the effective timezone in the same turn as the read or in the plan before calling. Do not require an extra write-style approval solely for timezone.
+
+The owning domain workflow remains responsible for tool-specific omitted values, range limits, storage behavior, credit confirmation, and other execution rules.

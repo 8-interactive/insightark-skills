@@ -22,9 +22,11 @@ agent. Therefore CS quality review runs on **Strategy A**:
 
 - To read the exchange for judging a reply in context, use
   `senderTypes: ["Customer","_User"]` in one search call.
-- To pull only staff replies, use `senderType: "_User"`.
+- To pull only staff replies, use `senderTypes: ["_User"]`.
 - Narrow with `startAt`/`endAt`, `platform`, and `conversationId` as usual, and
   honour the shared sample caps (`messaging_message_search` calls ≤ 5 per run).
+  Follow the canonical Strategy A time-window rules in
+  [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
 - **Single conversation** ("誰處理這通、回得好不好?") is still Strategy A: search
   narrowed by `conversationId` (+ `senderTypes`). Do **not** reach for
   `messaging_conversation_messages` — it reads the timeline but cannot name the
@@ -41,7 +43,7 @@ There is **no** endpoint that lists org staff. The only source of
 `senderId → agent` is the identity attached to each `_User` message by
 `messaging_message_search`. So discover agents from the data:
 
-1. Run one bounded search over the period with `senderType: "_User"` (or
+1. Run one bounded search over the period with `senderTypes: ["_User"]` (or
    `senderTypes: ["Customer","_User"]`).
 2. Collect the **distinct `sender` objectIds** that appear, each with its
    `userName` / `userEmail` label.
