@@ -1,421 +1,315 @@
-# SUPER 8 Studio InsightArk Skills
+# InsightArk Connector for AI Agents
 
-[English](#english) | [中文](#中文)
+[中文](#適用於-ai-agent-的-insightark-連接器)
 
----
+InsightArk is a core product of **Super 8 Studio**—an AI-driven conversational commerce and marketing platform. It provides social customer management and data intelligence capabilities for agent-assisted operations.
 
-<a name="english"></a>
+This plugin provides an officially supported InsightArk connection. It packages the `insightark` MCP server with workflow skills, allowing agents to work with InsightArk through natural-language requests. Officially supported agents are:
 
-**SUPER 8 Studio InsightArk Skills** is a plugin for Claude Code, Codex, and Cursor that brings [Super 8 Studio](https://www.no8.io) InsightArk MCP directly into your AI agent workflow.
+- ChatGPT / Codex
+- Claude Code
+- Cursor
 
-It provides a curated set of reusable skills covering the full CRM lifecycle — investigating conversations, managing customers, sending broadcasts, and automating marketing journeys. Once installed, your agent can query inboxes, update customer records, compose messages, and trigger campaigns without leaving the conversation interface.
+## Capabilities
 
-Credentials are managed securely through the platform's native keychain on Claude Code, or via an environment config file on Codex. A built-in health check runs automatically at session start to surface credential issues early.
+Use the plugin to:
 
-## Plugin Install (Claude Code)
+- investigate conversations and messages;
+- search, update, and tag customers;
+- draft, send, and monitor messages or broadcasts; and
+- create, validate, start, pause, and inspect marketing-automation procedures.
 
-### 1. Add marketplace and install
+For example:
 
-```bash
-claude plugin marketplace add 8-interactive/insightark-skills
-claude plugin install insightark-skills@insightark-skills
-```
+> 調查昨天未回覆的對話，整理待跟進清單。
+>
+> 找出最近 30 天有互動的客戶，並加上 `VIP` 標籤。
 
-Claude CLI `install` does **not** reliably prompt for credentials. After install, Claude will report that one required `userConfig` option is not set — you must configure it in Claude Code (or pass it via CLI).
+| Skill | Capability |
+|---|---|
+| `insightark-universal-workflow` | Shared policy (customer guidance, rich preview, write lifecycle, scheduling timezone) — prerequisite for all workflows |
+| `insightark-session` | Validate access and inspect the authenticated identity, organizations, and credit balance |
+| `insightark-investigator` | Investigate conversations and messages in read-only mode |
+| `insightark-conversations` | List and retrieve conversations and messages |
+| `insightark-customer-manager` | Search and update customers; add or remove tags |
+| `insightark-messaging` | Send and validate messages, including LINE templates |
+| `insightark-broadcast-manager` | Create and monitor broadcasts |
+| `insightark-ma-automation` | Manage marketing-automation procedures |
 
-| Variable           | Description                                           |
-| ------------------ | ----------------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken` (stored in system keychain) |
+## Prerequisites
 
-After install, run `claude plugin details insightark-skills@insightark-skills` and confirm **MCP servers ≥ 1** (`insightark` with the hosted HTTP URL).
+- An InsightArk-enabled Super 8 Studio organization.
+- Organization administrator access.
+- A supported agent from the list above.
 
-### 2. Enable the plugin
+## Installation and authentication
 
-Installed disabled by default (connects to an external API):
+Install the plugin from a supported marketplace. The plugin automatically configures the bundled `insightark` MCP server; do not add it separately. MCP server authentication uses OAuth; the authorization flow differs by agent and is described in the relevant installation steps below.
 
-```bash
-claude plugin enable insightark-skills@insightark-skills
-```
+### Marketplace source
 
-A `SessionStart` hook runs `doctor.sh` automatically so credential issues surface at the start of every session.
-
-### 3. Configure `S8_SESSION_TOKEN` (required)
-
-After `install`, you will typically see:
-
-> `1 userConfig option not yet set (1 required) — run /plugin configure insightark-skills@insightark-skills in Claude Code, or pass --config KEY=VALUE.`
-
-Open Claude Code and run:
+When an agent asks for the marketplace source, copy this URL:
 
 ```text
-/plugin configure insightark-skills@insightark-skills
+https://github.com/8-interactive/insightark-skills
 ```
 
-Get your token from Console:
+The marketplace and plugin identifier is `insightark-skills`.
 
-- Production: `https://console.no8.io` → Account Settings → InsightArk MCP → Create token
+### Complete OAuth authorization
 
-The token starts with `r:` and is shown once.
+The agent opens an InsightArk sign-in page during installation:
 
-### Session token
+1. Sign in using your usual Super 8 Studio sign-in method.
+2. On the authorization page, review the requested permissions:
+   - `insightark-mcp:read`
+   - `insightark-mcp:write`
+3. Select **Allow** to complete authorization.
 
-1. Console → **Account Settings → InsightArk MCP**
-2. Create a token (shown **once**)
+### ChatGPT desktop and Codex CLI
 
-Tokens expire after six months. Never commit tokens or share them in chat.
+#### ChatGPT desktop
 
----
+1. In the left sidebar, select **Plugins**.
+2. Select the arrow next to **Create** in the upper-right corner, then select **Add marketplace**.
+3. Paste the [marketplace source](#marketplace-source) into the **Source** field and select **Add marketplace**.
+4. Return to **Plugins**. Open the **Personal** tab (next to **Public**).
+5. Select **SUPER 8 Studio InsightArk Skills**.
+6. Select **Install** in the upper-right corner. Installation opens the browser for OAuth automatically.
 
-## Plugin Install (Codex)
+After OAuth completes, start a new **Codex Work** conversation in ChatGPT desktop.
 
-### 1. Add marketplace and install
+#### Reauthorize
+
+For ChatGPT desktop or Codex, uninstall the InsightArk plugin and install it again using the steps above. Installation starts OAuth automatically.
+
+#### Codex CLI
 
 ```bash
-codex plugin marketplace add 8-interactive/insightark-skills
-codex plugin install insightark-skills@insightark-skills
+codex plugin marketplace add https://github.com/8-interactive/insightark-skills
+codex plugin add insightark-skills@insightark-skills
 ```
 
-### 2. Configure credentials
+OAuth opens automatically during `codex plugin add`.
 
-The Codex plugin installs InsightArk workflow Skills. Register the MCP once with the bundled secure setup command; it prompts for the session token without echoing it and writes the `insightark` MCP registration to `~/.codex/config.toml`:
+### Claude Code
 
-```bash
-./setup-env.sh --write-client-configs
-```
+#### Claude Code desktop app
 
-Restart Codex, then verify the registration:
+1. Select the **+** button next to the chat prompt, then select **Plugins**.
+2. Select **Add plugin**.
+3. Add the [marketplace source](#marketplace-source), then select **SUPER 8 Studio InsightArk Skills**.
+4. Select **Install** and complete OAuth in the browser when it opens.
 
-```bash
-codex mcp list
-```
-
-`insightark` should be enabled. `Auth: Unsupported` is expected during this token-based transition because InsightArk uses the `_SessionToken` header, not Codex OAuth.
-
-| Variable           | Description                                  |
-| ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
-| `S8_API_URL`       | Optional override in `.insightark.env` only (default URL comes from release channel) |
-
-### Session token
-
-1. Console → **Account Settings → InsightArk MCP**
-2. Create a token (shown **once**)
-
-Tokens expire after six months. Never commit tokens or share them in chat.
-
----
-
-## Plugin Install (Cursor)
-
-### 1. Install from GitHub mirror or local checkout
-
-Install the plugin from the [GitHub mirror](https://github.com/8-interactive/insightark-skills) using **Cursor → Settings → Plugins → Install from local repo**, or clone and point Cursor at the checkout.
-
-### 2. Configure credentials and MCP
-
-Run `setup-env.sh` after install. Use `--write-client-configs` to upsert `mcpServers.insightark` in `~/.cursor/mcp.json` with the baked hosted URL and your token:
-
-```bash
-./setup-env.sh
-./setup-env.sh --session-token "r:..." --write-client-configs
-```
-
-Confirm **Cursor Settings → MCP** shows `insightark` connected.
-
----
-
-## Tarball Install
-
-Download and extract the latest release directly from the CDN, then run the installer:
-
-**macOS / Linux**
-
-```bash
-curl -L https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz \
-  -o insightark-skills-v2-latest.tar.gz
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills
-./install.sh
-./setup-env.sh
-```
-
-**Windows (PowerShell)**
-
-```powershell
-Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" `
-  -OutFile "insightark-skills-v2-latest.tar.gz"
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills
-./install.sh
-./setup-env.sh
-```
-
----
-
-## Manual Install
-
-Clone or download from the [GitHub repository](https://github.com/8-interactive/insightark-skills), then run:
-
-```bash
-./install.sh
-./setup-env.sh
-./setup-env.sh --check
-```
-
-### Config files
-
-| Location         | Path                              | Contents                                      |
-| ---------------- | --------------------------------- | --------------------------------------------- |
-| Install registry | `~/.insightark.config`            | Skills install paths                          |
-| Skills dir       | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`, `S8_API_URL` |
-| User (fallback)  | `~/.insightark.env`               | Fallback if install registry is missing       |
-| Project override | `{project}/.insightark.env`       | Optional per-project override    |
-
-**Load order:** user file → skills install dir → project file → process environment.
-
-### CLI options
-
-```bash
-./install.sh --base-dir ~ --agents claude-code,cursor,codex
-./install.sh --target ~/.agents/skills   # shared folder, no per-agent subpaths
-./uninstall.sh --base-dir ~ --agents claude-code,codex
-```
-
----
-
-## MCP Client Setup
-
-The hosted InsightArk MCP server is available at:
-
-| Environment | Endpoint |
-| --- | --- |
-| Production | `https://api-next.no8.io/mcp` |
-
-MCP uses an InsightArk MCP `_SessionToken`. The organization must have InsightArk MCP available (not disabled), and the token owner must be the organization owner or an InsightArk admin.
-
-Client setup for Codex, Cursor, and Claude Code is documented in [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md).
-
----
-
-## Skills
-
-| Skill | Purpose |
-| --- | --- |
-| `insightark-session` | Validate the developer session, list manageable organizations, and inspect credit usage. |
-| `insightark-conversations` | Triage conversation inboxes by platform, inbox state, customer, or activity time. |
-| `insightark-investigator` | Deep-dive into conversations and messages for investigation or debugging. |
-| `insightark-customer-manager` | Search customers, inspect profiles, update supported fields, and manage tags. |
-| `insightark-messaging` | Compose, preview, optionally upload media, and send 1:1 customer messages. |
-| `insightark-broadcast-manager` | Preview, create, list, and inspect broadcast tasks. |
-| `insightark-ma-automation` | Validate, create, start, pause, inspect, and trigger Marketing Automation procedures. |
-
-**Typical flow:** `insightark-session` → a workflow skill for the task → preview/approval before any write operation.
-
----
-
-<a name="中文"></a>
-
-**SUPER 8 Studio InsightArk Skills** 是適用於 Claude Code、Codex 與 Cursor 的 Plugin，將 [Super 8 Studio](https://www.no8.io) InsightArk MCP 直接整合進 AI Agent 工作流程。
-
-內含一組涵蓋完整 CRM 生命週期的可重用 Skills，包括對話調查、客戶管理、廣播發送與行銷自動化。安裝後，Agent 可在不離開對話介面的情況下查詢收件匣、更新客戶資料、撰寫訊息並觸發行銷活動。
-
-憑證管理方面，Claude Code 透過平台原生系統鑰匙圈安全儲存，Codex 則透過環境設定檔管理。內建健康檢查會在每次 session 開始時自動執行，提早偵測憑證問題。
-
-## Plugin 安裝（Claude Code）
-
-### 1. 加入 Marketplace 並安裝
-
-```bash
-claude plugin marketplace add 8-interactive/insightark-skills
-claude plugin install insightark-skills@insightark-skills
-```
-
-Hosted MCP endpoint 已在發佈時寫入 plugin。但 Claude CLI 的 `install` **不一定會**提示設定憑證：安裝後通常會看到「尚有 1 個必填 `userConfig` 未設定」，需要你在 Claude Code 內完成 `/plugin configure`（或在 CLI 用 `--config KEY=VALUE` 傳入）。
-
-| 變數               | 說明                                          |
-| ------------------ | --------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`（儲存於系統鑰匙圈） |
-
-安裝後執行 `claude plugin details insightark-skills@insightark-skills`，確認 **MCP servers ≥ 1**（`insightark` 指向 hosted HTTP URL）。
-
-### 2. 啟用 Plugin
-
-預設為停用狀態（因需連線至外部 API）：
-
-```bash
-claude plugin enable insightark-skills@insightark-skills
-```
-
-`SessionStart` hook 會在每次 session 開始時自動執行 `doctor.sh`，讓憑證問題提早浮現。
-
-### 3. 設定 `S8_SESSION_TOKEN`（必填）
-
-安裝後通常會看到類似訊息：
-
-> `1 userConfig option not yet set (1 required) — run /plugin configure insightark-skills@insightark-skills in Claude Code, or pass --config KEY=VALUE.`
-
-請打開 Claude Code 並執行：
+#### Claude Code terminal
 
 ```text
-/plugin configure insightark-skills@insightark-skills
+/plugin marketplace add 8-interactive/insightark-skills
+/plugin install insightark-skills@insightark-skills
 ```
 
-Token 取得位置：
+When prompted, select the installation scope. OAuth opens automatically when the plugin is installed.
 
-- Production：`https://console.no8.io` → Account Settings → InsightArk MCP → Create token
+#### Reauthorize
 
-Token 以 `r:` 開頭，且只會顯示一次。
+Uninstall the InsightArk plugin, then install it again using the steps above. Installation starts OAuth automatically.
 
-### Session Token 取得方式
+### Cursor
 
-1. Console → **Account Settings → InsightArk MCP**
-2. 建立 Token（**僅顯示一次**）
+1. Open **Customize** from the Cursor sidebar, then select **Browse Marketplace** in the upper-right corner.
+2. Open the **All** dropdown menu to the left of the **Manage** button at the top.
+3. Select **Add Marketplace** → **Import from GitHub**.
+4. Paste the [marketplace source](#marketplace-source) in the **Repository** field and complete the import.
+5. On the Marketplace page, find **SUPER 8 Studio InsightArk Skills** and select **Add**.
+6. Once the status changes to **Added**, open the plugin details page.
+7. In the **MCPs** section, select **Authenticate** next to `insightark` to start OAuth authorization.
 
-Token 有效期六個月，請勿提交至版本控制或在對話中分享。
+Cursor does not provide a native CLI command to install marketplace plugins. Cursor CLI reuses the plugin and MCP configuration installed in the IDE.
+
+#### Reauthorize
+
+After authentication, the **Authenticate** button is no longer shown. To authorize again:
+
+1. Open the InsightArk plugin details page.
+2. In the **MCPs** section, select `insightark` to open its configuration.
+3. Under **Environments**, select **Logout** for the connected local environment.
+4. Return to the plugin details page and select **Authenticate** next to `insightark`.
+
+## Verify the connection
+
+Ask your agent:
+
+> 使用 `insightark-session` skill 驗證我的 InsightArk MCP 設定。
+
+The skill calls `auth_me`. A successful result confirms that the agent can access your InsightArk organizations.
+
+## Manage authorized agents
+
+To review or revoke agent access:
+
+1. In Super 8 Console, select your avatar in the lower-left corner.
+2. Open the **User Information** tab.
+3. Scroll to **Connected Apps** to view agents authorized through OAuth.
+4. Select the relevant agent to revoke its authorization.
+
+## Documentation
+
+- [Changelog](./CHANGELOG.md)
 
 ---
 
-## Plugin 安裝（Codex）
+# 適用於 AI Agent 的 InsightArk 連接器
 
-### 1. 加入 Marketplace 並安裝
+[English](#insightark-connector-for-ai-agents)
+
+InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理與數據洞察。Super 8 Studio 是雲發互動科技（Super 8）打造的 AI 驅動對話商務與行銷解決方案平台。
+
+本 plugin 提供官方支援的 InsightArk 連線能力。它將 `insightark` MCP server 與工作流程 skills 打包，讓 agent 能依自然語言指令操作 InsightArk。目前官方支援的 agent 包括：
+- ChatGPT / Codex
+- Claude Code
+- Cursor
+
+## 功能
+
+安裝後，你可以請 agent：
+
+- 調查對話與訊息；
+- 搜尋、更新客戶及管理標籤；
+- 建立、發送與追蹤訊息或廣播；以及
+- 建立、驗證、啟動、暫停及查看行銷自動化流程。
+
+例如：
+
+> 調查昨天未回覆的對話，整理待跟進清單。
+>
+> 找出最近 30 天有互動的客戶，並加上 `VIP` 標籤。
+
+| Skill | 功能 |
+|---|---|
+| `insightark-session` | 驗證存取權限，查看已認證身分、組織與剩餘額度 |
+| `insightark-investigator` | 唯讀調查對話與訊息 |
+| `insightark-conversations` | 列出與取得對話及訊息 |
+| `insightark-customer-manager` | 搜尋與更新客戶，新增或移除標籤 |
+| `insightark-messaging` | 發送與驗證訊息，包含 LINE 模板 |
+| `insightark-broadcast-manager` | 建立與追蹤廣播 |
+| `insightark-ma-automation` | 管理行銷自動化流程 |
+
+## 使用條件
+
+- 需有已啟用 InsightArk 的 Super 8 Studio 組織。
+- 需要具有組織的 admin 權限。
+- 使用上述官方支援的 AI agent。
+
+## 安裝與認證
+
+從支援的 marketplace 安裝 plugin，Plugin 會自動設定內建的 `insightark` MCP server，請勿另外新增 MCP server。MCP server 認證走 OAuth 協定，依據不同的 agent 會有不同的認證流程，詳見各 agent 的說明。
+
+### Marketplace 來源
+
+當 agent 要求 marketplace 來源時，請複製以下 URL：
+
+```text
+https://github.com/8-interactive/insightark-skills
+```
+
+Marketplace 和 plugin 識別名稱皆為 `insightark-skills`。
+
+### 完成 OAuth 授權
+
+安裝時，agent 會開啟 InsightArk 登入頁面：
+
+1. 依你過往登入 Super 8 Studio 的方式完成登入。
+2. 在授權頁面確認要求的權限範圍：
+   - `insightark-mcp:read`
+   - `insightark-mcp:write`
+3. 點選 **允許**，即完成授權。
+
+### ChatGPT desktop 與 Codex CLI
+
+#### ChatGPT desktop
+
+1. 在左側列表點選 **外掛程式**。
+2. 點選右上角 **建立** 右方的向下展開箭頭，再選擇 **新增市集**。
+3. 在 **來源** 欄位貼上 [Marketplace 來源](#marketplace-來源)，再按 **新增市集**。
+4. 回到 **外掛程式**，在 **公開** 與 **個人** 頁籤中選擇 **個人**。
+5. 點選 **SUPER 8 Studio InsightArk Skills**。
+6. 點選右上角的 **安裝**。安裝後會自動開啟瀏覽器進行 OAuth 認證。
+
+OAuth 完成後，在 ChatGPT desktop 開啟新的 **Codex Work** 對話即可使用 plugin。
+
+#### 重新授權
+
+ChatGPT desktop 或 Codex 請先解除安裝 InsightArk plugin，再依上述步驟重新安裝。安裝時會自動啟動 OAuth。
+
+#### Codex CLI
 
 ```bash
-codex plugin marketplace add 8-interactive/insightark-skills
-codex plugin install insightark-skills@insightark-skills
+codex plugin marketplace add https://github.com/8-interactive/insightark-skills
+codex plugin add insightark-skills@insightark-skills
 ```
 
-### 2. 設定憑證
+執行 `codex plugin add` 時會自動開啟 OAuth。
 
-Codex plugin 會安裝 InsightArk workflow Skills。再執行一次內建的安全設定指令註冊 MCP；它會以不回顯方式要求輸入 session token，並將 `insightark` MCP 寫入 `~/.codex/config.toml`：
+### Claude Code
 
-```bash
-./setup-env.sh --write-client-configs
+#### Claude Code desktop app
+
+1. 點選 chat prompt 旁的 **+**，再選擇 **Plugins**。
+2. 點選 **Add plugin**。
+3. 加入 [Marketplace 來源](#marketplace-來源)，選擇 **SUPER 8 Studio InsightArk Skills**。
+4. 點選 **Install**，並在瀏覽器開啟後完成 OAuth。
+
+#### Claude Code terminal
+
+```text
+/plugin marketplace add 8-interactive/insightark-skills
+/plugin install insightark-skills@insightark-skills
 ```
 
-重新啟動 Codex 後，執行下列指令確認：
+依提示選擇安裝範圍，安裝 plugin 時會自動開啟 OAuth。
 
-```bash
-codex mcp list
-```
+#### 重新授權
 
-`insightark` 應為 enabled。這個 token 過渡期若顯示 `Auth: Unsupported` 屬於預期行為，因為 InsightArk 使用 `_SessionToken` header，而不是 Codex OAuth。
+解除安裝 InsightArk plugin，再依上述步驟重新安裝。安裝時會自動啟動 OAuth。
 
-| 變數               | 說明                                         |
-| ------------------ | -------------------------------------------- |
-| `S8_SESSION_TOKEN` | InsightArk MCP `_SessionToken`                    |
-| `S8_API_URL`       | 僅於 `.insightark.env` 可選覆寫（預設 URL 依 release channel） |
+### Cursor
 
-### Session Token 取得方式
+1. 在 Cursor 側邊欄開啟 **Customize**，再點選右上角的 **Browse Marketplace**。
+2. 開啟上方 **Manage** 按鈕左側的 **All** 下拉選單。
+3. 選擇 **Add Marketplace** → **Import from GitHub**。
+4. 在 **Repository** 欄位貼上 [Marketplace 來源](#marketplace-來源)，完成匯入。
+5. 在 Marketplace 頁面上找到 **SUPER 8 Studio InsightArk Skills**，點選 **Add**。
+6. 當狀態變為 **Added** 後，點選進入 plugin 詳細頁面。
+7. 在 **MCPs** 區塊的 `insightark` 右側點選 **Authenticate**，開始 OAuth 授權流程。
 
-1. Console → **Account Settings → InsightArk MCP**
-2. 建立 Token（**僅顯示一次**）
+Cursor 目前沒有原生 CLI 指令可安裝 marketplace plugin。Cursor CLI 會沿用 IDE 已安裝的 plugin 與 MCP 設定。
 
-Token 有效期六個月，請勿提交至版本控制或在對話中分享。
+#### 重新授權
 
----
+完成認證後，**Authenticate** 按鈕會消失。需要重新授權時：
 
-## Plugin 安裝（Cursor）
+1. 開啟 InsightArk plugin 詳細頁面。
+2. 在 **MCPs** 區塊點選 `insightark`，開啟 MCP 設定。
+3. 在 **Environments** 中，對已連接的 local environment 點選 **Logout**。
+4. 回到 plugin 詳細頁面，在 `insightark` 右側點選 **Authenticate**。
 
-### 1. 從 GitHub mirror 或本機 checkout 安裝
+## 驗證連線
 
-從 [GitHub mirror](https://github.com/8-interactive/insightark-skills) 以 **Cursor → Settings → Plugins → Install from local repo** 安裝，或 clone 後指向該目錄。
+請 agent：
 
-### 2. 設定憑證與 MCP
+> 使用 `insightark-session` skill 驗證我的 InsightArk MCP 設定。
 
-安裝後執行 `setup-env.sh`。加上 `--write-client-configs` 可將 `mcpServers.insightark` 寫入 `~/.cursor/mcp.json`（含 baked URL 與 token）：
+該 skill 會呼叫 `auth_me`。成功結果代表 agent 已能存取你的 InsightArk 組織。
 
-```bash
-./setup-env.sh
-./setup-env.sh --session-token "r:..." --write-client-configs
-```
+## 管理已授權的 agent
 
-於 **Cursor Settings → MCP** 確認 `insightark` 已連線。
+檢視或撤銷 agent 的授權：
 
----
+1. 在 Super 8 Console 左下角點選使用者頭像。
+2. 開啟 **使用者資訊** 頁籤。
+3. 往下滑到 **已連接的應用程式**，即可查看已透過 OAuth 授權的 agent。
+4. 選擇要撤銷的 agent，取消其授權。
 
-## Tarball 安裝
+## 文件
 
-從 CDN 直接下載最新發佈版，解壓後執行安裝程式：
-
-**macOS / Linux**
-
-```bash
-curl -L https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz \
-  -o insightark-skills-v2-latest.tar.gz
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills
-./install.sh
-./setup-env.sh
-```
-
-**Windows（PowerShell）**
-
-```powershell
-Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" `
-  -OutFile "insightark-skills-v2-latest.tar.gz"
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills
-./install.sh
-./setup-env.sh
-```
-
----
-
-## 手動安裝
-
-從 [GitHub repository](https://github.com/8-interactive/insightark-skills) Clone 或下載後執行：
-
-```bash
-./install.sh
-./setup-env.sh
-./setup-env.sh --check
-```
-
-### 設定檔說明
-
-| 位置           | 路徑                              | 內容                                          |
-| -------------- | --------------------------------- | --------------------------------------------- |
-| 安裝登錄檔     | `~/.insightark.config`            | Skills 安裝路徑                               |
-| Skills 目錄    | `{skills-target}/.insightark.env` | `S8_SESSION_TOKEN`、`S8_API_URL` |
-| 使用者（備援） | `~/.insightark.env`               | 找不到安裝登錄檔時的備援                      |
-| 專案覆蓋       | `{project}/.insightark.env`       | 可選的測試環境 URL             |
-
-**載入順序：** 使用者檔案 → Skills 安裝目錄 → 專案檔案 → Process 環境變數（最高優先）。
-
-### CLI 選項
-
-```bash
-./install.sh --base-dir ~ --agents claude-code,cursor,codex
-./install.sh --target ~/.agents/skills   # 共用資料夾，不使用各 agent 子目錄
-./uninstall.sh --base-dir ~ --agents claude-code,codex
-```
-
----
-
-## MCP Client 設定
-
-Hosted InsightArk MCP server 位於：
-
-| 環境 | Endpoint |
-| --- | --- |
-| Production | `https://api-next.no8.io/mcp` |
-
-MCP 使用 InsightArk MCP `_SessionToken`。組織必須可用 InsightArk MCP（未 disable），且 token 所屬使用者必須是該組織 owner 或 InsightArk admin。
-
-Codex、Cursor、Claude Code 的設定方式請見 [MCP_CLIENT_SETUP.md](./MCP_CLIENT_SETUP.md)。
-
----
-
-## Skills 列表
-
-| Skill | 用途 |
-| --- | --- |
-| `insightark-session` | 驗證 developer session、列出可管理組織、查看 credits。 |
-| `insightark-conversations` | 依平台、收件匣狀態、客戶或活動時間整理 conversation inbox。 |
-| `insightark-investigator` | 深入查詢對話與訊息，用於調查與除錯。 |
-| `insightark-customer-manager` | 搜尋客戶、查看 profile、更新支援欄位、加減 tags。 |
-| `insightark-messaging` | 編寫、預覽、必要時上傳 media，並傳送 1:1 customer message。 |
-| `insightark-broadcast-manager` | 預覽、建立、列出與查詢 broadcast task。 |
-| `insightark-ma-automation` | 驗證、建立、啟動、暫停、查詢與 trigger Marketing Automation procedure。 |
-
-**典型流程：** `insightark-session` → 依任務選擇 workflow skill → 寫入前先 preview / approval。
+- [Changelog](./CHANGELOG.md)

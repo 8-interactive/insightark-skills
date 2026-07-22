@@ -1,6 +1,6 @@
 {
   "name": "insightark-skills",
-  "version": "2.0.3",
+  "version": "2.4.0",
   "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations.",
   "author": {
     "name": "Super8",
@@ -18,16 +18,7 @@
     "skills"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
-  "userConfig": {
-    "S8_SESSION_TOKEN": {
-      "type": "string",
-      "title": "Session token",
-      "description": "InsightArk MCP session token (starts with r:).",
-      "sensitive": true,
-      "required": true
-    }
-  },
+  "mcpServers": "./codex.mcp.json",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "shortDescription": "InsightArk skills and hosted MCP for SUPER 8 Studio.",
@@ -41,12 +32,14 @@
     "websiteURL": "https://www.no8.io",
     "privacyPolicyURL": "https://www.no8.io/privacy",
     "termsOfServiceURL": "https://www.no8.io/terms",
-    "brandColor": "#2F6FED",
+    "brandColor": "#FF6A00",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "Use insightark-session to validate my InsightArk MCP setup.",
-      "Use insightark-investigator to investigate recent conversations.",
-      "Use insightark-customer-manager to search and update customers.",
-      "Use insightark-broadcast-manager to create and monitor a broadcast."
+      "\u4f7f\u7528 insightark-session \u9a57\u8b49\u6211\u7684 InsightArk MCP \u8a2d\u5b9a\u3002\u78ba\u8a8d\u53ef\u7528\u5f8c\uff0c\u8acb\u6458\u8981\u4f60\u80fd\u5e6b\u6211\u505a\u54ea\u4e9b InsightArk \u5de5\u4f5c\u6d41\u7a0b\u8207\u64cd\u4f5c\u3002",
+      "\u4f7f\u7528 insightark-investigator \u8abf\u67e5\u6700\u8fd1\u7684\u5c0d\u8a71\u3002",
+      "\u4f7f\u7528 insightark-customer-manager \u641c\u5c0b\u8207\u66f4\u65b0\u5ba2\u6236\u3002",
+      "\u4f7f\u7528 insightark-broadcast-manager \u5efa\u7acb\u4e26\u8ffd\u8e64\u5ee3\u64ad\u3002"
     ]
   }
 }

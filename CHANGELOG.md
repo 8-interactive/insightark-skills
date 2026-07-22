@@ -1,38 +1,56 @@
 # Changelog
 
-## 2.0.3
+## 2.4.0 — Generic instant timezone policy (query windows included)
 
-- Setup is token-only: `setup-env.sh` no longer prompts for or writes `S8_ORG_ID`; `--org-id` is rejected.
-- `--env-hints` documents only `S8_API_URL` and `S8_SESSION_TOKEN`.
-- `doctor.sh` gates setup health on MCP `auth_me` only (no org-list hard-fail / Default org line).
+- Apply universal `timezone-policy.md` whenever customer temporal language becomes an MCP input representing a specific instant or interval boundary; no current tool/field allowlist is required.
+- Unspecified customer wall-clock → Asia/Taipei (`+08:00`); honor explicit timezone / `Z` / offset. Exclude calendar dates, recurring wall-clock settings, durations, cursors, and returned timestamps.
+- Keep message-search date-only / one-sided defaults and ≤90-day limit in messaging and canonical investigator Strategy A guidance; downstream analysis lenses reuse Strategy A.
+- `CS_QUALITY_REVIEW.md`: replace singular `senderType` with `senderTypes: ["_User"]`.
+- Hierarchy validators assert semantic policy ownership, canonical domain guidance, and CS `senderTypes`-only.
 
-## 2.0.2
+## 2.3.0 — MA template discovery + universal workflow policy hierarchy
 
-- Bundle hosted MCP with workflow skills for Claude Code, Codex, and Cursor plugins.
-- Bake MCP endpoint URL per release channel (`staging` / `main`); remove `S8_API_URL` from Claude plugin `userConfig`.
-- Add `setup-env.sh` client-config merge for `~/.cursor/mcp.json` and Codex `~/.codex/config.toml` fallback.
-- Add packaging validators: `validate-release-tree.sh`, `validate-install-harness.sh`; reorder CI to generate MCP before validate.
-- **Retire npm customer distribution** — remove `npx` CLI adapter; `package.json` is private dev tooling only and is excluded from the public mirror tree.
+MA template discovery (server + skill):
 
-## 2.0.0
+- Catalog agent-ready entries expose `defaultRootTemplateType` (agent-ready default `all`); `ma_template_get` materializes root `templateType` from the selected catalog entry.
+- Blank-canvas omit of `templateType` defaults to `all` only when `authoringSource: "blank-canvas"`; catalog clones keep the materialized type.
+- Supported create/validate root types: `all`, `default`, and catalog `defaultRootTemplateType` values — not console-only keys.
+- Skill fixtures and MA workflow guidance consume the materialized `templateType` (no client-side ID/`consoleKey` derivation).
 
-- Consolidate per-tool skills into 7 workflow-oriented MCP skills.
-- Use the hosted InsightArk MCP server as the primary execution path.
-- Add customer-facing MCP client setup guidance for Codex, Cursor, and Claude Code.
-- Keep CDN/tarball distribution compatible with channel-specific releases.
-- Align npm package name with GitHub distribution repo: `@8-interactive/insightark-skills`.
+Universal workflow policy hierarchy (skills):
 
-## 1.1.0
+- Add policy skill `insightark-universal-workflow` (Rich Preview Gate + write lifecycle) with catalog `role` / `prerequisites`.
+- Seven workflow skills link the Prerequisite; messaging / broadcast / MA delegate rich-preview and write-lifecycle rules.
+- Validators enforce hierarchy behavior, release-tree policy skill presence, and reject treating credit `0` as unlimited.
 
-- Renamed all skills from `super8-studio-*` to `insightark-*`.
-- npm package renamed from `@super8/studio-api-skills` to `@insightark/skills`, bin renamed to `insightark-skills`.
-- Product rebranded to "SUPER 8 Studio InsightArk Skills".
-- GitHub repo moved to `8-interactive/insightark-skills`.
-- `docs/` excluded from npm publish and CDN tarball (dev-only content).
+## 2.2.0 — Investigator qualitative analysis lenses + MCP schema contract hardening
 
-## 1.0.0
+Qualitative detection & analysis lenses (investigator):
 
-- Add canonical skill bundle installer for direct skills installation.
-- Add shared runtime scripts for Super 8 Studio InsightArk MCP workflows.
-- Add plugin, marketplace, npm, and validation metadata for multi-channel
-  installation readiness.
+- Add `insightark-investigator/references/QUALITATIVE_DETECTION.md`: an on-demand playbook for batch qualitative intent/sentiment/complaint detection using only existing read-only MCP tools.
+- Document two detection paths — tag-segmented (`crm_customer_search` → `messaging_conversation_list` → `messaging_conversation_messages`) and time-window/keyword (`messaging_message_search`) — with a selection rule.
+- Add hard cost/sample guardrails (`credits_usage` before/after, default sample caps, no blind retry, stop-and-report) and traceable, non-fabricated, human-reviewable reading rules.
+- Add `insightark-investigator/references/ROOT_CAUSE_ANALYSIS.md` (US-2): a complaint root-cause / theme-categorisation lens — theme buckets, per-theme root cause + improvement direction, and traceable representative cases.
+- Add `insightark-investigator/references/OPPORTUNITY_DISCOVERY.md` (US-3): a positive-intent / opportunity-discovery lens — signal types, keyword seeds, and an explicit "keep runs separate from complaint analysis" rule.
+- Add `insightark-investigator/references/CS_QUALITY_REVIEW.md` (US-6): a per-agent CS reply-quality lens — evaluates the staff responder, discovers agents from `_User` message identity (no roster tool), groups by `sender` objectId, and compiles traceable exemplary / needs-improvement cases. Runs on Strategy A because staff identity is returned only by `messaging_message_search`.
+- All three lenses reuse the `QUALITATIVE_DETECTION.md` shared layer (Strategy A/B path selection, credit/sample guardrails, traceable non-fabricated reading rules) — no duplication of the data path.
+- `SKILL.md` gains an "Analysis lenses" pointer; README investigator entry (EN + 中文) notes all three lenses.
+
+MCP schema contract hardening (skills):
+
+- Message search skills use `senderTypes` only (singular `senderType` removed); document all five published sender classes.
+- Broadcast / customer / conversations skills add situational notes for closed params; exact enums defer to MCP schema.
+- Clarify multi-class search as one tool call / one normal 20-credit charge vs two searches.
+
+- No new MCP tool and no new skill; still exactly 7 workflow skills. Server backend and `tools/message-preview/` untouched.
+
+## 2.1.0 — First supported marketplace + OAuth release
+
+- Deliver Claude Code, Cursor, and Codex/ChatGPT desktop plugins with host-specific static OAuth MCP manifests.
+- Production customer path is approved marketplace install → host OAuth Connect → `auth_me`.
+- Remove manual skill-copy installer surface, SessionToken setup, shell API runtime, and empty hooks packaging.
+- Keep `skills/_insightark-shared/` metadata-only (`RELEASE`, `VERSION`).
+- Move LINE template guidelines and examples under `insightark-messaging/references/` for MCP workflows.
+- Point Cursor plugin `logo` at `assets/logo.png` (same brand asset as Codex).
+- Ship Chinese starter `commands/` aligned with Codex `interface.defaultPrompt` for Cursor and Claude Code.
+- Pin Cursor plugin `mcpServers` to `./mcp.json` so static `auth.CLIENT_ID` is used instead of Claude `.mcp.json` / DCR fallback.

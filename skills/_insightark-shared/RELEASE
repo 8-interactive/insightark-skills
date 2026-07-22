@@ -1,4 +1,4 @@
-channel=staging
-api_url=https://stage-api-next.no8.io
-console_url=https://stage-console.no8.io
-built_from_branch=staging
+channel=production
+api_url=https://api-next.no8.io
+console_url=https://console.no8.io
+built_from_branch=main

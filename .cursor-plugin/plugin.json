@@ -1,8 +1,8 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "2.0.3",
-  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Run ./setup-env.sh after install to configure your InsightArk MCP token.",
+  "version": "2.4.0",
+  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Install the plugin, then Connect the bundled insightark MCP server through Cursor OAuth.",
   "author": {
     "name": "Super8",
     "url": "https://www.no8.io"
@@ -18,5 +18,9 @@
     "crm",
     "skills"
   ],
-  "skills": "./skills/"
+  "category": "Productivity",
+  "logo": "assets/logo.png",
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "mcpServers": "./mcp.json"
 }

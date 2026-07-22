@@ -4,7 +4,7 @@
       "type": "http",
       "url": "https://api-next.no8.io/mcp",
       "oauth": {
-        "clientId": "insightark-claude-code"
+        "client_id": "insightark-codex"
       }
     }
   }

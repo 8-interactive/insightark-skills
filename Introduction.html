@@ -469,24 +469,19 @@
     <main class="main">
       <!-- ① Progress indicator -->
       <nav class="steps-nav" aria-label="Setup steps">
-        <button
-          class="step-item active"
-          onclick="goToStep(0)"
-          id="step-nav-0"
-          aria-current="step"
-        >
+        <button class="step-item active" onclick="goToStep(0)" id="step-nav-0" aria-current="step">
           <div class="step-circle">1</div>
-          <div class="step-label" id="step-nav-label-0">下載</div>
+          <div class="step-label" id="step-nav-label-0">選擇 Agent</div>
         </button>
         <div class="step-connector" id="connector-0"></div>
         <button class="step-item" onclick="goToStep(1)" id="step-nav-1">
           <div class="step-circle">2</div>
-          <div class="step-label" id="step-nav-label-1">安裝</div>
+          <div class="step-label" id="step-nav-label-1">安裝 Plugin</div>
         </button>
         <div class="step-connector" id="connector-1"></div>
         <button class="step-item" onclick="goToStep(2)" id="step-nav-2">
           <div class="step-circle">3</div>
-          <div class="step-label" id="step-nav-label-2">設定憑證 (選填)</div>
+          <div class="step-label" id="step-nav-label-2">OAuth 授權</div>
         </button>
         <div class="step-connector" id="connector-2"></div>
         <button class="step-item" onclick="goToStep(3)" id="step-nav-3">
@@ -496,459 +491,138 @@
         <div class="step-connector" id="connector-3"></div>
         <button class="step-item" onclick="goToStep(4)" id="step-nav-4">
           <div class="step-circle">5</div>
-          <div class="step-label" id="step-nav-label-4">解除安裝</div>
+          <div class="step-label" id="step-nav-label-4">重新授權／卸載</div>
         </button>
       </nav>
 
-      <!-- ② Step panels -->
-
-      <!-- Step 1: Download -->
+      <!-- Step 1: Choose agent -->
       <div class="step-panel active" id="panel-0">
         <div class="step-card">
-          <h2 class="step-heading" id="s1-title">下載 Skills 套件</h2>
+          <h2 class="step-heading" id="s1-title">選擇 Agent</h2>
           <p class="step-description" id="s1-desc">
-            選擇來源，下載 Skills 套件到你的電腦。
+            InsightArk 透過各 AI agent 的 plugin marketplace 安裝。完整逐步說明請見 <code>README.md</code>。
           </p>
-
-          <div class="sub-label" id="s1-source-label">來源</div>
-          <div class="source-selector">
-            <button
-              class="source-btn active"
-              onclick="setSource('tarball')"
-              id="src-tarball"
-              aria-pressed="true"
-            >
-              📦 發布套件（推薦）
-            </button>
-            <button
-              class="source-btn"
-              onclick="setSource('git')"
-              id="src-git"
-              aria-pressed="false"
-            >
-              🔧 Git Clone
-            </button>
-          </div>
-
-          <div id="section-tarball">
-            <div class="tab-group">
-              <button
-                class="tab-btn active"
-                onclick="setOS('mac')"
-                id="os-tab-mac-s1"
-                aria-pressed="true"
-              >
-                macOS / Linux
-              </button>
-              <button
-                class="tab-btn"
-                onclick="setOS('win')"
-                id="os-tab-win-s1"
-                aria-pressed="false"
-              >
-                Windows
-              </button>
-            </div>
-            <div
-              class="code-wrap"
-              id="tarball-mac-wrap"
-              aria-label="Download command for macOS/Linux"
-            >
-              <pre id="tarball-mac-code">
-curl -LO https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills</pre
-              >
-              <button class="copy-btn" onclick="copyCode(this)">複製</button>
-            </div>
-            <div
-              class="code-wrap"
-              id="tarball-win-wrap"
-              aria-label="Download command for Windows"
-              style="display: none"
-            >
-              <pre id="tarball-win-code">
-Invoke-WebRequest -Uri "https://downloads.no8.io/main/releases/skills/insightark-skills-v2-latest.tar.gz" -OutFile "insightark-skills-v2-latest.tar.gz"
-tar -xzf insightark-skills-v2-latest.tar.gz
-cd insightark-skills</pre
-              >
-              <button class="copy-btn" onclick="copyCode(this)">複製</button>
-            </div>
-
-            <div class="callout tip">
-              <span class="callout-icon">💡</span>
-              <span id="s1-tip-tarball"
-                >下載的套件包含
-                <code>RELEASE</code> 檔，安裝後的設定步驟會自動偵測 API
-                環境，不需手動選擇。</span
-              >
-            </div>
-          </div>
-
-          <div id="section-git" style="display: none">
-            <div class="code-wrap" aria-label="Git clone command">
-              <pre id="git-clone-code">
-git clone https://github.com/no8io/insightark-skills.git
-cd insightark-skills</pre
-              >
-              <button class="copy-btn" onclick="copyCode(this)">複製</button>
-            </div>
-            <div class="callout warn">
-              <span class="callout-icon">⚠️</span>
-              <span id="s1-warn-git"
-                >Git checkout 沒有 RELEASE 檔，設定步驟時需手動選擇 API
-                環境。</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Install -->
-      <div class="step-panel" id="panel-1">
-        <div class="step-card">
-          <h2 class="step-heading" id="s2-title">安裝 Skills</h2>
-          <p class="step-description" id="s2-desc">
-            執行安裝腳本，將 Skills 複製到你的 AI Agent 目錄。
-          </p>
-
-          <div class="tab-group">
-            <button
-              class="tab-btn active"
-              onclick="setOS('mac')"
-              id="os-tab-mac-s2"
-              aria-pressed="true"
-            >
-              macOS / Linux
-            </button>
-            <button
-              class="tab-btn"
-              onclick="setOS('win')"
-              id="os-tab-win-s2"
-              aria-pressed="false"
-            >
-              Windows (Git Bash / WSL)
-            </button>
-          </div>
-          <div class="code-wrap" aria-label="Install command">
-            <pre>./install.sh</pre>
-            <button class="copy-btn" onclick="copyCode(this)">複製</button>
-          </div>
-
-          <div class="callout warn" id="s2-win-note" style="display: none">
-            <span class="callout-icon">⚠️</span>
-            <span id="s2-win-text"
-              >Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準
-              PowerShell。</span
-            >
-          </div>
-
-          <hr class="section-divider" />
-          <div class="sub-label" id="s2-prompts-label">安裝精靈步驟</div>
-          <ol class="steps-list">
-            <li>
-              <span class="step-num">1</span
-              ><span id="s2-step1"
-                >選擇安裝模式：<strong>Per-agent</strong>（各 Agent 獨立目錄）或
-                <strong>共用資料夾</strong></span
-              >
-            </li>
-            <li>
-              <span class="step-num">2</span
-              ><span id="s2-step2"
-                >選擇要安裝的 AI Agent（可多選）：Claude
-                Code、Cursor、Codex、OpenCode、GitHub Copilot</span
-              >
-            </li>
-            <li>
-              <span class="step-num">3</span
-              ><span id="s2-step3"
-                >選擇安裝位置：<code>~</code>（使用者 Home
-                目錄）或自訂路徑</span
-              >
-            </li>
-            <li>
-              <span class="step-num">4</span
-              ><span id="s2-step4">確認安裝計畫後執行</span>
-            </li>
-          </ol>
-
-          <hr class="section-divider" />
-          <div class="sub-label" id="s2-table-label">安裝路徑對照表</div>
           <table class="agent-table">
             <thead>
               <tr>
-                <th id="th-agent">Agent</th>
-                <th id="th-path">Skills 路徑</th>
+                <th id="th-host">Agent</th>
+                <th id="th-client">安裝入口</th>
+                <th id="th-manifest">OAuth 時機</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Claude Code</td>
-                <td>~/.claude/skills</td>
-              </tr>
-              <tr>
-                <td>Cursor</td>
-                <td>~/.cursor/skills</td>
-              </tr>
-              <tr>
-                <td>Codex</td>
-                <td>~/.codex/skills</td>
-              </tr>
-              <tr>
-                <td>OpenCode</td>
-                <td>~/.opencode/skills</td>
-              </tr>
-              <tr>
-                <td>GitHub Copilot</td>
-                <td>~/.copilot/skills</td>
-              </tr>
+              <tr><td>ChatGPT / Codex</td><td>Plugins / Codex CLI marketplace</td><td>安裝 plugin 時自動開啟</td></tr>
+              <tr><td>Claude Code</td><td>Desktop Plugins 或 terminal <code>/plugin</code></td><td>安裝 plugin 時自動開啟</td></tr>
+              <tr><td>Cursor</td><td>Customize → Browse Marketplace</td><td>Plugin 詳情 MCPs → Authenticate</td></tr>
             </tbody>
           </table>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <span id="s1-tip">正式顧客流程是<strong>從 marketplace 安裝 plugin</strong>後完成 OAuth。請勿手動新增 MCP server。</span>
+          </div>
         </div>
       </div>
 
-      <!-- Step 3: Configure (Optional) -->
-      <div class="step-panel" id="panel-2">
+      <!-- Step 2: Install plugin -->
+      <div class="step-panel" id="panel-1">
         <div class="step-card">
-          <h2 class="step-heading" id="s3-title">
-            設定 API 憑證（通常由 install.sh 自動完成）
-          </h2>
-
-          <div class="callout danger">
-            <span class="callout-icon">🔒</span>
-            <div>
-              <strong id="s3-sec-title">安全注意事項</strong>
-              <ul
-                style="margin-top: 6px; padding-left: 16px; font-size: 0.875rem"
-                id="s3-sec-list"
-              >
-                <li>請勿將 <code>.insightark.env</code> 提交到版本控制</li>
-                <li>請勿在聊天或 Email 中分享 Token</li>
-                <li>
-                  Token 有效期 6 個月，過期請重新執行
-                  <code>./setup-env.sh</code>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="callout tip">
-            <span class="callout-icon">✅</span>
-            <span id="s3-auto-note"
-              >install.sh
-              安裝時會自動執行憑證設定精靈，通常不需要額外操作。若需重新設定，請執行以下指令。</span
-            >
-          </div>
-
-          <div class="code-wrap" aria-label="Configure credentials command">
-            <pre>./setup-env.sh</pre>
+          <h2 class="step-heading" id="s2-title">安裝 Plugin</h2>
+          <p class="step-description" id="s2-desc">
+            從 agent marketplace 安裝 <strong>SUPER 8 Studio InsightArk Skills</strong>。Marketplace 來源：
+          </p>
+          <div class="code-wrap" aria-label="Marketplace source">
+            <pre>https://github.com/8-interactive/insightark-skills</pre>
             <button class="copy-btn" onclick="copyCode(this)">複製</button>
           </div>
-
-          <div class="sub-label" id="s3-wizard-label">精靈執行流程</div>
           <ol class="steps-list">
-            <li>
-              <span class="step-num">1</span
-              ><span id="s3-step1"
-                >自動從 <code>RELEASE</code> 檔偵測 API 環境（Production）</span
-              >
-            </li>
-            <li>
-              <span class="step-num">2</span
-              ><span id="s3-step2"
-                >自動開啟 Super 8 Console →
-                <strong>Account Settings → InsightArk MCP</strong>，建立
-                Token</span
-              >
-            </li>
-            <li>
-              <span class="step-num">3</span
-              ><span id="s3-step3">貼上 Token（僅顯示一次，輸入時遮蔽）</span>
-            </li>
-            <li>
-              <span class="step-num">4</span
-              ><span id="s3-step4"
-                >精靈列出可用 InsightArk MCP 的組織，選擇一個</span
-              >
-            </li>
-            <li>
-              <span class="step-num">5</span
-              ><span id="s3-step5"
-                >完成後將憑證寫入 <code>~/.insightark.env</code>（權限
-                600）</span
-              >
-            </li>
+            <li><span class="step-num">1</span><span id="s2-step1"><strong>ChatGPT / Codex</strong>：外掛程式 → 新增市集 → 個人 tab → Install；或 Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code></span></li>
+            <li><span class="step-num">2</span><span id="s2-step2"><strong>Claude Code</strong>：Desktop Plugins，或 terminal <code>/plugin marketplace add</code> / <code>/plugin install</code></span></li>
+            <li><span class="step-num">3</span><span id="s2-step3"><strong>Cursor</strong>：Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add</span></li>
           </ol>
+          <div class="callout tip">
+            <span class="callout-icon">✅</span>
+            <span id="s2-note">逐步點擊說明以 <code>README.md</code> 為準。Plugin 會自動設定內建的 <code>insightark</code> MCP server。</span>
+          </div>
         </div>
       </div>
 
-      <!-- Step 4: Verify -->
+      <!-- Step 3: OAuth -->
+      <div class="step-panel" id="panel-2">
+        <div class="step-card">
+          <h2 class="step-heading" id="s3-title">完成 OAuth 授權</h2>
+          <p class="step-description" id="s3-desc">安裝或認證時，agent 會開啟 InsightArk 登入頁面。登入後確認 <code>insightark-mcp:read</code> 與 <code>insightark-mcp:write</code>，再按允許。</p>
+          <div class="sub-label" id="s3-wizard-label">各 Agent 操作</div>
+          <ol class="steps-list">
+            <li><span class="step-num">1</span><span id="s3-step1"><strong>ChatGPT / Codex</strong>：安裝 plugin 時自動開啟 OAuth；完成後開啟新的 Codex Work 對話</span></li>
+            <li><span class="step-num">2</span><span id="s3-step2"><strong>Claude Code</strong>：安裝 plugin 時自動開啟 OAuth</span></li>
+            <li><span class="step-num">3</span><span id="s3-step3"><strong>Cursor</strong>：plugin 詳情 → MCPs → <code>insightark</code> 右側 Authenticate</span></li>
+            <li><span class="step-num">4</span><span id="s3-step4">請勿使用獨立的 MCP login 指令，也不要另外手動新增 MCP server</span></li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">🔒</span>
+            <span id="s3-auto-note">完成授權後，agent 會保存 OAuth credential。請勿在聊天中貼任何 token。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Validate -->
       <div class="step-panel" id="panel-3">
         <div class="step-card">
           <h2 class="step-heading" id="s4-title">驗證設定</h2>
-          <p class="step-description" id="s4-desc">
-            確認憑證正確且 API 可連通。
-          </p>
-
-          <div class="code-wrap" aria-label="Verify setup command">
-            <pre>./setup-env.sh --check</pre>
+          <p class="step-description" id="s4-desc">請 agent 使用 <code>insightark-session</code> skill，呼叫 MCP <code>auth_me</code>。</p>
+          <div class="code-wrap" aria-label="Validate setup">
+            <pre>Use insightark-session → auth_me</pre>
             <button class="copy-btn" onclick="copyCode(this)">複製</button>
           </div>
-
-          <div class="sub-label" id="s4-success-label">成功輸出範例</div>
+          <div class="sub-label" id="s4-success-label">成功指標</div>
           <div class="terminal">
-            <div>
-              <span class="ok">✓</span>
-              <span class="label">S8_API_URL </span>https://api-next.no8.io
-            </div>
-            <div>
-              <span class="ok">✓</span>
-              <span class="label">S8_SESSION_TOKEN </span>set (r:...)
-            </div>
-            <div>
-              <span class="ok">✓</span>
-              <span class="label">API reachable </span>
-            </div>
-            <div>
-              <span class="ok">✓</span> <span class="label">Auth valid </span>
-            </div>
+            <div><span class="ok">✓</span> <span class="label">MCP connected </span>insightark</div>
+            <div><span class="ok">✓</span> <span class="label">auth_me </span>returns authenticated user</div>
           </div>
-
           <hr class="section-divider" />
-          <div class="sub-label" id="s4-fail-label">常見問題排除</div>
-
+          <div class="sub-label" id="s4-fail-label">疑難排解</div>
           <div class="callout warn">
             <span class="callout-icon">🔑</span>
             <div>
-              <strong id="s4-err1-title">Auth valid 失敗</strong>
+              <strong id="s4-err1-title">需要認證（401 / 403 / authentication-required）</strong>
               <p id="s4-err1-desc" style="margin-top: 4px; font-size: 0.875rem">
-                Token 已過期，重新執行設定精靈：
+                ChatGPT / Codex 與 Claude Code：解除安裝後重新安裝。Cursor：MCPs → insightark → Logout，再按 Authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題。
               </p>
-              <div
-                class="code-wrap"
-                aria-label="Re-run setup command"
-                style="margin-top: 8px"
-              >
-                <pre>./setup-env.sh</pre>
-                <button class="copy-btn" onclick="copyCode(this)">複製</button>
-              </div>
             </div>
           </div>
-
           <div class="callout warn">
             <span class="callout-icon">🌐</span>
             <div>
-              <strong id="s4-err2-title">API reachable 失敗</strong>
+              <strong id="s4-err2-title">錯誤環境</strong>
               <p id="s4-err2-desc" style="margin-top: 4px; font-size: 0.875rem">
-                確認 API URL 是否對應正確環境：
+                從正確的 release channel 重新安裝 plugin（staging / production URL 已 bake）。
               </p>
-              <div
-                class="code-wrap"
-                aria-label="Override API URL command"
-                style="margin-top: 8px"
-              >
-                <pre>./setup-env.sh --api-url https://api-next.no8.io</pre>
-                <button class="copy-btn" onclick="copyCode(this)">複製</button>
-              </div>
             </div>
           </div>
-
           <div class="callout tip">
             <span class="callout-icon">🎉</span>
-            <span id="s4-success-msg"
-              >設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills
-              了。</span
-            >
+            <span id="s4-success-msg">設定完成！可以開始使用 InsightArk skills。</span>
           </div>
         </div>
       </div>
 
-      <!-- Step 5: Uninstall -->
+      <!-- Step 5: Reauth / revoke / uninstall -->
       <div class="step-panel" id="panel-4">
         <div class="step-card">
-          <h2 class="step-heading" id="s5-title">解除安裝</h2>
-          <p class="step-description" id="s5-desc">
-            移除所有已安裝的 Skills 及憑證設定。
-          </p>
-
+          <h2 class="step-heading" id="s5-title">重新授權、撤銷與卸載</h2>
+          <p class="step-description" id="s5-desc">重新授權方式依 agent 而異；撤銷伺服器授權請到 Console。</p>
+          <ol class="steps-list">
+            <li><span class="step-num">1</span><span id="s5-step1"><strong>ChatGPT / Codex、Claude Code</strong>：解除安裝 plugin 後再安裝，安裝時會重新走 OAuth</span></li>
+            <li><span class="step-num">2</span><span id="s5-step2"><strong>Cursor</strong>：plugin 詳情 → MCPs → insightark → Environments → Logout → Authenticate</span></li>
+            <li><span class="step-num">3</span><span id="s5-step3"><strong>Console Connected Apps</strong>：左下角頭像 → 使用者資訊 → 已連接的應用程式，可撤銷授權</span></li>
+          </ol>
           <div class="callout danger">
             <span class="callout-icon">⚠️</span>
-            <span id="s5-danger-note"
-              >解除安裝後，AI Agent 將無法使用 Super 8 Studio
-              Skills。如需繼續使用，請重新執行安裝流程。</span
-            >
-          </div>
-
-          <div class="sub-label" id="s5-uninstall-label">移除 Skills</div>
-          <div class="tab-group">
-            <button
-              class="tab-btn active"
-              onclick="setOS('mac')"
-              id="os-tab-mac-s5"
-              aria-pressed="true"
-            >
-              macOS / Linux
-            </button>
-            <button
-              class="tab-btn"
-              onclick="setOS('win')"
-              id="os-tab-win-s5"
-              aria-pressed="false"
-            >
-              Windows (Git Bash / WSL)
-            </button>
-          </div>
-          <div class="code-wrap" aria-label="Uninstall command">
-            <pre>./uninstall.sh</pre>
-            <button class="copy-btn" onclick="copyCode(this)">複製</button>
-          </div>
-
-          <div class="callout warn" id="s5-win-note" style="display: none">
-            <span class="callout-icon">⚠️</span>
-            <span id="s5-win-text"
-              >Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準
-              PowerShell。</span
-            >
-          </div>
-
-          <ol class="steps-list" style="margin-top: 8px">
-            <li>
-              <span class="step-num">1</span
-              ><span id="s5-step1">顯示目前已安裝的 Skills 路徑清單</span>
-            </li>
-            <li>
-              <span class="step-num">2</span
-              ><span id="s5-step2"
-                >確認後移除所有 Agent 目錄中的 Skills 檔案</span
-              >
-            </li>
-          </ol>
-
-          <hr class="section-divider" />
-          <div class="sub-label" id="s5-cred-label">移除憑證設定</div>
-
-          <div
-            class="code-wrap"
-            id="s5-mac-wrap"
-            aria-label="Remove credentials macOS/Linux"
-          >
-            <pre>rm ~/.insightark.env</pre>
-            <button class="copy-btn" onclick="copyCode(this)">複製</button>
-          </div>
-          <div
-            class="code-wrap"
-            id="s5-win-wrap"
-            aria-label="Remove credentials Windows"
-            style="display: none"
-          >
-            <pre>Remove-Item "$env:USERPROFILE\.insightark.env"</pre>
-            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+            <span id="s5-danger-note">不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console 已連接的應用程式。</span>
           </div>
         </div>
       </div>
 
-      <!-- ③ Navigation buttons -->
       <div class="nav-buttons">
         <button
           class="nav-btn secondary"
@@ -972,154 +646,93 @@ cd insightark-skills</pre
       let currentStep = 0;
       let currentLang = localStorage.getItem("s8-lang") || "zh";
       let currentOS = localStorage.getItem("s8-os") || "mac";
-      let currentSrc = "tarball";
-
       // ─── i18n strings ────────────────────────────────────────────────────────
       const S = {
         zh: {
           headerSubtitle: "安裝設定指南",
-          steps: ["下載", "安裝", "設定憑證 (選填)", "驗證", "解除安裝"],
+          steps: ["選擇 Agent", "安裝 Plugin", "OAuth 授權", "驗證", "重新授權／卸載"],
           btnPrev: "上一步",
           btnNext: "下一步 →",
           btnDone: "完成 🎉",
-          s1Title: "下載 Skills 套件",
-          s1Desc: "選擇來源，下載 Skills 套件到你的電腦。",
-          s1SourceLabel: "來源",
-          s1SrcTarball: "📦 發布套件（推薦）",
-          s1SrcGit: "🔧 Git Clone",
-          s1TipTarball:
-            "下載的套件包含 <code>RELEASE</code> 檔，安裝後的設定步驟會自動偵測 API 環境，不需手動選擇。",
-          s1WarnGit:
-            "Git checkout 沒有 RELEASE 檔，設定步驟時需手動選擇 API 環境。",
-          s2Title: "安裝 Skills",
-          s2Desc: "執行安裝腳本，將 Skills 複製到你的 AI Agent 目錄。",
-          s2PromptsLabel: "安裝精靈步驟",
-          s2Step1:
-            "選擇安裝模式：<strong>Per-agent</strong>（各 Agent 獨立目錄）或 <strong>共用資料夾</strong>",
-          s2Step2:
-            "選擇要安裝的 AI Agent（可多選）：Claude Code、Cursor、Codex、OpenCode、GitHub Copilot",
-          s2Step3: "選擇安裝位置：<code>~</code>（使用者 Home 目錄）或自訂路徑",
-          s2Step4: "確認安裝計畫後執行",
-          s2TableLabel: "安裝路徑對照表",
-          s2ThAgent: "Agent",
-          s2ThPath: "Skills 路徑",
-          s2WinText:
-            "Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準 PowerShell。",
-          s3Title: "設定 API 憑證",
-          s3Desc:
-            "此步驟通常由 install.sh 自動完成，無需手動操作。以下說明供參考或重新設定時使用。",
-          s3AutoNote:
-            "install.sh 安裝時會自動執行憑證設定精靈，通常不需要額外操作。若需重新設定，請執行以下指令。",
-          s3WizardLabel: "精靈執行流程",
-          s3Step1: "自動從 <code>RELEASE</code> 檔偵測 API 環境（Production）",
-          s3Step2:
-            "自動開啟 Super 8 Console → <strong>Account Settings → InsightArk MCP</strong>，建立 Token",
-          s3Step3: "貼上 Token（僅顯示一次，輸入時遮蔽）",
-          s3Step4: "精靈列出可用 InsightArk MCP 的組織，選擇一個",
-          s3Step5:
-            "完成後將憑證寫入 <code>~/.insightark.env</code>（權限 600）",
-          s3SecTitle: "安全注意事項",
-          s3SecList:
-            "<li>請勿將 <code>.insightark.env</code> 提交到版本控制</li><li>請勿在聊天或 Email 中分享 Token</li><li>Token 有效期 6 個月，過期請重新執行 <code>./setup-env.sh</code></li>",
+          s1Title: "選擇 Agent",
+          s1Desc: "InsightArk 透過各 AI agent 的 plugin marketplace 安裝。完整逐步說明請見 <code>README.md</code>。",
+          s1Tip: "正式顧客流程是<strong>從 marketplace 安裝 plugin</strong>後完成 OAuth。請勿手動新增 MCP server。",
+          thHost: "Agent",
+          thClient: "安裝入口",
+          thManifest: "OAuth 時機",
+          s2Title: "安裝 Plugin",
+          s2Desc: "從 agent marketplace 安裝 <strong>SUPER 8 Studio InsightArk Skills</strong>。Marketplace 來源：",
+          s2Step1: "<strong>ChatGPT / Codex</strong>：外掛程式 → 新增市集 → 個人 tab → Install；或 Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code>",
+          s2Step2: "<strong>Claude Code</strong>：Desktop Plugins，或 terminal <code>/plugin marketplace add</code> / <code>/plugin install</code>",
+          s2Step3: "<strong>Cursor</strong>：Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add",
+          s2Note: "逐步點擊說明以 <code>README.md</code> 為準。Plugin 會自動設定內建的 <code>insightark</code> MCP server。",
+          s3Title: "完成 OAuth 授權",
+          s3Desc: "安裝或認證時，agent 會開啟 InsightArk 登入頁面。登入後確認 <code>insightark-mcp:read</code> 與 <code>insightark-mcp:write</code>，再按允許。",
+          s3WizardLabel: "各 Agent 操作",
+          s3Step1: "<strong>ChatGPT / Codex</strong>：安裝 plugin 時自動開啟 OAuth；完成後開啟新的 Codex Work 對話",
+          s3Step2: "<strong>Claude Code</strong>：安裝 plugin 時自動開啟 OAuth",
+          s3Step3: "<strong>Cursor</strong>：plugin 詳情 → MCPs → <code>insightark</code> 右側 Authenticate",
+          s3Step4: "請勿使用獨立的 MCP login 指令，也不要另外手動新增 MCP server",
+          s3AutoNote: "完成授權後，agent 會保存 OAuth credential。請勿在聊天中貼任何 token。",
           s4Title: "驗證設定",
-          s4Desc: "確認憑證正確且 API 可連通。",
-          s4SuccessLabel: "成功輸出範例",
-          s4FailLabel: "常見問題排除",
-          s4Err1Title: "Auth valid 失敗",
-          s4Err1Desc: "Token 已過期，重新執行設定精靈：",
-          s4Err2Title: "API reachable 失敗",
-          s4Err2Desc: "確認 API URL 是否對應正確環境：",
-          s4SuccessMsg:
-            "設定完成！現在可以在你的 AI Agent 中使用 Super 8 Studio Skills 了。",
-          s5Title: "解除安裝",
-          s5Desc: "移除所有已安裝的 Skills 及憑證設定。",
-          s5DangerNote:
-            "解除安裝後，AI Agent 將無法使用 Super 8 Studio Skills。如需繼續使用，請重新執行安裝流程。",
-          s5UninstallLabel: "移除 Skills",
-          s5WinText:
-            "Windows 用戶需在 Git Bash 或 WSL 中執行，不支援 CMD 或標準 PowerShell。",
-          s5Step1: "顯示目前已安裝的 Skills 路徑清單",
-          s5Step2: "確認後移除所有 Agent 目錄中的 Skills 檔案",
-          s5CredLabel: "移除憑證設定",
+          s4Desc: "請 agent 使用 <code>insightark-session</code> skill，呼叫 MCP <code>auth_me</code>。",
+          s4SuccessLabel: "成功指標",
+          s4FailLabel: "疑難排解",
+          s4Err1Title: "需要認證（401 / 403 / authentication-required）",
+          s4Err1Desc: "ChatGPT / Codex 與 Claude Code：解除安裝後重新安裝。Cursor：MCPs → insightark → Logout，再按 Authenticate。網路錯誤、timeout、MCP unavailable 或 5xx 不是 OAuth 問題。",
+          s4Err2Title: "錯誤環境",
+          s4Err2Desc: "從正確的 release channel 重新安裝 plugin（staging / production URL 已 bake）。",
+          s4SuccessMsg: "設定完成！可以開始使用 InsightArk skills。",
+          s5Title: "重新授權、撤銷與卸載",
+          s5Desc: "重新授權方式依 agent 而異；撤銷伺服器授權請到 Console。",
+          s5Step1: "<strong>ChatGPT / Codex、Claude Code</strong>：解除安裝 plugin 後再安裝，安裝時會重新走 OAuth",
+          s5Step2: "<strong>Cursor</strong>：plugin 詳情 → MCPs → insightark → Environments → Logout → Authenticate",
+          s5Step3: "<strong>Console Connected Apps</strong>：左下角頭像 → 使用者資訊 → 已連接的應用程式，可撤銷授權",
+          s5DangerNote: "不要假設「卸載 plugin」等於「撤銷 Console OAuth」。若需撤銷伺服器憑證，請到 Console 已連接的應用程式。",
           copy: "複製",
           copied: "已複製！",
         },
         en: {
           headerSubtitle: "Setup Guide",
-          steps: [
-            "Download",
-            "Install",
-            "Configure (Optional)",
-            "Verify",
-            "Uninstall",
-          ],
+          steps: ["Choose Agent", "Install Plugin", "OAuth", "Validate", "Reauthorize / Uninstall"],
           btnPrev: "Previous",
           btnNext: "Next →",
           btnDone: "Done 🎉",
-          s1Title: "Download Skills Bundle",
-          s1Desc: "Choose your source to download the Skills bundle.",
-          s1SourceLabel: "Source",
-          s1SrcTarball: "📦 Published Package (Recommended)",
-          s1SrcGit: "🔧 Git Clone",
-          s1TipTarball:
-            "The downloaded bundle includes a <code>RELEASE</code> file — the configure step will automatically detect the correct API URL, no manual selection needed.",
-          s1WarnGit:
-            "Git checkout has no RELEASE file. You will need to manually select the API environment during the configure step.",
-          s2Title: "Install Skills",
-          s2Desc:
-            "Run the install script to copy Skills into your AI agent directories.",
-          s2PromptsLabel: "Installer prompts",
-          s2Step1:
-            "Choose install mode: <strong>Per-agent</strong> (separate directory per agent) or <strong>Shared folder</strong>",
-          s2Step2:
-            "Select AI agents to install for (multi-select): Claude Code, Cursor, Codex, OpenCode, GitHub Copilot",
-          s2Step3:
-            "Choose install base: <code>~</code> (user home) or a custom path",
-          s2Step4: "Review the install plan and confirm",
-          s2TableLabel: "Install path reference",
-          s2ThAgent: "Agent",
-          s2ThPath: "Skills path",
-          s2WinText:
-            "Windows users must run in Git Bash or WSL — CMD and standard PowerShell are not supported.",
-          s3Title: "Configure API Credentials",
-          s3Desc:
-            "This step is handled automatically by install.sh. The details below are for reference or manual re-configuration only.",
-          s3AutoNote:
-            "install.sh runs the credential wizard automatically during installation — no extra action needed. To reconfigure, run the command below.",
-          s3WizardLabel: "Wizard steps",
-          s3Step1:
-            "Detects API environment from the <code>RELEASE</code> file (Production)",
-          s3Step2:
-            "Opens Super 8 Console → <strong>Account Settings → InsightArk MCP</strong> to create a token",
-          s3Step3: "Paste the token (shown once, input is masked)",
-          s3Step4:
-            "Lists organizations with InsightArk MCP enabled — select one",
-          s3Step5:
-            "Writes credentials to <code>~/.insightark.env</code> with permissions 600",
-          s3SecTitle: "Security",
-          s3SecList:
-            "<li>Never commit <code>.insightark.env</code> to version control</li><li>Never share tokens in chat or email</li><li>Tokens expire after 6 months — re-run <code>./setup-env.sh</code> when expired</li>",
-          s4Title: "Verify Setup",
-          s4Desc: "Confirm credentials are valid and the API is reachable.",
-          s4SuccessLabel: "Expected successful output",
+          s1Title: "Choose your agent",
+          s1Desc: "InsightArk installs from each AI agent's plugin marketplace. See <code>README.md</code> for full step-by-step instructions.",
+          s1Tip: "The supported customer path is <strong>marketplace plugin install</strong>, then OAuth. Do not add the MCP server manually.",
+          thHost: "Agent",
+          thClient: "Install entry",
+          thManifest: "OAuth timing",
+          s2Title: "Install the plugin",
+          s2Desc: "Install <strong>SUPER 8 Studio InsightArk Skills</strong> from the agent marketplace. Marketplace source:",
+          s2Step1: "<strong>ChatGPT / Codex</strong>: Plugins → Add marketplace → Personal tab → Install; or Codex CLI <code>plugin marketplace add</code> / <code>plugin add</code>",
+          s2Step2: "<strong>Claude Code</strong>: Desktop Plugins, or terminal <code>/plugin marketplace add</code> / <code>/plugin install</code>",
+          s2Step3: "<strong>Cursor</strong>: Customize → Browse Marketplace → All → Add Marketplace → Import from GitHub → Add",
+          s2Note: "Use <code>README.md</code> for click-by-click detail. The plugin configures the bundled <code>insightark</code> MCP server automatically.",
+          s3Title: "Complete OAuth authorization",
+          s3Desc: "During install or authentication, the agent opens the InsightArk sign-in page. After sign-in, review <code>insightark-mcp:read</code> and <code>insightark-mcp:write</code>, then select Allow.",
+          s3WizardLabel: "Agent-specific actions",
+          s3Step1: "<strong>ChatGPT / Codex</strong>: OAuth opens automatically during plugin install; then start a new Codex Work conversation",
+          s3Step2: "<strong>Claude Code</strong>: OAuth opens automatically during plugin install",
+          s3Step3: "<strong>Cursor</strong>: plugin details → MCPs → Authenticate next to <code>insightark</code>",
+          s3Step4: "Do not use standalone MCP login commands, and do not add the MCP server manually",
+          s3AutoNote: "After authorization, the agent stores the OAuth credential. Never paste tokens in chat.",
+          s4Title: "Validate setup",
+          s4Desc: "Ask your agent to use the <code>insightark-session</code> skill and call MCP <code>auth_me</code>.",
+          s4SuccessLabel: "Success indicators",
           s4FailLabel: "Troubleshooting",
-          s4Err1Title: "Auth valid fails",
-          s4Err1Desc: "Token has expired. Re-run the setup wizard:",
-          s4Err2Title: "API reachable fails",
-          s4Err2Desc: "Check that the API URL matches the correct environment:",
-          s4SuccessMsg:
-            "Setup complete! You can now use Super 8 Studio Skills in your AI agent.",
-          s5Title: "Uninstall",
-          s5Desc: "Remove all installed Skills and credentials.",
-          s5DangerNote:
-            "After uninstalling, your AI agent will no longer have access to Super 8 Studio Skills. Reinstall to continue using them.",
-          s5UninstallLabel: "Remove Skills",
-          s5WinText:
-            "Windows users must run in Git Bash or WSL — CMD and standard PowerShell are not supported.",
-          s5Step1: "Lists currently installed Skills paths",
-          s5Step2:
-            "Removes Skills files from all agent directories after confirmation",
-          s5CredLabel: "Remove credentials",
+          s4Err1Title: "Authentication required (401 / 403 / authentication-required)",
+          s4Err1Desc: "ChatGPT / Codex and Claude Code: uninstall, then reinstall. Cursor: MCPs → insightark → Logout, then Authenticate. Network errors, timeouts, MCP unavailable, or 5xx are not OAuth failures.",
+          s4Err2Title: "Wrong environment",
+          s4Err2Desc: "Reinstall the plugin from the correct release channel (staging / production URLs are baked).",
+          s4SuccessMsg: "Setup complete! You can use InsightArk skills.",
+          s5Title: "Reauthorize, revoke, and uninstall",
+          s5Desc: "Reauthorization differs by agent. Revoke server-side access in Console.",
+          s5Step1: "<strong>ChatGPT / Codex, Claude Code</strong>: uninstall the plugin, then install again to restart OAuth",
+          s5Step2: "<strong>Cursor</strong>: plugin details → MCPs → insightark → Environments → Logout → Authenticate",
+          s5Step3: "<strong>Console Connected Apps</strong>: avatar (lower left) → User Information → Connected Apps to revoke authorization",
+          s5DangerNote: "Do not assume plugin uninstall revokes Console OAuth. Revoke server credentials in Console Connected Apps when needed.",
           copy: "Copy",
           copied: "Copied!",
         },
@@ -1167,35 +780,26 @@ cd insightark-skills</pre
 
         setText("s1-title", t("s1Title"));
         setText("s1-desc", t("s1Desc"));
-        setText("s1-source-label", t("s1SourceLabel"));
-        setText("src-tarball", t("s1SrcTarball"));
-        setText("src-git", t("s1SrcGit"));
-        setText("s1-tip-tarball", t("s1TipTarball"));
-        setText("s1-warn-git", t("s1WarnGit"));
+        setText("s1-tip", t("s1Tip"));
+        setText("th-host", t("thHost"));
+        setText("th-client", t("thClient"));
+        setText("th-manifest", t("thManifest"));
 
         setText("s2-title", t("s2Title"));
         setText("s2-desc", t("s2Desc"));
-        setText("s2-prompts-label", t("s2PromptsLabel"));
         setText("s2-step1", t("s2Step1"));
         setText("s2-step2", t("s2Step2"));
         setText("s2-step3", t("s2Step3"));
-        setText("s2-step4", t("s2Step4"));
-        setText("s2-table-label", t("s2TableLabel"));
-        setText("th-agent", t("s2ThAgent"));
-        setText("th-path", t("s2ThPath"));
-        setText("s2-win-text", t("s2WinText"));
+        setText("s2-note", t("s2Note"));
 
         setText("s3-title", t("s3Title"));
         setText("s3-desc", t("s3Desc"));
-        setText("s3-auto-note", t("s3AutoNote"));
         setText("s3-wizard-label", t("s3WizardLabel"));
         setText("s3-step1", t("s3Step1"));
         setText("s3-step2", t("s3Step2"));
         setText("s3-step3", t("s3Step3"));
         setText("s3-step4", t("s3Step4"));
-        setText("s3-step5", t("s3Step5"));
-        setText("s3-sec-title", t("s3SecTitle"));
-        setText("s3-sec-list", t("s3SecList"));
+        setText("s3-auto-note", t("s3AutoNote"));
 
         setText("s4-title", t("s4Title"));
         setText("s4-desc", t("s4Desc"));
@@ -1209,12 +813,10 @@ cd insightark-skills</pre
 
         setText("s5-title", t("s5Title"));
         setText("s5-desc", t("s5Desc"));
-        setText("s5-danger-note", t("s5DangerNote"));
-        setText("s5-uninstall-label", t("s5UninstallLabel"));
-        setText("s5-win-text", t("s5WinText"));
         setText("s5-step1", t("s5Step1"));
         setText("s5-step2", t("s5Step2"));
-        setText("s5-cred-label", t("s5CredLabel"));
+        setText("s5-step3", t("s5Step3"));
+        setText("s5-danger-note", t("s5DangerNote"));
 
         document.querySelectorAll(".copy-btn:not(.copied)").forEach((btn) => {
           btn.textContent = t("copy");
@@ -1270,56 +872,8 @@ cd insightark-skills</pre
       function setOS(os) {
         currentOS = os;
         localStorage.setItem("s8-os", os);
-        ["s1", "s2", "s5"].forEach((p) => {
-          const mac = document.getElementById("os-tab-mac-" + p);
-          const win = document.getElementById("os-tab-win-" + p);
-          if (mac) {
-            mac.classList.toggle("active", os === "mac");
-            mac.setAttribute("aria-pressed", String(os === "mac"));
-          }
-          if (win) {
-            win.classList.toggle("active", os === "win");
-            win.setAttribute("aria-pressed", String(os === "win"));
-          }
-        });
-        const macWrap = document.getElementById("tarball-mac-wrap");
-        const winWrap = document.getElementById("tarball-win-wrap");
-        if (macWrap) macWrap.style.display = os === "mac" ? "block" : "none";
-        if (winWrap) winWrap.style.display = os === "win" ? "block" : "none";
-        const s2WinNote = document.getElementById("s2-win-note");
-        if (s2WinNote) s2WinNote.style.display = os === "win" ? "flex" : "none";
-        const s5WinNote = document.getElementById("s5-win-note");
-        if (s5WinNote) s5WinNote.style.display = os === "win" ? "flex" : "none";
-        const s5MacWrap = document.getElementById("s5-mac-wrap");
-        const s5WinWrap = document.getElementById("s5-win-wrap");
-        if (s5MacWrap)
-          s5MacWrap.style.display = os === "mac" ? "block" : "none";
-        if (s5WinWrap)
-          s5WinWrap.style.display = os === "win" ? "block" : "none";
       }
 
-      // ─── Source selector ──────────────────────────────────────────────────────
-      function setSource(src) {
-        currentSrc = src;
-        document
-          .getElementById("src-tarball")
-          .classList.toggle("active", src === "tarball");
-        document
-          .getElementById("src-tarball")
-          .setAttribute("aria-pressed", String(src === "tarball"));
-        document
-          .getElementById("src-git")
-          .classList.toggle("active", src === "git");
-        document
-          .getElementById("src-git")
-          .setAttribute("aria-pressed", String(src === "git"));
-        document.getElementById("section-tarball").style.display =
-          src === "tarball" ? "block" : "none";
-        document.getElementById("section-git").style.display =
-          src === "git" ? "block" : "none";
-      }
-
-      // ─── Copy button ──────────────────────────────────────────────────────────
       function copyCode(btn) {
         const text = btn.closest(".code-wrap").querySelector("pre").textContent;
         const done = () => {

@@ -1,8 +1,8 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "2.0.3",
-  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. After install, run /plugin configure to set S8_SESSION_TOKEN (Console → Account Settings → InsightArk MCP → Create token).",
+  "version": "2.4.0",
+  "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Install the plugin, then Connect the bundled insightark MCP server through Claude Code OAuth.",
   "author": {
     "name": "Super8",
     "url": "https://www.no8.io"
@@ -23,14 +23,6 @@
     "skills"
   ],
   "skills": "./skills/",
-  "defaultEnabled": false,
-  "userConfig": {
-    "S8_SESSION_TOKEN": {
-      "type": "string",
-      "title": "Session token",
-      "description": "InsightArk MCP session token (starts with r:). Create one in Console → Account Settings → InsightArk MCP → Create token. URLs: https://console.no8.io (prod) / https://stage-console.no8.io (staging).",
-      "sensitive": true,
-      "required": true
-    }
-  }
+  "commands": "./commands/",
+  "defaultEnabled": false
 }
