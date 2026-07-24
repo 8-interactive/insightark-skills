@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.5.0 — US-1 analysis guidance + contentKinds / list activity window
+
+- Document per-tool messaging scenarios (list／get／messages／search／preview) and contrast list `lastMessageAt*` activity windows vs search `startAt`/`endAt` message windows.
+- Guide Strategy A qualitative detection: corpus vs keyword decision tree, optional Phase 0 calibration, no redundant same-window keyword re-search, prefer `contentKinds: ["text"]`.
+- Document `messaging_message_search.contentKinds` exact MIME map; clarify `messaging_message_preview` is outbound-only.
+- Document conversation list `lastMessageAtFrom`/`To` (≤90d, timezone-aware instants) and opaque `pageCursor` keyset paging.
+
 ## 2.4.0 — Generic instant timezone policy (query windows included)
 
 - Apply universal `timezone-policy.md` whenever customer temporal language becomes an MCP input representing a specific instant or interval boundary; no current tool/field allowlist is required.

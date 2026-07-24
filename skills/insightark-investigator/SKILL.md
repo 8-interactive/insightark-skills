@@ -15,19 +15,19 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 - `auth_me` — validate session (no `orgId` required)
 - `auth_organizations` — list manageable organizations (no `orgId` required)
-- `messaging_conversation_list` — browse conversations
+- `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `pageCursor`)
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read message timeline
-- `messaging_message_search` — keyword-driven message search
+- `messaging_message_search` — time／keyword／`contentKinds` message search (Strategy A primary path)
 
 ## Workflow
 
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one operational path:
-   - `messaging_conversation_list` for discovery and pagination
+   - `messaging_conversation_list` for inbox／activity discovery and `pageCursor` paging (not message-proportion analysis)
    - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
-   - `messaging_message_search` for keyword-oriented evidence lookup
+   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats)
 4. Return a concise read-only investigation result grounded in the public API response.
 
 ## Qualitative detection (intent / sentiment / complaint)

@@ -37,7 +37,7 @@ Use when the audience is "messages in a date range" or "messages mentioning a
 keyword" across the whole org, with **no tag constraint**.
 
 - `messaging_message_search` with any AND-combination of `keyword`, `platform`,
-  `startAt`, `endAt`, `senderTypes`, `senderIds`, `conversationId`.
+  `startAt`, `endAt`, `senderTypes`, `senderIds`, `conversationId`, `contentKinds`.
 - Default sender filter (omit `senderType`/`senderTypes`) is **Customer only**.
   For full customer+staff dialogue pass `senderTypes: ["Customer","_User"]` in a
   single call — do not pass both `senderType` and `senderTypes`.
@@ -50,7 +50,16 @@ keyword" across the whole org, with **no tag constraint**.
   disclose the effective timezone. For date-only bounds, confirm clocks; for a
   one-sided bound, also disclose the server-derived opposite bound and enforce
   the 90-day maximum. Do not silently invent midnight.
+- Prefer `contentKinds: ["text"]` for customer sentiment／complaint detection
+  (drops notify-event noise). Include `template` when staff／bot templates matter;
+  use `event` only for join／follow-style investigation. See messaging skill for
+  the exact kind→MIME table (`video`／`audio` are outside `image`／`file`).
 - `limit` default 20, max **1000**; page with `skip`.
+
+**Do not** use `messaging_conversation_list` as the primary path for org-wide
+message sentiment or complaint **proportions** — list filters Customer
+`lastMessageAt` (who was active), not message `createdAt` corpora. List activity
+bounds may help discover active conversations; message stats still need search.
 
 ### Choosing a path
 
@@ -59,6 +68,22 @@ keyword" across the whole org, with **no tag constraint**.
 | a customer **tag** (segment) | **Strategy B** |
 | a **time window** and/or **keyword**, no tag | **Strategy A** |
 | a tag **and** a keyword | Strategy B to select customers, then filter messages client-side by `createdAt`/keyword (avoid a second paid search) |
+
+### Decision tree (Strategy A)
+
+1. **Proportion／overall sentiment／trend** over a time window → one (or few)
+   `messaging_message_search` calls **without** keyword (mutually exclusive filters
+   only), preferably `contentKinds: ["text"]`, then classify **client-side**.
+2. **Find complaints／urgency／a known theme** → keyword search after a keyword
+   bank exists (from the user or from calibration). Prefer `contentKinds: ["text"]`.
+3. **Optional Phase 0 (calibration)** when brand／product vocabulary is unknown →
+   one bounded text-oriented pull (respect sample caps, e.g. limit a few hundred)
+   to learn terms, then keyword or second-pass classify. Skip if the user already
+   supplied keywords.
+4. **No redundant same-window re-search** → after a time-window corpus is already
+   in hand, do **not** issue more `messaging_message_search` calls solely to
+   recompute statistics already computable client-side. At most a small number of
+   keyword calls to demonstrate re-queryability when the user needs that proof.
 
 ---
 
