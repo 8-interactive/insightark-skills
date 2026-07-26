@@ -59,7 +59,7 @@ Return a compact, reviewable opportunity list — **not** a scoring engine
 (explicitly out of scope), just organised, traceable signals for a human to act on:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (before→after)
+Sampled: N conversations (period / tag), credits used: X (sum of returned chargedCredits)
 Opportunity (theme)        | Signal type      | Evidence (conversationId · createdAt) | Suggested action
 大包裝需求                 | 功能/商品需求    | conv_abc · 07-14  "有沒有家庭號..."     | 評估大容量SKU / 預購測水溫
 補貨時間常被問             | 重複詢問         | conv_def·07-15, conv_ghi·07-16          | 補貨通知/到貨預告內容

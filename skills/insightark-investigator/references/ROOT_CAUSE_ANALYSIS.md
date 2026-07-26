@@ -11,8 +11,8 @@ no new skill. Before selecting or reading conversations, follow that playbook fo
 - **Path selection** — Strategy B (tag-segmented via `crm_customer_search`
   `includeTags` → `messaging_conversation_list` → `messaging_conversation_messages`)
   vs Strategy A (time-window / keyword via `messaging_message_search`).
-- **Cost & sample guardrails** — `credits_usage` before/after, default sample
-  caps, no blind retry, stop-and-report at the cap.
+- **Cost & sample guardrails** — returned `chargedCredits` per completed call,
+  default sample caps, no blind retry, stop-and-report at the cap.
 - **Reading rules** — trace every finding to real messages, do not fabricate
   complaints, treat null `_User` identity (S8N-13049) as a known limitation,
   present findings as human-reviewable.
@@ -89,7 +89,7 @@ For each theme that appears, produce:
 Return a compact, reviewable summary, not a long transcript dump:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (before→after)
+Sampled: N conversations (period / tag), credits used: X (sum of returned chargedCredits)
 Theme                | Cases | Representative (conversationId · createdAt) | Likely cause → Suggested fix
 物流／出貨            |   6   | conv_abc · 07-14  "到貨過三天還沒..."       | 出貨後無主動通知 → 補出貨/延遲通知
 服務／客服回覆        |   3   | conv_def · 07-15  "已讀不回..."             | 尖峰時段回覆量能不足 → 值班/自動回覆

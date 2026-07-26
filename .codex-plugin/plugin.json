@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "shortDescription": "InsightArk skills and hosted MCP for SUPER 8 Studio.",
-    "longDescription": "Seven workflow skills plus bundled hosted MCP for investigating conversations, managing customers, broadcasts, and marketing automation.",
+    "longDescription": "Eight workflow skills plus bundled hosted MCP for investigating conversations, managing customers, broadcasts, marketing automation, and LINE ChatGroups.",
     "developerName": "Super8",
     "category": "Productivity",
     "capabilities": [

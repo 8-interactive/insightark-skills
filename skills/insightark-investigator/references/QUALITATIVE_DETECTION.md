@@ -97,8 +97,10 @@ batch read as spending real budget.
 
 **You MUST:**
 
-1. **Measure before/after.** Call `credits_usage` (it does **not** consume
-   credits) at the start, and again at the end, and report actual consumption.
+1. **Use response metadata.** Sum the top-level `chargedCredits` returned by
+   each completed tool call and report that as actual consumption. You may call
+   `credits_usage` to inspect remaining balance, but never subtract balances to
+   infer a call or run cost; concurrent calls make that ambiguous.
 2. **Respect default sample caps** unless the user explicitly approves more:
    - customers per run: **≤ 25**
    - conversations per customer: **≤ 3** (most recent)

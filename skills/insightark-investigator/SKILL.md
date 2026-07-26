@@ -11,6 +11,8 @@ allowed-mcp: true
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
 
+**Audience:** 1:1 / Customer conversations. For LINE **ChatGroup** discovery or group-message analysis, hand off to `insightark-chat-groups` (do not use `messaging_conversation_list` as group discovery).
+
 ## MCP Tools
 
 - `auth_me` — validate session (no `orgId` required)
@@ -39,9 +41,11 @@ across a set of conversations rather than a single lookup — load
 - **Path selection**: tag-segmented audiences use `crm_customer_search` →
   `messaging_conversation_list` → `messaging_conversation_messages` (the only
   tag-aware path); time-window / keyword audiences use `messaging_message_search`.
-- **Cost guardrails**: measure with `credits_usage` before/after (it does not
-  consume credits), respect hard sample caps, and never blind-retry — batch reads
-  cost more than the nominal per-call rate.
+- **Cost guardrails**: use each completed call's returned `chargedCredits` for
+  per-call and run-total reporting; `credits_usage` only inspects remaining
+  balance and must not be used to infer cost, especially for concurrent reads.
+  Respect hard sample caps, and never blind-retry — batch reads cost more than
+  the nominal per-call rate.
 - **Reading rules**: findings must cite specific messages, must not fabricate
   complaints, and are human-reviewable signals, not authoritative labels.
 
