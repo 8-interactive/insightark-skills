@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0 — Release metadata synchronization
+
+- Align the source tooling and all host plugin/marketplace manifests with the published skills version.
+
 ## 2.5.0 — US-1 analysis guidance + contentKinds / list activity window
 
 - Document per-tool messaging scenarios (list／get／messages／search／preview) and contrast list `lastMessageAt*` activity windows vs search `startAt`/`endAt` message windows.
