@@ -13,12 +13,12 @@ lenses read the *customer*; this one evaluates the **staff responder** (`_User`)
 
 ---
 
-## Primary path is Strategy A (`messaging_message_search`)
+## Primary path is `messaging_message_search`
 
 Staff (`_User`) reply identity — `userName` / `userEmail` — is returned **only by
-`messaging_message_search`**. `messaging_conversation_messages` (the Strategy B
-reader) does **not** carry staff identity, so it cannot attribute replies to an
-agent. Therefore CS quality review runs on **Strategy A**:
+`messaging_message_search`**. `messaging_conversation_messages` does **not**
+carry staff identity, so it cannot attribute replies to an agent. Therefore CS
+quality review uses `messaging_message_search`:
 
 - To read the exchange for judging a reply in context, use
   `senderTypes: ["Customer","_User"]` in one search call.
@@ -32,10 +32,7 @@ agent. Therefore CS quality review runs on **Strategy A**:
   `messaging_conversation_messages` — it reads the timeline but cannot name the
   agent.
 
-If an audience must be tag-segmented first (Strategy B via
-`crm_customer_search`), you can still discover the conversations that way, but you
-must read the messages through `messaging_message_search` to recover staff
-identity.
+For a tag-segmented audience, add `includeTags` to that same search.
 
 ## Identify the agents (no roster tool exists)
 
@@ -84,7 +81,7 @@ These are candidate signals for a human reviewer, **not** an authoritative score
 Per agent, a small, traceable set — not a transcript dump:
 
 ```
-Sampled: N staff replies over <period> (platform), credits used: X (before→after)
+Sampled: N staff replies over <period> (platform), credits used: X (sum of returned chargedCredits)
 Agent (senderId · label)        | Exemplary (conversationId · createdAt · quote) | Needs-improve (conversationId · createdAt · quote)
 u_abc · 小美 <mei@…>             | conv_11 · 07-14 "已幫您加急並回報物流…"          | conv_19 · 07-16 "(顧客追問兩次才回)"
 u_def · staff (identity null)    | conv_22 · 07-15 "…"                            | —

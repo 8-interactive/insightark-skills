@@ -1,10 +1,7 @@
 {
   "mcpServers": {
     "insightark": {
-      "url": "https://api-next.no8.io/mcp",
-      "auth": {
-        "CLIENT_ID": "insightark-cursor"
-      }
+      "url": "https://api-next.no8.io/mcp"
     }
   }
 }

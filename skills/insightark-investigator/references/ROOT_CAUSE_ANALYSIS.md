@@ -8,11 +8,10 @@ This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md). It adds no new tool and
 no new skill. Before selecting or reading conversations, follow that playbook for:
 
-- **Path selection** — Strategy B (tag-segmented via `crm_customer_search`
-  `includeTags` → `messaging_conversation_list` → `messaging_conversation_messages`)
-  vs Strategy A (time-window / keyword via `messaging_message_search`).
-- **Cost & sample guardrails** — `credits_usage` before/after, default sample
-  caps, no blind retry, stop-and-report at the cap.
+- **Path selection** — one bounded `messaging_message_search` using tag,
+  time-window, and/or literal keyword filters.
+- **Cost & sample guardrails** — returned `chargedCredits` per completed call,
+  default sample caps, no blind retry, stop-and-report at the cap.
 - **Reading rules** — trace every finding to real messages, do not fabricate
   complaints, treat null `_User` identity (S8N-13049) as a known limitation,
   present findings as human-reviewable.
@@ -41,8 +40,8 @@ both, or cost and quality both suffer.
 ## Selecting the complaint set
 
 - **Have a complaint tag / segment** (e.g. customers tagged `客訴`, `退款`,
-  `VIP-申訴`) → Strategy B, `crm_customer_search(includeTags)`.
-- **No tag, want a period or keyword sweep** → Strategy A,
+  `VIP-申訴`) → search with `includeTags` plus bounded time/keyword filters.
+- **No tag, want a period or keyword sweep** →
   `messaging_message_search` with a complaint-leaning `keyword` (退款 / 退貨 / 出貨
   / 到貨 / 客訴 / 投訴 / 沒收到 / 錯 / 壞 / 慢 / 態度 …), a bounded `startAt`/`endAt`,
   and `platform` if the ask is channel-specific. Follow the canonical Strategy A
@@ -89,7 +88,7 @@ For each theme that appears, produce:
 Return a compact, reviewable summary, not a long transcript dump:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (before→after)
+Sampled: N conversations (period / tag), credits used: X (sum of returned chargedCredits)
 Theme                | Cases | Representative (conversationId · createdAt) | Likely cause → Suggested fix
 物流／出貨            |   6   | conv_abc · 07-14  "到貨過三天還沒..."       | 出貨後無主動通知 → 補出貨/延遲通知
 服務／客服回覆        |   3   | conv_def · 07-15  "已讀不回..."             | 尖峰時段回覆量能不足 → 值班/自動回覆

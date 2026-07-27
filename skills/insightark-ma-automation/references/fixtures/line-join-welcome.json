@@ -18,12 +18,12 @@
   },
   "nodes": [
     {
-      "id": "start_1",
+      "id": "start1",
       "type": "start",
       "position": { "x": 0, "y": 0 }
     },
     {
-      "id": "trigger_join",
+      "id": "triggerJoin",
       "type": "trigger",
       "data": {
         "type": "join"
@@ -31,7 +31,7 @@
       "position": { "x": 120, "y": 0 }
     },
     {
-      "id": "message_welcome",
+      "id": "messageWelcome",
       "type": "message",
       "data": {
         "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
@@ -49,14 +49,14 @@
       "position": { "x": 280, "y": 0 }
     },
     {
-      "id": "end_1",
+      "id": "end1",
       "type": "end",
       "position": { "x": 440, "y": 0 }
     }
   ],
   "edges": [
-    { "source": "start_1", "target": "trigger_join" },
-    { "source": "trigger_join", "target": "message_welcome" },
-    { "source": "message_welcome", "target": "end_1" }
+    { "source": "start1", "target": "triggerJoin" },
+    { "source": "triggerJoin", "target": "messageWelcome" },
+    { "source": "messageWelcome", "target": "end1" }
   ]
 }

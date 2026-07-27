@@ -11,23 +11,25 @@ allowed-mcp: true
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
 
+**Audience:** 1:1 / Customer conversations. For LINE **ChatGroup** discovery or group-message analysis, hand off to `insightark-chat-groups` (do not use `messaging_conversation_list` as group discovery).
+
 ## MCP Tools
 
 - `auth_me` — validate session (no `orgId` required)
 - `auth_organizations` — list manageable organizations (no `orgId` required)
-- `messaging_conversation_list` — browse conversations
+- `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `pageCursor`)
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read message timeline
-- `messaging_message_search` — keyword-driven message search
+- `messaging_message_search` — time／keyword／tag／`contentKinds` message search
 
 ## Workflow
 
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one operational path:
-   - `messaging_conversation_list` for discovery and pagination
+   - `messaging_conversation_list` for inbox／activity discovery and `pageCursor` paging (not message-proportion analysis)
    - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
-   - `messaging_message_search` for keyword-oriented evidence lookup
+   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats)
 4. Return a concise read-only investigation result grounded in the public API response.
 
 ## Qualitative detection (intent / sentiment / complaint)
@@ -36,20 +38,23 @@ For batch qualitative reading — judging customer intent, sentiment, or complai
 across a set of conversations rather than a single lookup — load
 `references/QUALITATIVE_DETECTION.md` on demand and follow it. It covers:
 
-- **Path selection**: tag-segmented audiences use `crm_customer_search` →
-  `messaging_conversation_list` → `messaging_conversation_messages` (the only
-  tag-aware path); time-window / keyword audiences use `messaging_message_search`.
-- **Cost guardrails**: measure with `credits_usage` before/after (it does not
-  consume credits), respect hard sample caps, and never blind-retry — batch reads
-  cost more than the nominal per-call rate.
+- **Path selection**: time-window, keyword, and tag-segmented audiences use one
+  bounded `messaging_message_search` call with its matching filters.
+- **Cost guardrails**: use each completed call's returned `chargedCredits` for
+  per-call and run-total reporting; `credits_usage` only inspects remaining
+  balance and must not be used to infer cost, especially for concurrent reads.
+  Respect hard sample caps, and never blind-retry — batch reads cost more than
+  the nominal per-call rate.
 - **Reading rules**: findings must cite specific messages, must not fabricate
   complaints, and are human-reviewable signals, not authoritative labels.
 
 ### Analysis lenses (same tools, same guardrails)
 
 `QUALITATIVE_DETECTION.md` is the shared foundation (path selection + cost
-guardrails + reading rules). Two focused lenses build on it — load the one that
-matches the ask, then follow the shared Strategy A/B and sample/credit caps:
+guardrails + reading rules). `messaging_message_search` is the standard path;
+`messaging_conversation_messages` is a recent context peek, not a period corpus.
+Two focused lenses build on it — load the one that matches the ask, then follow
+the shared sample/credit caps:
 
 - **Complaint root cause / theme categorisation** → `references/ROOT_CAUSE_ANALYSIS.md`.
   Use when the ask is not just "how many complaints" but "which themes, why, and
@@ -71,6 +76,15 @@ matches the ask, then follow the shared Strategy A/B and sample/credit caps:
 - Do not depend on repository-local code or hidden internal fields.
 - Prefer `messaging_message_search` for analysis. Do not rebuild Excel via repeated MCP search; human downloads use Console CS export.
 - Page sizes: search／conversation_messages max 1000; conversation_list max 100.
+
+## Period vs timeline vs list (important)
+
+1. **Time-scoped asks** (year／quarter／month／“last 30 days”) → use **`messaging_message_search`** with explicit `startAt`/`endAt`. Do **not** treat `messaging_conversation_messages` as that period’s corpus.
+2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
+3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows.
+4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
+5. **Long ranges:** search max **90 days**. Split longer periods into ≤90-day windows; estimate credits (`windows × 20` per conversation／org sweep, plus list／get costs) before running.
+6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.
 
 ## Message search sender filters (important)
 

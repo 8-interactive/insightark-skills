@@ -18,7 +18,7 @@
   },
   "nodes": [
     {
-      "id": "start_1",
+      "id": "start1",
       "type": "start",
       "position": {
         "x": 0,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "trigger_tag",
+      "id": "triggerTag",
       "type": "trigger",
       "data": {
         "type": "tag",
@@ -41,7 +41,7 @@
       }
     },
     {
-      "id": "message_follow_up",
+      "id": "messageFollowUp",
       "type": "message",
       "data": {
         "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
@@ -62,7 +62,7 @@
       }
     },
     {
-      "id": "end_1",
+      "id": "end1",
       "type": "end",
       "position": {
         "x": 440,
@@ -72,16 +72,16 @@
   ],
   "edges": [
     {
-      "source": "start_1",
-      "target": "trigger_tag"
+      "source": "start1",
+      "target": "triggerTag"
     },
     {
-      "source": "trigger_tag",
-      "target": "message_follow_up"
+      "source": "triggerTag",
+      "target": "messageFollowUp"
     },
     {
-      "source": "message_follow_up",
-      "target": "end_1"
+      "source": "messageFollowUp",
+      "target": "end1"
     }
   ]
 }

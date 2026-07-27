@@ -18,7 +18,7 @@
   },
   "nodes": [
     {
-      "id": "start_1",
+      "id": "start1",
       "type": "start",
       "position": {
         "x": 0,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "trigger_tag",
+      "id": "triggerTag",
       "type": "trigger",
       "data": {
         "type": "tag",
@@ -41,7 +41,7 @@
       }
     },
     {
-      "id": "message_card",
+      "id": "messageCard",
       "type": "message",
       "data": {
         "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
@@ -85,10 +85,10 @@
       }
     },
     {
-      "id": "group_click",
+      "id": "groupClick",
       "type": "group",
       "data": {
-        "source": "message_card",
+        "source": "messageCard",
         "type": "click",
         "clickType": "button",
         "timeout": {
@@ -103,11 +103,11 @@
       }
     },
     {
-      "id": "cond_yes",
+      "id": "condYes",
       "type": "condition",
       "data": {
-        "groupId": "group_click",
-        "source": "message_card",
+        "groupId": "groupClick",
+        "source": "messageCard",
         "type": "click",
         "buttons": [
           {
@@ -122,11 +122,11 @@
       }
     },
     {
-      "id": "cond_no",
+      "id": "condNo",
       "type": "condition",
       "data": {
-        "groupId": "group_click",
-        "source": "message_card",
+        "groupId": "groupClick",
+        "source": "messageCard",
         "type": "click",
         "buttons": [
           {
@@ -141,11 +141,11 @@
       }
     },
     {
-      "id": "cond_timeout",
+      "id": "condTimeout",
       "type": "condition",
       "data": {
-        "groupId": "group_click",
-        "source": "message_card",
+        "groupId": "groupClick",
+        "source": "messageCard",
         "type": "n-click"
       },
       "position": {
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "msg_yes",
+      "id": "msgYes",
       "type": "message",
       "data": {
         "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
@@ -175,7 +175,7 @@
       }
     },
     {
-      "id": "end_yes",
+      "id": "endYes",
       "type": "end",
       "position": {
         "x": 1000,
@@ -183,7 +183,7 @@
       }
     },
     {
-      "id": "end_no",
+      "id": "endNo",
       "type": "end",
       "position": {
         "x": 820,
@@ -191,7 +191,7 @@
       }
     },
     {
-      "id": "end_timeout",
+      "id": "endTimeout",
       "type": "end",
       "position": {
         "x": 820,
@@ -201,40 +201,40 @@
   ],
   "edges": [
     {
-      "source": "start_1",
-      "target": "trigger_tag"
+      "source": "start1",
+      "target": "triggerTag"
     },
     {
-      "source": "trigger_tag",
-      "target": "message_card"
+      "source": "triggerTag",
+      "target": "messageCard"
     },
     {
-      "source": "message_card",
-      "target": "cond_yes"
+      "source": "messageCard",
+      "target": "condYes"
     },
     {
-      "source": "message_card",
-      "target": "cond_no"
+      "source": "messageCard",
+      "target": "condNo"
     },
     {
-      "source": "message_card",
-      "target": "cond_timeout"
+      "source": "messageCard",
+      "target": "condTimeout"
     },
     {
-      "source": "cond_yes",
-      "target": "msg_yes"
+      "source": "condYes",
+      "target": "msgYes"
     },
     {
-      "source": "msg_yes",
-      "target": "end_yes"
+      "source": "msgYes",
+      "target": "endYes"
     },
     {
-      "source": "cond_no",
-      "target": "end_no"
+      "source": "condNo",
+      "target": "endNo"
     },
     {
-      "source": "cond_timeout",
-      "target": "end_timeout"
+      "source": "condTimeout",
+      "target": "endTimeout"
     }
   ]
 }

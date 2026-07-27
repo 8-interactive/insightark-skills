@@ -17,6 +17,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `auth_organizations` — list manageable organizations (no `orgId` required)
 - `crm_customer_get` — get one customer by id
 - `crm_customer_search` — search customers with public filters
+- `crm_tag_list` — discover organization tag inventory and rough holder counts
+- `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect saved group snapshots
+- `crm_customer_group_rename`, `crm_customer_group_delete` — rename or soft-delete customer groups (confirm first)
 - `crm_customer_update` — patch supported profile fields
 - `crm_customer_tag_add` — add tags to a customer
 - `crm_customer_tag_remove` — remove tags from a customer
@@ -26,7 +29,8 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped customer tool.
 3. Choose one operational path:
-   - `crm_customer_search` for discovery, filtering, and pagination
+   - `crm_tag_list` to discover tag names (optionally by literal `nameContains`) before searching or mutating when exact names are unknown; it returns Console-aligned `name`, `count`, `density`, and `lastUsed` when available
+   - `crm_customer_search` to list customers matching known tags, other public filters, and pagination; do not use it to browse the organization tag catalog
    - `crm_customer_get` for one customer record
    - `crm_customer_update` for supported public profile changes (confirm first)
    - `crm_customer_tag_add` to append one or more tags (confirm first)
@@ -55,4 +59,8 @@ Exact editable fields and enum values come from the `crm_customer_update` MCP to
 - Treat update and tag operations as explicit write actions.
 - Do not perform a write unless the target customer id and intended field or tag changes are explicit.
 - Stay within the published public customer schema and InsightArk MCP tools.
+- Do not invent organization-level tag write tools. `crm_tag_list` is read-only inventory discovery.
+- Customer groups are `custom` or Console-defined `query` groups. MCP does not create or refresh groups; use Console for those operations and CSV import/export. Query counts and member pages are materialized snapshots; `updatedAt` is a mutable group record timestamp, not a materialization clock.
+- Before rename or soft-delete, present the target and effect and obtain explicit confirmation.
+- Group membership does not prove broadcast eligibility. Use `broadcast_audience_preview` before a group-targeted broadcast.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

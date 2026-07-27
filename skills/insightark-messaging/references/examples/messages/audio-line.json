@@ -1,0 +1,9 @@
+{
+  "platform": "line",
+  "messages": [
+    {
+      "contentType": "application/x-audio",
+      "data": { "url": "https://media.example.com/promo.mp3", "duration": 12000 }
+    }
+  ]
+}

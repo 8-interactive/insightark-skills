@@ -7,7 +7,7 @@ suggestions, recurring questions, purchase intent, and unmet needs — e.g. "從
 
 This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
-Strategy A/B path selection, same cost/sample guardrails, same traceable /
+one message-search path, same cost/sample guardrails, same traceable /
 non-fabricated reading rules. It adds no new tool and no new skill. Everything
 below is the *opportunity lens* on top of that foundation.
 
@@ -44,8 +44,9 @@ Classify each candidate into what the customer is actually signalling:
 
 ## Selecting the opportunity set
 
-- **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → Strategy B.
-- **Sweep by period / keyword** → Strategy A with positive-intent `keyword`
+- **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → use
+  `includeTags` in the same bounded message search.
+- **Sweep by period / keyword** → use positive-intent `keyword`
   seeds above, a bounded `startAt`/`endAt`, and `platform` if channel-specific.
   Follow the canonical Strategy A time-window rules in
   [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
@@ -59,7 +60,7 @@ Return a compact, reviewable opportunity list — **not** a scoring engine
 (explicitly out of scope), just organised, traceable signals for a human to act on:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (before→after)
+Sampled: N conversations (period / tag), credits used: X (sum of returned chargedCredits)
 Opportunity (theme)        | Signal type      | Evidence (conversationId · createdAt) | Suggested action
 大包裝需求                 | 功能/商品需求    | conv_abc · 07-14  "有沒有家庭號..."     | 評估大容量SKU / 預購測水溫
 補貨時間常被問             | 重複詢問         | conv_def·07-15, conv_ghi·07-16          | 補貨通知/到貨預告內容

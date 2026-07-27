@@ -16,6 +16,22 @@ Validate shape against the tables below, then call MCP `messaging_message_previe
 | Variables | Customer display name in `text/plain` `content` or template `altText`: use EJS `<%= name %>` (same as Super 8 Console). **Do not use `{{name}}`** — it is sent literally. Preview: set `sampleCustomer.displayName` or `originalDisplayName`. Send/broadcast: uses each recipient's `originalDisplayName` (falls back to `displayName`). |
 | LINE-only types | `carousel`, `imagemap` — rejected on facebook / instagram / whatsapp |
 
+## Supported LINE capability matrix
+
+Every rich message (or a text batch with `quickReply`) requires preview, approval, then the unchanged payload for `messaging_customer_send_message` or `broadcast_create`. A batch contains **one to five** ordered messages.
+
+| Type | Canonical payload | Media prerequisite | Send path |
+|---|---|---|---|
+| Text | `text/plain` + `data.content` | None | Direct / broadcast |
+| Image | `application/x-image` + `data.url` | `media_upload_url` supports image purpose/MIME | Direct / broadcast |
+| Audio | `application/x-audio` + `data.url` | Accessible HTTPS URL supplied by user | Direct / broadcast |
+| Video | `application/x-video` + `data.url` | Accessible HTTPS URL supplied by user | Direct / broadcast |
+| File | `application/x-file` + `data.url` | `media_upload_url` supports PDF/file only | Direct / broadcast |
+| Card / confirm / carousel / imagemap / richvideo / image | `application/x-template` + matching `templateType` | Follow the matching example; image assets use compatible upload URL | Direct / broadcast |
+| Quick reply | top-level `quickReply` action objects | None | Last message only; Direct / broadcast |
+
+When the uploader does not advertise the format/purpose pair, do not claim it can upload the file: ask the user for an accessible HTTPS URL. Complete the presigned upload before preview and use the returned URL unchanged.
+
 ---
 
 ## `card` — 多頁卡片（標題 + 副標 + 圖 + 按鈕）
@@ -151,3 +167,5 @@ Same **uniform `aspectRatio`** rule as `carousel`. Each element is a full-image 
 4. Check the payload against the tables in this reference (uniform carousel ratios, required fields).
 5. Call MCP `messaging_message_preview` → user confirms (~4h link, 2 credits).
 6. Dispatch with the **same payload** via MCP `messaging_customer_send_message` or `broadcast_create` (broadcast/MA skills hand rich authoring to this reference).
+
+Any content, order, URL, quick reply, or action change after preview requires a new preview and approval.

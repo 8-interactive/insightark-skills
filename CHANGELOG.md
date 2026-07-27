@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.6.1 — Single-source version metadata
+
+- Use `skills/_insightark-shared/VERSION` as the canonical version and synchronize all host metadata with a checked-in script.
+
+## 2.6.0 — Release metadata synchronization
+
+- Align the source tooling and all host plugin/marketplace manifests with the published skills version.
+
+## 2.5.0 — US-1 analysis guidance + contentKinds / list activity window
+
+- Document per-tool messaging scenarios (list／get／messages／search／preview) and contrast list `lastMessageAt*` activity windows vs search `startAt`/`endAt` message windows.
+- Guide Strategy A qualitative detection: corpus vs keyword decision tree, optional Phase 0 calibration, no redundant same-window keyword re-search, prefer `contentKinds: ["text"]`.
+- Document `messaging_message_search.contentKinds` exact MIME map; clarify `messaging_message_preview` is outbound-only.
+- Document conversation list `lastMessageAtFrom`/`To` (≤90d, timezone-aware instants) and opaque `pageCursor` keyset paging.
+
 ## 2.4.0 — Generic instant timezone policy (query windows included)
 
 - Apply universal `timezone-policy.md` whenever customer temporal language becomes an MCP input representing a specific instant or interval boundary; no current tool/field allowlist is required.
@@ -46,11 +61,11 @@ MCP schema contract hardening (skills):
 
 ## 2.1.0 — First supported marketplace + OAuth release
 
-- Deliver Claude Code, Cursor, and Codex/ChatGPT desktop plugins with host-specific static OAuth MCP manifests.
+- Deliver Claude Code, Cursor, and Codex/ChatGPT desktop plugins with URL-only DCR OAuth MCP manifests.
 - Production customer path is approved marketplace install → host OAuth Connect → `auth_me`.
 - Remove manual skill-copy installer surface, SessionToken setup, shell API runtime, and empty hooks packaging.
 - Keep `skills/_insightark-shared/` metadata-only (`RELEASE`, `VERSION`).
 - Move LINE template guidelines and examples under `insightark-messaging/references/` for MCP workflows.
 - Point Cursor plugin `logo` at `assets/logo.png` (same brand asset as Codex).
 - Ship Chinese starter `commands/` aligned with Codex `interface.defaultPrompt` for Cursor and Claude Code.
-- Pin Cursor plugin `mcpServers` to `./mcp.json` so static `auth.CLIENT_ID` is used instead of Claude `.mcp.json` / DCR fallback.
+- Pin Cursor plugin `mcpServers` to `./mcp.json` so the host performs DCR from its own URL-only manifest.
