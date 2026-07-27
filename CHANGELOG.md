@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.1 — Single-source version metadata
+
+- Use `skills/_insightark-shared/VERSION` as the canonical version and synchronize all host metadata with a checked-in script.
+
 ## 2.6.0 — Release metadata synchronization
 
 - Align the source tooling and all host plugin/marketplace manifests with the published skills version.

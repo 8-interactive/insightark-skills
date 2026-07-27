@@ -1,7 +1,7 @@
 {
   "name": "insightark-skills",
   "displayName": "SUPER 8 Studio InsightArk Skills",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "InsightArk workflow skills and hosted MCP for SUPER 8 Studio CRM operations. Install the plugin, then Connect the bundled insightark MCP server through Cursor OAuth.",
   "author": {
     "name": "Super8",
