@@ -61,5 +61,7 @@ Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exac
 - `platform` is a Super8 channel id string (e.g. line, facebook); do not invent channels.
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance).
 - This skill covers **1:1 Customer conversations only**. For LINE ChatGroups (find by group name, analyze group messages), use `insightark-chat-groups` — do **not** treat `messaging_conversation_list` with `platform=line` as group discovery.
+- Do **not** describe list results as “all historical conversations in the database”: Customers missing `lastMessageAt` are excluded, and there is no full-history inventory mode.
+- For **period／year message analysis**, hand off to `insightark-investigator` / `messaging_message_search` (or `insightark-chat-groups` for LINE groups). `messaging_conversation_list` filters Customer activity, not message `createdAt`.
 - Do not assume a conversation id until it is returned by the API.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

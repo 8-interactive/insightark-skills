@@ -7,7 +7,7 @@ suggestions, recurring questions, purchase intent, and unmet needs — e.g. "從
 
 This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
-Strategy A/B path selection, same cost/sample guardrails, same traceable /
+one message-search path, same cost/sample guardrails, same traceable /
 non-fabricated reading rules. It adds no new tool and no new skill. Everything
 below is the *opportunity lens* on top of that foundation.
 
@@ -44,8 +44,9 @@ Classify each candidate into what the customer is actually signalling:
 
 ## Selecting the opportunity set
 
-- **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → Strategy B.
-- **Sweep by period / keyword** → Strategy A with positive-intent `keyword`
+- **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → use
+  `includeTags` in the same bounded message search.
+- **Sweep by period / keyword** → use positive-intent `keyword`
   seeds above, a bounded `startAt`/`endAt`, and `platform` if channel-specific.
   Follow the canonical Strategy A time-window rules in
   [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).

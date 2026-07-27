@@ -8,9 +8,8 @@ This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md). It adds no new tool and
 no new skill. Before selecting or reading conversations, follow that playbook for:
 
-- **Path selection** — Strategy B (tag-segmented via `crm_customer_search`
-  `includeTags` → `messaging_conversation_list` → `messaging_conversation_messages`)
-  vs Strategy A (time-window / keyword via `messaging_message_search`).
+- **Path selection** — one bounded `messaging_message_search` using tag,
+  time-window, and/or literal keyword filters.
 - **Cost & sample guardrails** — returned `chargedCredits` per completed call,
   default sample caps, no blind retry, stop-and-report at the cap.
 - **Reading rules** — trace every finding to real messages, do not fabricate
@@ -41,8 +40,8 @@ both, or cost and quality both suffer.
 ## Selecting the complaint set
 
 - **Have a complaint tag / segment** (e.g. customers tagged `客訴`, `退款`,
-  `VIP-申訴`) → Strategy B, `crm_customer_search(includeTags)`.
-- **No tag, want a period or keyword sweep** → Strategy A,
+  `VIP-申訴`) → search with `includeTags` plus bounded time/keyword filters.
+- **No tag, want a period or keyword sweep** →
   `messaging_message_search` with a complaint-leaning `keyword` (退款 / 退貨 / 出貨
   / 到貨 / 客訴 / 投訴 / 沒收到 / 錯 / 壞 / 慢 / 態度 …), a bounded `startAt`/`endAt`,
   and `platform` if the ask is channel-specific. Follow the canonical Strategy A

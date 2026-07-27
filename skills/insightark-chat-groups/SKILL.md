@@ -17,7 +17,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `auth_organizations` — list manageable organizations (no `orgId` required)
 - `messaging_chat_group_list` — discover ChatGroups by optional literal `groupName` substring; page with `pageCursor`
 - `messaging_chat_group_get` — lock a ChatGroup by `chatGroupId` (Mongo `_id`) and read `conversationId`
-- `messaging_conversation_messages` — read recent messages once you have a group `conversationId`
+- `messaging_conversation_messages` — read **recent** messages once you have a group `conversationId` (no year／period filter)
 - `messaging_chat_group_message_search` — keyword／time／senderTypes search **inside one group** (exactly one of `conversationId` or `chatGroupId`)
 
 ## Do not use for group discovery
@@ -32,10 +32,19 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 | Tool | Use when | Do not use when |
 |---|---|---|
-| `messaging_chat_group_list` | User names a LINE group; need `chatGroupId` / `conversationId` | Browsing 1:1 inbox |
+| `messaging_chat_group_list` | User names a LINE group; need `chatGroupId` / `conversationId` | Claiming “all historical groups in the DB” |
 | `messaging_chat_group_get` | You already have `chatGroupId` | Searching by display name |
-| `messaging_conversation_messages` | Read recent thread after id lock | Org-wide keyword themes |
-| `messaging_chat_group_message_search` | Keyword／time analysis **after** id lock | Before resolving which group |
+| `messaging_conversation_messages` | Quick recent-thread peek after id lock | Any year／month／quarter／period analysis |
+| `messaging_chat_group_message_search` | Keyword／**period**／sender analysis after id lock | Before resolving which group |
+
+## Analysis rules (important)
+
+1. **Time-scoped asks** (a year, quarter, month, “last 30 days”, date range) → use **only** `messaging_chat_group_message_search` with explicit `startAt`/`endAt`. Do **not** use `messaging_conversation_messages` as that period’s corpus.
+2. **`messaging_conversation_messages`** returns the **most recent** messages only — no year filter. It may mix older／newer windows; never treat it as “all of 2026” (or any named period).
+3. **`messaging_chat_group_list`** returns discoverable groups that have usable `lastMessageAt`. It is **not** “every ChatGroup ever stored”. Groups missing `lastMessageAt` are excluded. Do not claim the list is a full historical inventory.
+4. **Non-text** rows (image／file／video／template／event) often expose only type／filename. Do **not** treat file or media counts as engagement or satisfaction.
+5. **Multi-window cost:** search span max **90 days**. For a longer period, split into ≤90-day windows. Before running, estimate credits ≈ `groups × windows × 20` (+ list／get／optional timeline peeks) and disclose the estimate.
+6. **Staff identity:** MCP does **not** expose a client `includeUserContact` argument (same as 1:1 `messaging_message_search`). Group search **always** enriches `_User` rows with `userName`／`userEmail` internally. Use search when you need per-agent attribution. `messaging_conversation_messages` does **not** enrich staff identity — if those fields are null there, say “無法歸屬／identity unavailable”, do **not** guess the sender.
 
 ## Workflow
 
@@ -44,10 +53,10 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 3. If multiple hits match, **disambiguate** with the user (name, `platform`, `lastMessageAt`, `memberCount`) before analysis. Optionally call `messaging_chat_group_get` to confirm.
 4. Lock either `conversationId` or `chatGroupId` from the chosen row.
 5. Analyze:
-   - Recent timeline → `messaging_conversation_messages`
-   - Keyword／period／sender analysis → `messaging_chat_group_message_search` with exactly one scope id (never both, never neither, never `groupName`)
-6. Default search senders are `Group`, `_User`, `Organization`, `AddOn`. Add `ForeignBot` only when explicitly needed.
-7. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period.
+   - Recent peek only → `messaging_conversation_messages`
+   - Keyword／**period**／sender analysis → `messaging_chat_group_message_search` with exactly one scope id (never both, never neither, never `groupName`)
+6. Default search senders are `Group`, `_User`, `Organization`, `AddOn`. Add `ForeignBot` only when explicitly needed. Defaults already include `_User`, so staff identity fields are available without an extra client flag.
+7. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into sequential ≤90-day searches.
 
 ## Guardrails
 
@@ -55,4 +64,8 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - Do **not** treat `messaging_conversation_list` as LINE group discovery.
 - Do **not** pass `groupName` to message search.
 - Do not assume a group id until list/get returns it.
+- `message_search_in_progress` means you already have another message search in
+  this organization (including Console) in progress. It is zero-charge: wait
+  for completion, then retry once; do not send parallel retries or treat it as
+  a timeout.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying.

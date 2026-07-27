@@ -20,7 +20,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `pageCursor`)
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read message timeline
-- `messaging_message_search` — time／keyword／`contentKinds` message search (Strategy A primary path)
+- `messaging_message_search` — time／keyword／tag／`contentKinds` message search
 
 ## Workflow
 
@@ -38,9 +38,8 @@ For batch qualitative reading — judging customer intent, sentiment, or complai
 across a set of conversations rather than a single lookup — load
 `references/QUALITATIVE_DETECTION.md` on demand and follow it. It covers:
 
-- **Path selection**: tag-segmented audiences use `crm_customer_search` →
-  `messaging_conversation_list` → `messaging_conversation_messages` (the only
-  tag-aware path); time-window / keyword audiences use `messaging_message_search`.
+- **Path selection**: time-window, keyword, and tag-segmented audiences use one
+  bounded `messaging_message_search` call with its matching filters.
 - **Cost guardrails**: use each completed call's returned `chargedCredits` for
   per-call and run-total reporting; `credits_usage` only inspects remaining
   balance and must not be used to infer cost, especially for concurrent reads.
@@ -52,8 +51,10 @@ across a set of conversations rather than a single lookup — load
 ### Analysis lenses (same tools, same guardrails)
 
 `QUALITATIVE_DETECTION.md` is the shared foundation (path selection + cost
-guardrails + reading rules). Two focused lenses build on it — load the one that
-matches the ask, then follow the shared Strategy A/B and sample/credit caps:
+guardrails + reading rules). `messaging_message_search` is the standard path;
+`messaging_conversation_messages` is a recent context peek, not a period corpus.
+Two focused lenses build on it — load the one that matches the ask, then follow
+the shared sample/credit caps:
 
 - **Complaint root cause / theme categorisation** → `references/ROOT_CAUSE_ANALYSIS.md`.
   Use when the ask is not just "how many complaints" but "which themes, why, and
@@ -75,6 +76,15 @@ matches the ask, then follow the shared Strategy A/B and sample/credit caps:
 - Do not depend on repository-local code or hidden internal fields.
 - Prefer `messaging_message_search` for analysis. Do not rebuild Excel via repeated MCP search; human downloads use Console CS export.
 - Page sizes: search／conversation_messages max 1000; conversation_list max 100.
+
+## Period vs timeline vs list (important)
+
+1. **Time-scoped asks** (year／quarter／month／“last 30 days”) → use **`messaging_message_search`** with explicit `startAt`/`endAt`. Do **not** treat `messaging_conversation_messages` as that period’s corpus.
+2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
+3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows.
+4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
+5. **Long ranges:** search max **90 days**. Split longer periods into ≤90-day windows; estimate credits (`windows × 20` per conversation／org sweep, plus list／get costs) before running.
+6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.
 
 ## Message search sender filters (important)
 

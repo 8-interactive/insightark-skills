@@ -18,7 +18,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `messaging_conversation_list` — browse／page conversations by Customer last activity
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read one conversation’s recent timeline
-- `messaging_message_search` — org-wide message search by time／keyword／`contentKinds`
+- `messaging_message_search` — org-wide message search by time／literal keyword／Customer tags／`contentKinds`
 - `messaging_message_preview` — **outbound** message-batch preview URL before send／broadcast (costs 2 credits); **not** for reading existing inbox messages
 - `media_upload_url` — upload local media for message payloads
 - `messaging_customer_send_message` — send outbound messages to a customer
@@ -30,7 +30,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 | `messaging_conversation_list` | Inbox／“active in this period” conversation lists; `pageCursor` paging | Message sentiment％／keyword corpus across the org |
 | `messaging_conversation_get` | Known `conversationId` summary | Bulk scan |
 | `messaging_conversation_messages` | Full recent thread for one conversation (e.g. single-customer deep dive) | Org-wide theme search |
-| `messaging_message_search` | Time-window message corpus, keyword evidence, Strategy A analysis | As a substitute for inbox activity lists (use list) |
+| `messaging_message_search` | Time-window or tag-scoped corpus, literal-keyword evidence | As a substitute for inbox activity lists (use list) |
 | `messaging_message_preview` | Rich／template outbound preview before send or broadcast | Previewing or fetching **existing** conversation messages |
 | `messaging_customer_send_message` | Confirmed outbound send | Analysis reads |
 
@@ -71,6 +71,15 @@ When building `application/x-template` or other rich LINE payloads, load `refere
 - `messaging_message_search` / `messaging_conversation_messages` accept `limit` up to 1000; `messaging_conversation_list` remains max 100.
 - Never call `messaging_message_preview` to read existing conversation history.
 
+## Period vs timeline (important)
+
+1. **Time-scoped asks** → `messaging_message_search` with explicit `startAt`/`endAt` only. Do not use `messaging_conversation_messages` as the period corpus.
+2. **`messaging_conversation_messages`** = recent thread peek only (no year filter).
+3. **`messaging_conversation_list`** = Customer activity inbox (excludes missing `lastMessageAt`); not a full historical inventory; activity bounds ≠ message `createdAt`.
+4. Non-text／media rows are not engagement scores.
+5. Ranges over 90 days need sequential ≤90-day search windows; estimate credits before running.
+6. Staff `userName`／`userEmail` come from `messaging_message_search` (always enriched internally; no client `includeUserContact` param). Timeline reads do not enrich staff identity — do not guess senders.
+
 ## Message search sender filters (important)
 
 Use only `senderTypes` (string array). Exact allowed class strings come from the MCP tool schema `senderTypes.items.enum`.
@@ -91,6 +100,14 @@ Default (omit `senderTypes`) returns **Customer only**. Staff fields (`userName`
 - Time window is always applied: omit `startAt`/`endAt` → last **14 days**; only `startAt` → `endAt = now`; only `endAt` → `startAt = endAt − 14 days`; both provided → max **90 days**. When the user asks for a specific period, always pass matching `startAt`/`endAt` — do not rely on the 14-day default.
 - When customer time language becomes `startAt`/`endAt` instant boundaries, follow `skills/insightark-universal-workflow/references/timezone-policy.md` and disclose the effective timezone. Date-only two-sided ranges need confirmed clocks; one-sided date-only endpoints need a confirmed clock plus disclosure of the server-derived opposite bound, and must stay ≤ 90 days — never silently invent midnight.
 - Still narrow with `conversationId` and a tight `startAt`/`endAt` when possible.
+
+### Optional Customer tags
+
+- `includeTags: ["VIP", "Refund"]` means the Customer has **any** listed tag (OR).
+- `excludeTags` removes Customers with any listed tag. When both are supplied,
+  inclusion and exclusion both apply.
+- `crm_customer_search.includeTags` also uses OR semantics; do not invent an
+  all-tags meaning for either tool.
 
 ### Optional `contentKinds` (include-only)
 
@@ -117,6 +134,13 @@ When `messaging_message_search` fails with structured tool error `code: message_
 1. Do **not** retry with the exact same parameters (timeout still consumes the tool's credit cost; there is no refund).
 2. Prefer splitting `startAt`/`endAt` in half and searching sequentially.
 3. Reduce `limit` when helpful.
-4. Add supported filters only: `keyword`, `conversationId`, `platform`, `senderTypes`, `senderIds`.
+4. Add supported filters only: `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`.
 5. Cap automatic split/retry attempts (e.g. a few halvings); if still timing out, stop and tell the user the range is too large — suggest more filters or Console search.
-6. Supported filters include published schema fields such as `keyword`, `conversationId`, `platform`, `senderTypes`, `senderIds`, and `contentKinds`. Do **not** invent unpublished filters.
+6. Supported filters include published schema fields such as `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, and `contentKinds`. Do **not** invent unpublished filters.
+
+## Message search busy (`error.code = message_search_in_progress`)
+
+This means **you already have another message search running in this organization**
+(possibly from Console). It is retryable and returns zero charged credits: wait
+for the earlier search to finish, then retry once. Do not treat it as a timeout,
+do not split the query, and do not issue parallel retries.
