@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.0 — Org-wide ChatGroup message search
+
+- `messaging_chat_group_message_search` is organization-wide by default (omit `conversationId` and `chatGroupId`). Passing either id still narrows to one room; passing both remains invalid before credit.
+- **Compatibility:** omitting both room ids previously failed with zero-credit `error/invalid-scope`; it now runs a charged (20 credit) org-wide ChatGroup search, parallel to `messaging_message_search` for 1:1.
+- Add shared `contentKinds` (same enum／MIME map as `messaging_message_search`).
+- `insightark-chat-groups`: route org／cross-group asks without per-group loops; disclose the 20-credit／90-day search contract and actual coverage for multi-call analysis.
+
 ## 2.6.1 — Single-source version metadata
 
 - Use `skills/_insightark-shared/VERSION` as the canonical version and synchronize all host metadata with a checked-in script.

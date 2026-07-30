@@ -1,6 +1,6 @@
 {
   "name": "insightark-skills",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "logo": "./assets/logo.png",
@@ -14,7 +14,7 @@
   "plugins": [
     {
       "name": "insightark-skills",
-      "version": "2.6.1",
+      "version": "2.7.0",
       "source": {
         "source": "local",
         "path": "./"

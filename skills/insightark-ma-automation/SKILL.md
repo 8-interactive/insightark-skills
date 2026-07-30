@@ -1,6 +1,6 @@
 ---
 name: insightark-ma-automation
-description: Create draft Marketing Automation procedures, then publish/start, pause, inspect status, and manually trigger via InsightArk MCP (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON. Create alone does not publish.
+description: Create draft Marketing Automation procedures, then publish, pause, inspect status, and manually trigger via InsightArk MCP (developer session, org owner/admin). Always validate payload before create. Do not preset or guess any customer business field; ask until all required inputs are explicit. Canonical graph/message shapes follow marketing-automation-front-end (submodule), not ad-hoc JSON. Create alone does not publish.
 when_to_use: When a user needs to manage MA journeys or enqueue a manual API trigger for a customer via InsightArk MCP.
 allowed-mcp: true
 ---
@@ -19,11 +19,22 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `ma_procedure_get` — get procedure **status summary** only (requires `orgId`, `procedureId`); does **not** return `editor.nodes` / `editor.edges`
 - `ma_procedure_validate` — validate a journey definition without persisting (requires `orgId`, `payload`)
 - `ma_procedure_create` — create a **draft** procedure (requires `orgId`, `payload`); does **not** publish
-- `ma_procedure_start` — **publish/start** a draft procedure (requires `orgId`, `procedureId`)
+- `ma_procedure_publish` — **publish** a draft (leaves editing; requires `orgId`, `procedureId`). May become `progress`, `scheduled`, or `pausing`. Does **not** wait for `startTime`.
 - `ma_procedure_pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
 - `ma_procedure_trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
 
-There is currently **no** MCP tool to fetch a full existing Studio graph, update an existing procedure, or clone one from an already-created journey. Catalog-backed authoring uses `ma_template_list` → `ma_template_get`. Packaged files under `references/fixtures/` are documentation / golden / drift copies only — **do not** clone them as the runtime source of truth.
+### Procedure lifecycle (create vs publish vs time)
+
+Status after create/publish is **derived** from `enabled`, `pausing`, `editing`, and the `startTime`/`endTime` window (same as Studio).
+
+| Step | Tool / event | Meaning |
+|------|----------------|---------|
+| Draft | `ma_procedure_create` | Saved with `editing`; status `editing`; **not** accepting triggers |
+| Publish | `ma_procedure_publish` | Leaves editing (Studio publish). Typical statuses: `progress`, `scheduled` (before `startTime`), or `pausing` (e.g. active-journey quota). Also possible: `terminated` if `enabled` is false; `done` if already past `endTime` |
+| Schedule window | wall clock | After publish, when now ≥ `startTime` (and before `endTime`, not paused/disabled), status is `progress` — **no second publish** |
+| Pause / resume | `ma_procedure_pause` | Only tool that toggles pause |
+
+There is currently **no** MCP tool to fetch a full existing Studio graph, update an existing procedure, or clone one from an already-created journey. Catalog-backed authoring uses `ma_template_list` → `ma_template_get`. Packaged files under `references/fixtures/` are documentation / golden / drift copies only — **do not** clone catalog fixtures as the runtime source of truth (blank-canvas recipes below may use packaged skeletons as structural references).
 
 ### Catalog template discovery (required for catalog-backed creation)
 
@@ -32,9 +43,9 @@ For **every** catalog template (including capability-neutral LINE archetypes), r
 1. Call `ma_template_list` (default = available only). Use `includeUnavailable: true` only when explaining upgrade/conditional options.
 2. Select an **available** entry; disclose its `templateId` + `version` to the customer.
 3. Call `ma_template_get` for that id; replace every `requiredInputs` / `<REQUIRED_FROM_CUSTOMER…>` value.
-4. Show the final business-field summary, get approval, `ma_procedure_validate`, then confirm again before `ma_procedure_create` (draft). Publish only via `ma_procedure_start` after separate approval.
+4. Show the final business-field summary, get approval, `ma_procedure_validate`, then confirm again before `ma_procedure_create` (draft). Publish only via `ma_procedure_publish` after separate approval.
 
-**Blank canvas:** only when the customer explicitly chooses blank-canvas authoring (no catalog template) may you skip list/get; still run the normal checklist → validate → create-draft → optional publish flow.
+**Blank canvas:** use when the customer explicitly chooses blank-canvas authoring, **or** when discovery shows no agent-ready catalog template that covers the required trigger/action/judgment combination. In the catalog-gap case, state the gap in customer language, get acknowledgment, then proceed blank-canvas with the normal checklist → validate → create-draft → optional publish flow.
 
 **Do not** infer GA4 / EC / sticker / channel entitlement from the user description, a static fixture, a configured GA4 domain alone, or Console template names. Relay discovery unavailableReasons in customer language (feature_not_enabled includes featureKey such as ma_sticker).
 
@@ -50,7 +61,7 @@ Never copy catalog `templateId` or `consoleKey` into root `templateType`. Never 
 
 ### Locate journeys by customer-provided name
 
-Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish(start) / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma_procedure_list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above.
+Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma_procedure_list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above.
 
 ## Hard rules: no presetting business fields
 
@@ -79,14 +90,14 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 | Organization | Target `orgId` (must be manageable by the current session). |
 | Journey name | `name`. |
 | Platform (發送平台) | `platform` — **必填**（如 line、facebook、instagram、whatsapp、livechat）；由客戶指定。 |
-| Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
+| Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。`startTime` must be **now or later** (do not use a past clock such as “today 00:00” if that instant has already passed). 客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
 | Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 Explain what each limit controls before asking. **Do not** describe numeric `0` as unlimited (`per_customer: 0` is a hard stop). Unlimited is not defined by this skill. |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
 | Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則使用 `oos: { "enabled": false, ... }`；**若 `enabled: true`**，必須與客戶確認並填寫 `hour`、`minute`、`duration`（秒）。 |
 | Trigger | Full trigger type and rules. |
-| Content and steps | Copy or template shape per message node; multi-step journeys need step-by-step customer confirmation. |
+| Content and steps | Copy or template shape per message node; multi-step journeys need step-by-step customer confirmation. **Fixed clock schedules** (e.g. daily HH:MM): confirmation MUST disclose the **next fire** relative to now (if today’s slot already passed → next calendar occurrence, usually tomorrow). Prefer relative short windows when the goal is near-term verification. |
 | Message step `skipOOS` | Add **only** if the customer explicitly wants that message node to bypass OOS; otherwise **omit** the field. |
-| Switches | `enabled` and whether to publish immediately after create (publish only after explicit customer approval via `ma_procedure_start`). |
+| Switches | `enabled` and whether to publish immediately after create (publish only after explicit customer approval via `ma_procedure_publish`). |
 | Final sign-off | Show final payload table and receive explicit customer approval before API calls. |
 
 Phrases like "same as before" or "you decide" are **not** literal values. Keep asking until every item has a **literal, actionable** answer.
@@ -104,7 +115,16 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
 5. For any preview-required message step (non-`text/plain` or quick replies), follow `skills/insightark-universal-workflow/references/rich-preview-gate.md` (disclose 2-credit cost, preview + journey timing, wait for approval). Text-only steps without quick replies need confirmation only.
 6. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
 7. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload` (**draft only**). Cap at **three** validate-fix rounds.
-8. Publish only with explicit approval via `ma_procedure_start`.
+8. Publish only with explicit approval via `ma_procedure_publish`.
+9. After successful publish, **always** call `ma_procedure_get` before telling the customer the journey is live. Explain `status` (derived from enabled / pausing / editing / time window):
+   - `progress` — live and accepting triggers in window
+   - `scheduled` — published; waiting for `startTime` (no extra publish when time arrives)
+   - `pausing` — published but paused (possible active-journey quota); explain and **ask** before `ma_procedure_pause action=resume`
+   - `terminated` — `enabled` is false; not live
+   - `done` — past `endTime`; not live
+   - `editing` — still a draft (publish did not leave editing); not live
+   - other — do not claim the journey is live
+   Never auto-resume without confirmation.
 
 **Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
@@ -125,8 +145,9 @@ Packaged copies under [`references/fixtures/`](references/fixtures/) mirror serv
 | `line-join-welcome` | `line-join-welcome.json` |
 | `line-tag-follow-up` | `line-tag-follow-up.json` |
 | `line-tag-click-branch` | `ma-tag-trigger-click-branch-skeleton.json` |
+| _(blank-canvas)_ keyword branch | `ma-tag-keyword-branch-skeleton.json` |
 
-**Runtime:** always `ma_template_get`. Do not treat these files as live clone sources.
+**Runtime catalog:** always `ma_template_get`. Do not treat catalog fixtures as live clone sources. The keyword-branch fixture is blank-canvas-only (not a catalog archetype).
 
 **Structure only may be kept as-is** after retrieval (node/edge topology, Studio discriminators, stable wiring ids such as `tplCard001`). Recompute derived button ids if message `template` or nested structure changes.
 
@@ -144,9 +165,10 @@ Every `<REQUIRED_FROM_CUSTOMER…>` value MUST be replaced with a customer-confi
 | `oos.*` | Off-hours policy |
 | trigger rules / tags | Tag triggers: `match` (`any`\|`all`) + `tags` only — never a tag `event` |
 | message copy, waits, URLs, buttons | Content / behavior |
-| group `timeout.value` + `timeout.unit` (`minute`\|`hour`\|`day`), allowMulti | Branch timing — collect value and unit; **never** calculate or author `time` / `timeType` seconds |
+| group `timeout.value` + `timeout.unit` (`minute`\|`hour`\|`day`), allowMulti | **Click groups only** — collect value and unit; **never** calculate or author `time` / `timeType` seconds for click |
+| keyword group `time` + `timeType` | **Keyword groups only** — Studio seconds + unit; see blank-canvas recipes (not click `timeout`) |
 
-Do **not** tell the customer a journey is published after `ma_procedure_create` alone — call `ma_procedure_start` only after explicit approval.
+Do **not** tell the customer a journey is published after `ma_procedure_create` alone — call `ma_procedure_publish` only after explicit approval.
 
 ## Example JSON (linear shape only)
 
@@ -211,10 +233,17 @@ The block below illustrates **structure only** for blank-canvas journeys **witho
 | Discovery code ma_not_available | Marketing Automation product not available for the org |
 | Validate after discovery succeeds but capability changed | Trust current validate/create errors; discovery was advisory — re-list or fall back to available archetype / blank canvas |
 | `error/ma-studio-ga4-service-not-enabled` / `error/ma-studio-feature-not-enabled` | Same facts as discovery; `featureKey` may be present on feature errors |
+| No catalog archetype covers customer intent (e.g. tagging action, keyword branch, rejoin) | Acknowledge the gap; after customer OK, author blank-canvas using recipes below |
 
 ## Validate error remediation
 
 Group related codes; fix **wiring**, not copy, unless the code is clearly about content.
+
+### Schedule / journey bounds
+
+| Code | What to do |
+|------|------------|
+| `error/ma-studio-start-in-past` | Journey `startTime` cannot be in the past. Ask for a start instant that is **now or later** (timezone per universal policy), then re-validate. |
 
 ### Shape / type
 
@@ -228,15 +257,17 @@ Group related codes; fix **wiring**, not copy, unless the code is clearly about 
 | Code | What to do |
 |------|------------|
 | `error/ma-payload-condition-group-missing` | Point `groupId` at an existing `group` node |
-| `error/ma-payload-condition-group-type` | That group must have `data.type: "click"` |
+| `error/ma-payload-condition-group-type` | Click conditions need `data.type: "click"` on the group |
 | `error/ma-payload-condition-group-click-type` | Set `clickType` to `any` or `button` |
-| `error/ma-payload-condition-group-duration-shape` | Use only `data.timeout: { value, unit }`; remove raw `time` / `timeType` |
+| `error/ma-payload-condition-group-duration-shape` | **Click groups:** use only `data.timeout: { value, unit }`; remove raw `time` / `timeType` |
 | `error/ma-payload-condition-group-timeout-value` | Set `timeout.value` to a customer-confirmed positive whole number |
 | `error/ma-payload-condition-group-timeout-unit` | Set `timeout.unit` to `minute` \| `hour` \| `day` |
-| `error/ma-payload-condition-group-time-type` | Internal/prepared only — do not author `timeType` on MCP; repair via `timeout.unit` |
-| `error/ma-payload-condition-group-time` | Internal/prepared only — do not author seconds on MCP; repair via `timeout.value` / `unit` |
+| `error/ma-payload-condition-group-time-type` | Click: repair via `timeout.unit`. **Keyword groups:** set Studio `timeType` to `minute` \| `hour` \| `day` |
+| `error/ma-payload-condition-group-time` | Click: repair via `timeout`. **Keyword groups:** set Studio `time` to non-negative seconds (`value * unit factor`) |
 
-**Duration authoring:** ask the customer for a positive whole value and one unit (`minute` / `hour` / `day`). Write `group.data.timeout`. Never calculate seconds and never fall back to `time` / `timeType`.
+**Click duration authoring:** ask value + unit; write `group.data.timeout`. Never calculate seconds for click groups.
+
+**Keyword duration authoring:** ask value + unit in business language, then write Studio `timeType` (= unit) and `time` (= seconds). Do **not** use click `data.timeout` on keyword groups (intent-only compile is click-only).
 
 ### Source + edges
 
@@ -272,6 +303,34 @@ Group related codes; fix **wiring**, not copy, unless the code is clearly about 
 | `error/ma-runtime-condition-topology` | One edge per condition; end-target → `end`, else `children: [target]` |
 
 Do **not** try to fix these by only editing message copy.
+
+## Blank-canvas recipes (standard edition)
+
+Use when catalog has no matching archetype. Always set `authoringSource: "blank-canvas"`, complete the checklist, validate, create draft, then publish with approval.
+
+### Keyword-branch (hit / miss)
+
+Topology: trigger → guide `message` → keyword `group` + `right-keyword` / `n-keyword` (optional `wrong-keyword`) → per-branch actions → `end`.
+
+Structural reference: [`references/fixtures/ma-tag-keyword-branch-skeleton.json`](references/fixtures/ma-tag-keyword-branch-skeleton.json).
+
+Keyword `group.data`: `type: "keyword"`, `source` = guide message id, `keywordType` (`keyword` \| `any`), `keywords` when type is `keyword`, `timeType` + `time` (seconds), optional `allowMulti`. Conditions: `groupId`, `source`, `type` ∈ `right-keyword` \| `n-keyword` \| `wrong-keyword`. Edges: guide message → each condition (same pattern as click-branch).
+
+### Node recipes (minimal shapes)
+
+Align with Super8 Studio / `marketing-automation-front-end` editor nodes. Do not invent alternate enums or wrappers.
+
+| Intent | Node sketch |
+|--------|-------------|
+| Tag trigger | `trigger` with `data.type: "tag"`, `match` (`any`\|`all`), `tags: [...]` — no tag `event` |
+| Keyword trigger | `trigger` with `data.type: "keyword"`, `conditions: [{ type: "keyword", value: ["…"] }]` (non-empty `value` list from customer) |
+| Rejoin trigger | `trigger` with `data.type: "rejoin"` (confirm platform/rejoin semantics with customer) |
+| Tagging action | Top-level node `type: "tagging"` with `data.tags: [...]` (and usually `data.type: "tagging"`). **Not** an `action` wrapper node. |
+| Wait | Top-level `wait` with `data.waitTime` = non-negative integer **seconds** (Studio default often `300`; `0` means no delay). Prefer message-node `waitTime` only when delaying that message step (same seconds rule; `null` = off on messages). |
+| Schedule | Top-level `schedule` with Studio clock fields (Asia/Taipei wall clock for `time`). Required: `data.type` ∈ `day` \| `week` \| `month`, and `data.time` as `"HH:mm"` (e.g. `"18:10"`). **day:** only `type` + `time`. **week:** also `data.week: number[]` weekday ints `0`–`6` (Sunday=`0`). **month:** also `data.month: number[]` day-of-month `1`–`31`, plus `data.hasLastDay: boolean`. Disclose **next fire** in the confirmation table (if today’s slot already passed → next occurrence). |
+| Inbox | Top-level `type: "inbox"` with `data.inbox` **exactly** one of Studio values: `unassigned` \| `private` \| `done` (Console dropdown; no other values). For `private`, also set `data.userId` (org member objectId) and usually `data.displayName`. **Not** an `action` wrapper. Unknown inbox strings must not be used — runtime would silently treat them like unassigned. |
+
+Wire with normal `edges` (`source`/`target`). Validate before create.
 
 ## Field reference (create / validate body)
 

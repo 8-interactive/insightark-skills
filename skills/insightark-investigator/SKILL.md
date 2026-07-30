@@ -123,7 +123,7 @@ When customer time language becomes `startAt`/`endAt` instant boundaries, follow
 When search returns structured `message_search_timeout` (`isError: true`):
 
 1. Never blind-retry identical args (credits are still charged).
-2. Halve `startAt`/`endAt` and search sequentially; reduce `limit` if needed.
-3. Use only published filters: `keyword`, `conversationId`, `platform`, `senderTypes`, `senderIds`.
+2. Split `startAt`/`endAt` into smaller windows; reduce `limit` if needed.
+3. Use only published filters: `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`.
 4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
 5. Do not invent unsupported message-type / `contentType` filters.
