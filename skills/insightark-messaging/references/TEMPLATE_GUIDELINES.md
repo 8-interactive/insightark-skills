@@ -165,7 +165,7 @@ Same **uniform `aspectRatio`** rule as `carousel`. Each element is a full-image 
 2. Start from the matching file in `references/examples/messages/`.
 3. Upload local images via MCP `media_upload_url`; patch returned HTTPS URLs into the payload.
 4. Check the payload against the tables in this reference (uniform carousel ratios, required fields).
-5. Call MCP `messaging_message_preview` → user confirms (~4h link, 2 credits).
+5. Call MCP `messaging_message_preview` → present `previewUrl` and validity from the returned `expiresAt` (2 credits).
 6. Dispatch with the **same payload** via MCP `messaging_customer_send_message` or `broadcast_create` (broadcast/MA skills hand rich authoring to this reference).
 
 Any content, order, URL, quick reply, or action change after preview requires a new preview and approval.
