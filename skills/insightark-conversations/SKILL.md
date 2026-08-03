@@ -23,7 +23,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 | `messaging_conversation_list` | Inbox triage; “who was active in this period”; page older activity; list a known customer’s conversations | Message-level sentiment／complaint proportions; keyword theme search across the org |
 | `messaging_conversation_get` | You already have a `conversationId` and need a summary | Scanning many conversations |
 
-For message bodies, keyword evidence, or org-wide time-window **message** analysis, use `insightark-messaging` / `messaging_message_search` (and `messaging_conversation_messages` for one thread).
+For message bodies, keyword evidence, or org-wide time-window **message** analysis, use `insightark-investigator` / `messaging_message_search` (and `messaging_conversation_messages` for one thread).
 
 ## Activity window vs message search window
 
@@ -62,6 +62,6 @@ Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exac
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance).
 - This skill covers **1:1 Customer conversations only**. For LINE ChatGroups (find by group name, analyze group messages), use `insightark-chat-groups` — do **not** treat `messaging_conversation_list` with `platform=line` as group discovery.
 - Do **not** describe list results as “all historical conversations in the database”: Customers missing `lastMessageAt` are excluded, and there is no full-history inventory mode.
-- For **period／year message analysis**, hand off to `insightark-investigator` / `messaging_message_search` (or `insightark-chat-groups` for LINE groups). `messaging_conversation_list` filters Customer activity, not message `createdAt`.
+- For **period／year message analysis**, hand off to `insightark-investigator` (or `insightark-chat-groups` for LINE groups). `messaging_conversation_list` filters Customer activity, not message `createdAt`.
 - Do not assume a conversation id until it is returned by the API.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.

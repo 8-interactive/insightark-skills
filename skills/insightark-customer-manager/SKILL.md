@@ -37,8 +37,18 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - `crm_customer_tag_remove` to remove one or more tags (confirm first)
 4. Return the result grounded in the published MCP / public customer schema response.
 
+## `crm_customer_search` name routing
+
+- Ordinary “find by name” requests: pass `displayName` and **omit** `displayNameMatch`.
+- Treat name-search results as candidate matches, not a uniquely identified customer.
+- Phone or email lookup: use `cellPhone` or `email`.
+- Explicit partial-name / name-fragment / broader-match requests: pass `displayNameMatch: "contains"`.
+- If default text search returns no customers and the user still expects a match: disclose that a contains retry is a broader **additional 15-credit** read, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
+- Do not send `displayNameMatch` without a non-empty name-shaped `displayName`.
+
 ## Example requests
 
+- `Use insightark-customer-manager to find the customer named "Amy Chen" in org org_demo_001.`
 - `Use insightark-customer-manager to find customers in org org_demo_001 whose display name contains "Amy", include tag "vip", and return the first 20 results.`
 - `Use insightark-customer-manager to show the customer detail for customer cus_123 in org org_demo_001.`
 - `Use insightark-customer-manager to update customer cus_123 in org org_demo_001 with email "amy@example.com" and language "zh-TW".`

@@ -15,7 +15,7 @@ Otherwise (text-only, no quick replies): obtain normal write confirmation; **do 
 2. Disclose the preview credit cost (**2 credits** for `messaging_message_preview`) before calling it.
 3. Upload any required **local** media via `media_upload_url`, then PUT to the returned presigned URL; patch HTTPS asset URLs into the payload.
 4. Call `messaging_message_preview` with the canonical payload.
-5. Present the preview URL to the customer.
+5. Present the preview URL to the customer, and state validity from the tool response `expiresAt` (ISO timestamp).
 6. For **MA** rich steps, also present the step’s place in the journey schedule (ordered relative timing). The preview tool does not render graph delays.
 7. Wait for explicit approval before send, `broadcast_create`, `ma_procedure_validate`, or `ma_procedure_create` for that content.
 
