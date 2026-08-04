@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-chat-groups
 
+**Customer language:** This workflow operates Console **群組對話** (LINE ChatGroups). Prefer 群組對話 in customer-facing speech; MCP tool ids remain `messaging_chat_group_*`.
+
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.

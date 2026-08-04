@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.7.2 — Terminology evidence skip when Console checkout absent
+
+- Console evidence deep-equal runs only against a populated `super8-v2-console` checkout (`package.json` or `src/`). Empty submodule placeholders (typical CI without submodule init) skip deep-equal after pointer-shape checks so `npm run validate` can pass in Drone.
+- Align `validate-release-tree.sh` starter commands with the current three Codex prompts (drop `search-and-update-customers`) and require `console-terminology.md` in the release tree.
+
+## 2.7.1 — Codex starter prompts refresh
+
+- Update Codex `interface.defaultPrompt` (and aligned Chinese starter `commands/`) to three concrete workflows: MCP session check, weekly conversation Dashboard, and draft a vip-tag LINE broadcast with preview／audience estimate before create.
+- Drop the prior customer-search starter command.
+
 ## 2.7.0 — Org-wide ChatGroup message search
 
 - `messaging_chat_group_message_search` is organization-wide by default (omit `conversationId` and `chatGroupId`). Passing either id still narrows to one room; passing both remains invalid before credit.
