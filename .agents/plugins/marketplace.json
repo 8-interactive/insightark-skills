@@ -1,20 +1,19 @@
 {
   "name": "insightark-skills",
-  "version": "2.7.0",
+  "version": "2.7.2",
   "interface": {
     "displayName": "SUPER 8 Studio InsightArk Skills",
     "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "\u4f7f\u7528 insightark-session \u9a57\u8b49\u6211\u7684 InsightArk MCP \u8a2d\u5b9a\u3002\u78ba\u8a8d\u53ef\u7528\u5f8c\uff0c\u8acb\u6458\u8981\u4f60\u80fd\u5e6b\u6211\u505a\u54ea\u4e9b InsightArk \u5de5\u4f5c\u6d41\u7a0b\u8207\u64cd\u4f5c\u3002",
-      "\u4f7f\u7528 insightark-investigator \u8abf\u67e5\u6700\u8fd1\u7684\u5c0d\u8a71\u3002",
-      "\u4f7f\u7528 insightark-customer-manager \u641c\u5c0b\u8207\u66f4\u65b0\u5ba2\u6236\u3002",
-      "\u4f7f\u7528 insightark-broadcast-manager \u5efa\u7acb\u4e26\u8ffd\u8e64\u5ee3\u64ad\u3002"
+      "\u4f7f\u7528 insightark-session \u9a57\u8b49\u6211\u7684 MCP \u8a2d\u5b9a\u3002\u78ba\u8a8d\u53ef\u7528\u5f8c\uff0c\u7c21\u77ed\u8aaa\u660e\u4e00\u4e0b\u4f60\u80fd\u5e6b\u6211\u505a\u4ec0\u9ebc\u3002",
+      "\u4f7f\u7528 insightark-investigator \u5206\u6790\u6700\u8fd1\u4e00\u9031\u7684\u5c0d\u8a71\uff0c\u4ee5 Dashboard \u5f62\u5f0f\u6458\u8981\u5448\u73fe\u7d50\u679c\u3002",
+      "\u4f7f\u7528 insightark-broadcast-manager \u8349\u64ec\u4e00\u5247 LINE \u7fa4\u767c\uff1a\u5c0d\u8c61\u70ba\u6709 vip \u6a19\u7c64\u7684\u5ba2\u6236\uff0c\u5148\u7d66\u6211\u9810\u89bd\u8207\u4eba\u6578\u4f30\u7b97\uff0c\u78ba\u8a8d\u5f8c\u518d\u5efa\u7acb\u3002"
     ]
   },
   "plugins": [
     {
       "name": "insightark-skills",
-      "version": "2.7.0",
+      "version": "2.7.2",
       "source": {
         "source": "local",
         "path": "./"

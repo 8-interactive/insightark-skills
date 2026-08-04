@@ -175,8 +175,8 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 
 - 調查對話與訊息；
 - 搜尋、更新客戶及管理標籤；
-- 建立、發送與追蹤訊息或廣播；以及
-- 建立、驗證、啟動、暫停及查看行銷自動化流程。
+- 建立、發送與追蹤訊息或群發訊息；以及
+- 建立、驗證、啟動、暫停及查看自動旅程。
 
 例如：
 
@@ -191,8 +191,8 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 | `insightark-conversations` | 列出與取得對話及訊息 |
 | `insightark-customer-manager` | 搜尋與更新客戶，新增或移除標籤 |
 | `insightark-messaging` | 發送與驗證訊息，包含 LINE 模板 |
-| `insightark-broadcast-manager` | 建立與追蹤廣播 |
-| `insightark-ma-automation` | 管理行銷自動化流程 |
+| `insightark-broadcast-manager` | 建立與追蹤群發訊息 |
+| `insightark-ma-automation` | 管理自動旅程 |
 
 ## 使用條件
 

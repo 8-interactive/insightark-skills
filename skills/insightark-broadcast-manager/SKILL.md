@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-broadcast-manager
 
+**Customer language:** This workflow operates Console **群發訊息** (short form 群發). Prefer those labels in customer-facing speech; MCP tool ids remain `broadcast_*`. Synonym routing for customer utterances lives under `insightark-universal-workflow` → `## Synonym routing`.
+
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.

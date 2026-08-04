@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-ma-automation
 
+**Customer language:** This workflow operates Console **自動旅程** (internal: MA / marketing automation). Prefer 自動旅程 in customer-facing speech; MCP tool ids remain `ma_*`. Synonym routing for customer utterances lives under `insightark-universal-workflow` → `## Synonym routing`.
+
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.

@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-customer-manager
 
+**Customer language:** This workflow operates Console **客戶中心** features — customers, **標籤管理**／標籤, and **目標客戶群**. Prefer those labels in customer-facing speech; MCP tool ids remain `crm_*`.
+
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. Write operations need explicit user confirmation before calling.

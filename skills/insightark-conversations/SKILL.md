@@ -7,6 +7,8 @@ allowed-mcp: true
 
 # Skill: insightark-conversations
 
+**Customer language:** This workflow browses Console **一對一對話** / **對話** inbox lists. Prefer those labels in customer-facing speech; MCP tool ids remain `messaging_conversation_*`.
+
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument.
