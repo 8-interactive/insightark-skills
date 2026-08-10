@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.3 — Customer-facing glossary without CI metadata
+
+- Slim `console-terminology.md` to Console label / English / Short form / Internal·MCP (drop Banned and Evidence from the shipped glossary).
+- Move banned tokens and Console evidence pointers to maintainer-only `scripts/console-terminology-gates.json`; validator aligns glossary labels to that file.
+
 ## 2.7.2 — Terminology evidence skip when Console checkout absent
 
 - Console evidence deep-equal runs only against a populated `super8-v2-console` checkout (`package.json` or `src/`). Empty submodule placeholders (typical CI without submodule init) skip deep-equal after pointer-shape checks so `npm run validate` can pass in Drone.
