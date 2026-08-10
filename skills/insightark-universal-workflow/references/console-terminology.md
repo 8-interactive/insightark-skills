@@ -1,27 +1,27 @@
 # Console terminology (zh-TW)
 
-Canonical customer-facing labels for InsightArk-reachable Studio features. Console zh-TW i18n is the source of truth for Console-backed rows. Agents MUST prefer the **Console label** (or accepted **Short form**) when naming these features to customers. MCP tool ids and English schema names stay English when calling tools.
+Canonical customer-facing labels for InsightArk-reachable Studio features. Prefer the **Console label** (or accepted **Short form**) when naming these features to customers. Use **Internal / MCP** only to choose tools or confirm mappings — keep MCP tool ids and English schema names in English when calling tools.
 
 Read this file from `insightark-universal-workflow` before capability summaries or confirmation copy that names Studio features.
 
 ## Glossary
 
-| Console label | Short form | Internal / MCP | Banned | Evidence |
-|---|---|---|---|---|
-| 群發訊息 | 群發 | broadcast / `broadcast_*` | 廣播 | super8-v2-console:src/i18n/zh-TW/main.json#/organization/broadcast=群發訊息 |
-| 自動旅程 | 旅程 | marketing automation / MA / `ma_*` | 行銷自動化 | super8-v2-console:src/i18n/zh-TW/main.json#/organization/marketing-automation=自動旅程 |
-| 客戶中心 | — | CRM / customer manager | — | super8-v2-console:src/i18n/zh-TW/main.json#/organization/customer-management=客戶中心 |
-| 標籤管理 | 標籤 | tag / `crm_tag_*` | — | super8-v2-console:src/i18n/zh-TW/main.json#/organization/tag-management=標籤管理 |
-| 目標客戶群 | 客戶群 | CustomerGroup / `crm_customer_group_*` | — | super8-v2-console:src/i18n/zh-TW/main.json#/customer-groups/title=目標客戶群 |
-| 一對一對話 | 對話 | conversation / `messaging_conversation_*` | — | super8-v2-console:src/i18n/zh-TW/main.json#/navigation/oneToOneConversation=一對一對話 |
-| 群組對話 | LINE 群組 | ChatGroup / `messaging_chat_group_*` | — | super8-v2-console:src/i18n/zh-TW/main.json#/chatGroup/title=群組對話 |
-| 已連接的應用程式 | — | Connected Apps / OAuth | — | super8-v2-console:src/i18n/zh-TW/main.json#/oauth-connected-apps/title=已連接的應用程式 |
+| Console label | English | Short form | Internal / MCP |
+|---|---|---|---|
+| 群發訊息 | Broadcast | 群發 | broadcast / `broadcast_*` |
+| 自動旅程 | Auto journey | 旅程 | marketing automation / MA / `ma_*` |
+| 客戶中心 | Customer center | — | CRM / customer manager |
+| 標籤管理 | Tag management | 標籤 | tag / `crm_tag_*` |
+| 目標客戶群 | Target customer group | 客戶群 | CustomerGroup / `crm_customer_group_*` |
+| 一對一對話 | One-to-one conversation | 對話 | conversation / `messaging_conversation_*` |
+| 群組對話 | Group chat | LINE 群組 | ChatGroup / `messaging_chat_group_*` |
+| 已連接的應用程式 | Connected apps | — | Connected Apps / OAuth |
 
 ### Pack-local (not a Console nav label)
 
-| Pack-facing label | Short form | Internal / MCP | Notes |
-|---|---|---|---|
-| InsightArk MCP credits | credits | `credits_usage` | Pack-local / non-Console. Do not conflate with Console AI 點數 or LINE／platform messaging quota. |
+| Pack-facing label | English | Short form | Internal / MCP | Notes |
+|---|---|---|---|---|
+| InsightArk MCP credits | InsightArk MCP credits | credits | `credits_usage` | Pack-local / non-Console. Do not conflate with Console AI 點數 or LINE／platform messaging quota. |
 
 ## Capability summary example
 
