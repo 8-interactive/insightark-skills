@@ -83,6 +83,16 @@ If `fbTag` is omitted, the API layer may still apply a default of `NO_TAG`. You 
 
 If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / off-hours (`oos`)**, **per-step delay (`waitTime` or similar)**, or another rule before mapping to fields.
 
+### Note: `oos` must always carry the full window
+
+`oos` is **never** a partial object. Whenever you send an object it MUST contain all four fields — `enabled`, `hour`, `minute`, `duration` — **even when `enabled` is `false`**; validate rejects a partial object (`error/ma-payload-invalid-oos-window`). If the customer does not author off-hours at all, either send the standard closed window `{ "enabled": false, "hour": 22, "minute": 0, "duration": 43200 }` or send `oos: null` and let the server apply that same default.
+
+`hour` / `minute` are **integers** (`0–23` / `0–59`), not an `"HH:mm"` string, and `duration` is the window **length in seconds**, not an end time. Collecting off-hours from the customer as `hh:mm ~ hh:mm` is fine — convert before building the payload:
+
+- `hour` = start `HH`, `minute` = start `mm`
+- `duration` = (end − start) in seconds; if end is on the next day, add `86400`
+- e.g. `22:00 ~ 10:00` → `{ "enabled": true, "hour": 22, "minute": 0, "duration": 43200 }`
+
 ## Pre-create checklist (customer must confirm all rows)
 
 **Do not** call `ma_procedure_validate` or `ma_procedure_create` until **every** row below is explicitly agreed with the customer:
@@ -95,7 +105,7 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 | Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。`startTime` must be **now or later** (do not use a past clock such as “today 00:00” if that instant has already passed). 客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
 | Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 Explain what each limit controls before asking. **Do not** describe numeric `0` as unlimited (`per_customer: 0` is a hard stop). Unlimited is not defined by this skill. |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
-| Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則使用 `oos: { "enabled": false, ... }`；**若 `enabled: true`**，必須與客戶確認並填寫 `hour`、`minute`、`duration`（秒）。 |
+| Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則送出完整關閉視窗 `oos: { "enabled": false, "hour": 22, "minute": 0, "duration": 43200 }`（或 `oos: null` 由 server 補同一組預設）。**若 `enabled: true`**，必須與客戶確認並填寫 `hour`（整數 0–23）、`minute`（整數 0–59）、`duration`（秒）。**四個欄位一律同時存在**——`enabled: false` 時也不得省略 `hour`/`minute`/`duration`，殘缺物件會被 validate 擋下且會讓旅程在 console 開不起來。 |
 | Trigger | Full trigger type and rules. |
 | Content and steps | Copy or template shape per message node; multi-step journeys need step-by-step customer confirmation. **Fixed clock schedules** (e.g. daily HH:MM): confirmation MUST disclose the **next fire** relative to now (if today’s slot already passed → next calendar occurrence, usually tomorrow). Prefer relative short windows when the goal is near-term verification. |
 | Message step `skipOOS` | Add **only** if the customer explicitly wants that message node to bypass OOS; otherwise **omit** the field. |
@@ -187,7 +197,12 @@ The block below illustrates **structure only** for blank-canvas journeys **witho
   "endTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
   "limits": { "message": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>", "per_customer": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>" },
   "fbTag": "<REQUIRED_FROM_CUSTOMER_OR_EXPLICIT_NULL_POLICY>",
-  "oos": "<REQUIRED_FROM_CUSTOMER_OBJECT_OR_DISABLED_POLICY>",
+  "oos": {
+    "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+    "hour": "<REQUIRED_FROM_CUSTOMER_OOS_HOUR>",
+    "minute": "<REQUIRED_FROM_CUSTOMER_OOS_MINUTE>",
+    "duration": "<REQUIRED_FROM_CUSTOMER_OOS_DURATION_SECONDS>"
+  },
   "nodes": [
     { "id": "s1", "type": "start", "position": { "x": 0, "y": 0 } },
     {
@@ -347,7 +362,7 @@ Wire with normal `edges` (`source`/`target`). Validate before create.
 | `startTime` / `endTime` | Schedule bounds from the customer; encode customer-derived instants per timezone-policy (default Asia/Taipei when timezone omitted). Confirm **customer intent** + **MCP input** before validate/create. |
 | `limits` | Total / per-customer caps; **`message` and `per_customer` must be non-negative integers**, or `per_customer: "onceByDay"`. Do **not** call `0` unlimited. |
 | `fbTag` | Meta-related tag policy (customer-confirmed). |
-| `oos` | Off-hours / OOS settings confirmed by the customer. |
+| `oos` | Off-hours / OOS settings confirmed by the customer. Full window only — `enabled` + `hour` + `minute` + `duration` together (or `null`); never a partial object. |
 | `nodes` / `edges` | Graph shape; business content from the customer; ids/positions may be wiring-only. |
 
 ## Guardrails
