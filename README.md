@@ -9,6 +9,7 @@ This plugin provides an officially supported InsightArk connection. It packages 
 - ChatGPT / Codex
 - Claude Code
 - Cursor
+- Google Antigravity
 
 ## Capabilities
 
@@ -44,7 +45,7 @@ For example:
 
 ## Installation and authentication
 
-Install the plugin from a supported marketplace. The plugin automatically configures the bundled `insightark` MCP server; do not add it separately. MCP server authentication uses OAuth; the authorization flow differs by agent and is described in the relevant installation steps below.
+Install the plugin through the host-specific method below. The plugin automatically configures the bundled `insightark` MCP server; do not add it separately. MCP server authentication uses OAuth; the authorization flow differs by agent and is described in the relevant installation steps below.
 
 ### Marketplace source
 
@@ -135,6 +136,19 @@ After authentication, the **Authenticate** button is no longer shown. To authori
 3. Under **Environments**, select **Logout** for the connected local environment.
 4. Return to the plugin details page and select **Authenticate** next to `insightark`.
 
+### Google Antigravity
+
+Antigravity currently discovers custom plugins from its plugin directories rather than this repository's marketplace manifests. CI now publishes a dedicated `insightark-skills-antigravity-*.zip` artifact whose root is the plugin directory itself. Extract that zip so `insightark-skills/` lands in one of these locations:
+
+- Workspace: `<workspace-root>/.agents/plugins/insightark-skills/`
+- Global: `~/.gemini/config/plugins/insightark-skills/`
+
+Open or reload the workspace, then go to **Settings → Customizations**. Confirm the `insightark` MCP server is listed and select **Authenticate**. Antigravity registers its OAuth client dynamically; do not enter a client ID or client secret.
+
+#### Reauthorize
+
+Open **Settings → Customizations**, locate the `insightark` MCP server, refresh it if needed, and select **Authenticate**.
+
 ## Verify the connection
 
 Ask your agent:
@@ -168,6 +182,7 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 - ChatGPT / Codex
 - Claude Code
 - Cursor
+- Google Antigravity
 
 ## 功能
 
@@ -202,7 +217,7 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 
 ## 安裝與認證
 
-從支援的 marketplace 安裝 plugin，Plugin 會自動設定內建的 `insightark` MCP server，請勿另外新增 MCP server。MCP server 認證走 OAuth 協定，依據不同的 agent 會有不同的認證流程，詳見各 agent 的說明。
+依照下方各 host 的方式安裝 plugin。Plugin 會自動設定內建的 `insightark` MCP server，請勿另外新增 MCP server。MCP server 認證走 OAuth 協定，依據不同的 agent 會有不同的認證流程，詳見各 agent 的說明。
 
 ### Marketplace 來源
 
@@ -292,6 +307,19 @@ Cursor 目前沒有原生 CLI 指令可安裝 marketplace plugin。Cursor CLI �
 2. 在 **MCPs** 區塊點選 `insightark`，開啟 MCP 設定。
 3. 在 **Environments** 中，對已連接的 local environment 點選 **Logout**。
 4. 回到 plugin 詳細頁面，在 `insightark` 右側點選 **Authenticate**。
+
+### Google Antigravity
+
+Antigravity 目前透過 plugin 目錄探索自訂 plugin，不使用本 repository 內既有的 marketplace manifests。CI 會額外發布專用的 `insightark-skills-antigravity-*.zip`，zip 根目錄就是 plugin 本身。解壓後讓 `insightark-skills/` 落在以下其中一處：
+
+- Workspace：`<workspace-root>/.agents/plugins/insightark-skills/`
+- 全域：`~/.gemini/config/plugins/insightark-skills/`
+
+開啟或重新載入 workspace，前往 **Settings → Customizations**，確認已出現 `insightark` MCP server，然後點選 **Authenticate**。Antigravity 會透過 DCR 動態註冊 OAuth client，不需填寫 client ID 或 client secret。
+
+#### 重新授權
+
+前往 **Settings → Customizations**，找到 `insightark` MCP server；必要時先 refresh，再點選 **Authenticate**。
 
 ## 驗證連線
 

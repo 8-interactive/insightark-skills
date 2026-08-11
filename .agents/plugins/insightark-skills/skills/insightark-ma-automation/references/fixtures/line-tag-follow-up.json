@@ -1,0 +1,87 @@
+{
+  "orgId": "<REQUIRED_FROM_CUSTOMER>",
+  "templateType": "all",
+  "name": "<REQUIRED_FROM_CUSTOMER>",
+  "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+  "platform": "<REQUIRED_FROM_CUSTOMER_PLATFORM>",
+  "startTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "endTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "limits": {
+    "message": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>",
+    "per_customer": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>"
+  },
+  "oos": {
+    "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+    "hour": "<REQUIRED_FROM_CUSTOMER_OOS_HOUR>",
+    "minute": "<REQUIRED_FROM_CUSTOMER_OOS_MINUTE>",
+    "duration": "<REQUIRED_FROM_CUSTOMER_OOS_DURATION_SECONDS>"
+  },
+  "nodes": [
+    {
+      "id": "start1",
+      "type": "start",
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "triggerTag",
+      "type": "trigger",
+      "data": {
+        "type": "tag",
+        "match": "<REQUIRED_FROM_CUSTOMER_TAG_MATCH>",
+        "tags": [
+          "<REQUIRED_FROM_CUSTOMER_TAG>"
+        ]
+      },
+      "position": {
+        "x": 120,
+        "y": 0
+      }
+    },
+    {
+      "id": "messageFollowUp",
+      "type": "message",
+      "data": {
+        "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
+        "waitTime": "<REQUIRED_FROM_CUSTOMER_WAIT_SECONDS>",
+        "messages": [
+          {
+            "index": 0,
+            "contentType": "text/plain",
+            "data": {
+              "content": "<REQUIRED_FROM_CUSTOMER_MESSAGE_TEXT>"
+            }
+          }
+        ]
+      },
+      "position": {
+        "x": 280,
+        "y": 0
+      }
+    },
+    {
+      "id": "end1",
+      "type": "end",
+      "position": {
+        "x": 440,
+        "y": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "start1",
+      "target": "triggerTag"
+    },
+    {
+      "source": "triggerTag",
+      "target": "messageFollowUp"
+    },
+    {
+      "source": "messageFollowUp",
+      "target": "end1"
+    }
+  ]
+}

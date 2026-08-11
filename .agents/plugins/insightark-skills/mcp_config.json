@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "insightark": {
+      "serverUrl": "https://stage-api-next.no8.io/mcp"
+    }
+  }
+}

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add a Google Antigravity plugin bundle under `.agents/plugins/insightark-skills/` in generated customer trees.
+- Configure the hosted InsightArk MCP with Antigravity's DCR-only `serverUrl` schema; no static OAuth client ID or secret is included.
+- Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
+- Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
+
 ## 2.7.3 — Customer-facing glossary without CI metadata
 
 - Slim `console-terminology.md` to Console label / English / Short form / Internal·MCP (drop Banned and Evidence from the shipped glossary).

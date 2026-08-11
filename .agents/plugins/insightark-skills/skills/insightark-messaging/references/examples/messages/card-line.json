@@ -1,0 +1,44 @@
+{
+  "messages": [
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "card",
+        "altText": "Product options",
+        "elements": [
+          {
+            "title": "Option A",
+            "subtitle": "Description for option A",
+            "imageType": "upload",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/prod/1730639197241/960x960.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [
+              {
+                "type": "postback",
+                "title": "Choose A",
+                "data": "choose_a",
+                "tags": []
+              }
+            ]
+          },
+          {
+            "title": "Option B",
+            "subtitle": "Description for option B",
+            "imageType": "upload",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/prod/1730639214937/960x960.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [
+              {
+                "type": "postback",
+                "title": "Choose B",
+                "data": "choose_b",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "platform": "line"
+}
