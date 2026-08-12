@@ -120,7 +120,7 @@ Uninstall the InsightArk plugin, then install it again using the steps above. In
 
 Antigravity currently discovers custom plugins from its plugin directories rather than this repository's marketplace manifests. Download the latest plugin zip:
 
-- [Download the latest Antigravity plugin](https://downloads.no8.io/main/releases/skills/insightark-skills-antigravity-latest.zip)
+- [Download the latest Antigravity plugin](https://downloads.no8.io/staging/releases/skills/insightark-skills-antigravity-latest.zip)
 
 Install it step by step:
 
@@ -140,7 +140,7 @@ Install it step by step:
    ```json
    {
      "insightark": {
-       "serverUrl": "https://api-next.no8.io/mcp"
+       "serverUrl": "https://stage-api-next.no8.io/mcp"
      }
    }
    ```
@@ -320,7 +320,7 @@ codex plugin add insightark-skills@insightark-skills
 
 Antigravity 目前透過 plugin 目錄探索自訂 plugin，不使用本 repository 內既有的 marketplace manifests。請下載最新 plugin zip：
 
-- [下載最新 Antigravity plugin](https://downloads.no8.io/main/releases/skills/insightark-skills-antigravity-latest.zip)
+- [下載最新 Antigravity plugin](https://downloads.no8.io/staging/releases/skills/insightark-skills-antigravity-latest.zip)
 
 請依以下步驟安裝：
 
@@ -340,7 +340,7 @@ Antigravity 目前透過 plugin 目錄探索自訂 plugin，不使用本 reposit
    ```json
    {
      "insightark": {
-       "serverUrl": "https://api-next.no8.io/mcp"
+       "serverUrl": "https://stage-api-next.no8.io/mcp"
      }
    }
    ```
