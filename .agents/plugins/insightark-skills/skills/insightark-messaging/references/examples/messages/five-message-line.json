@@ -1,0 +1,10 @@
+{
+  "platform": "line",
+  "messages": [
+    { "contentType": "text/plain", "data": { "content": "First" } },
+    { "contentType": "application/x-image", "data": { "url": "https://assets.example.com/one.jpg" } },
+    { "contentType": "application/x-audio", "data": { "url": "https://media.example.com/one.mp3" } },
+    { "contentType": "application/x-video", "data": { "url": "https://media.example.com/one.mp4" } },
+    { "contentType": "application/x-file", "data": { "url": "https://assets.example.com/info.pdf", "name": "info.pdf" } }
+  ]
+}

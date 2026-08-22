@@ -1,0 +1,244 @@
+{
+  "platform": "line",
+  "meta": { "purpose": "all-types-showcase" },
+  "sampleCustomer": { "displayName": "Preview 訪客" },
+  "messages": [
+    {
+      "contentType": "text/plain",
+      "data": {
+        "content": "Super 8 訊息預覽 — 全類型展示（LINE）\n每一則說明文字下方為該類型的實際訊息格式。"
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ text/plain — 一般文字訊息" }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "Hello <%= name %>，這是 text/plain 範例。" }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-image — 圖片訊息" }
+    },
+    {
+      "contentType": "application/x-image",
+      "data": {
+        "url": "https://assets.no8.io/app-api-uploader/prod/1730639197241/960x960.jpg"
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-video — 影片訊息" }
+    },
+    {
+      "contentType": "application/x-video",
+      "data": {
+        "url": "https://www.w3schools.com/html/mov_bbb.mp4"
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-file — 檔案訊息（PDF 等）" }
+    },
+    {
+      "contentType": "application/x-file",
+      "data": {
+        "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        "name": "sample-document.pdf"
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / card — 多頁卡片（標題 + 副標 + 圖 + 按鈕）" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "card",
+        "altText": "Card template showcase",
+        "elements": [
+          {
+            "title": "卡片標題",
+            "subtitle": "卡片副標題說明",
+            "imageType": "upload",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/prod/1730639197241/960x960.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [
+              { "type": "url", "title": "了解更多", "data": "https://example.com", "tags": [] }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / confirm — 確認型（標題 + 兩個按鈕）" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "confirm",
+        "altText": "Confirm template showcase",
+        "elements": [
+          {
+            "title": "確定要繼續嗎？",
+            "buttons": [
+              { "type": "postback", "title": "是", "data": "confirm_yes", "tags": [] },
+              { "type": "postback", "title": "否", "data": "confirm_no", "tags": [] }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / carousel — 輪播大圖（可左右滑）" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "carousel",
+        "altText": "Carousel template showcase",
+        "elements": [
+          {
+            "imageUrl": "https://assets.no8.io/app-api-uploader/stag/1734599063772/1040x1040_1.jpg",
+            "aspectRatio": "1:1",
+            "size": { "width": 1040, "height": 1040 },
+            "buttons": [
+              {
+                "type": "url",
+                "title": "Slide 1",
+                "data": "https://example.com/1",
+                "tags": [],
+                "x": "0%",
+                "y": "0%",
+                "width": "100%",
+                "height": "100%"
+              }
+            ]
+          },
+          {
+            "imageUrl": "https://assets.no8.io/app-api-uploader/stag/1734599063772/1040x1040_1.jpg",
+            "aspectRatio": "1:1",
+            "size": { "width": 1040, "height": 1040 },
+            "buttons": [
+              {
+                "type": "url",
+                "title": "Slide 2",
+                "data": "https://example.com/2",
+                "tags": [],
+                "x": "0%",
+                "y": "0%",
+                "width": "100%",
+                "height": "100%"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / imagemap — 單張大圖多區塊點擊" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "imagemap",
+        "altText": "Imagemap template showcase",
+        "elements": [
+          {
+            "title": "Imagemap 範例",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/stag/1734599063772/1040x1040_1.jpg",
+            "size": { "width": 1040, "height": 1040 },
+            "aspectRatio": "1:1",
+            "messageTemplateType": "ImagemapTemplate1",
+            "buttons": [
+              {
+                "title": "上半部",
+                "type": "url",
+                "data": "https://example.com/top",
+                "tags": [],
+                "x": "0%",
+                "y": "0%",
+                "width": "100%",
+                "height": "50%"
+              },
+              {
+                "title": "下半部",
+                "type": "postback",
+                "data": "bottom",
+                "tags": [],
+                "x": "0%",
+                "y": "50%",
+                "width": "100%",
+                "height": "50%"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / richvideo — 影片訊息（含預覽圖 + 按鈕）" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "richvideo",
+        "altText": "Rich video template showcase",
+        "elements": [
+          {
+            "title": "產品介紹影片",
+            "videoUrl": "https://example.com/media/demo.mp4",
+            "previewImageUrl": "https://assets.no8.io/app-api-uploader/prod/1727330921708/benson%E8%A8%AA%E8%AB%872.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [
+              { "type": "url", "title": "了解更多", "data": "https://example.com", "tags": [] }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ application/x-template / image — 多頁大圖輪播" }
+    },
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "image",
+        "altText": "Image template showcase",
+        "elements": [
+          {
+            "imageType": "upload",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/prod/1730639197241/960x960.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [{ "type": "postback", "title": "圖片 1", "data": "img_1", "tags": [] }]
+          },
+          {
+            "imageType": "upload",
+            "imageUrl": "https://assets.no8.io/app-api-uploader/prod/1730639214937/960x960.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [{ "type": "postback", "title": "圖片 2", "data": "img_2", "tags": [] }]
+          }
+        ]
+      }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "▸ quickReply — 快速回覆按鈕（附在最後一則訊息下方）" }
+    },
+    {
+      "contentType": "text/plain",
+      "data": { "content": "請選擇一個主題：" }
+    }
+  ],
+  "quickReply": [
+    { "action": "message", "label": "運送", "text": "shipping" },
+    { "action": "message", "label": "退貨", "text": "returns" },
+    { "action": "postback", "label": "轉客服", "postback": "handoff_agent" }
+  ]
+}

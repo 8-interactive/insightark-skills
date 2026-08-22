@@ -1,0 +1,240 @@
+{
+  "orgId": "<REQUIRED_FROM_CUSTOMER>",
+  "templateType": "all",
+  "name": "<REQUIRED_FROM_CUSTOMER>",
+  "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+  "platform": "<REQUIRED_FROM_CUSTOMER_PLATFORM>",
+  "startTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "endTime": "<REQUIRED_FROM_CUSTOMER_ISO8601_WITH_TIMEZONE>",
+  "limits": {
+    "message": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>",
+    "per_customer": "<REQUIRED_FROM_CUSTOMER_NONNEG_INT>"
+  },
+  "oos": {
+    "enabled": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>",
+    "hour": "<REQUIRED_FROM_CUSTOMER_OOS_HOUR>",
+    "minute": "<REQUIRED_FROM_CUSTOMER_OOS_MINUTE>",
+    "duration": "<REQUIRED_FROM_CUSTOMER_OOS_DURATION_SECONDS>"
+  },
+  "nodes": [
+    {
+      "id": "start1",
+      "type": "start",
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "triggerTag",
+      "type": "trigger",
+      "data": {
+        "type": "tag",
+        "match": "<REQUIRED_FROM_CUSTOMER_TAG_MATCH>",
+        "tags": [
+          "<REQUIRED_FROM_CUSTOMER_TAG>"
+        ]
+      },
+      "position": {
+        "x": 120,
+        "y": 0
+      }
+    },
+    {
+      "id": "messageCard",
+      "type": "message",
+      "data": {
+        "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
+        "waitTime": "<REQUIRED_FROM_CUSTOMER_WAIT_SECONDS>",
+        "messages": [
+          {
+            "index": 0,
+            "contentType": "application/x-template",
+            "template": "tplCard001",
+            "data": {
+              "templateType": "card",
+              "elements": [
+                {
+                  "title": "<REQUIRED_FROM_CUSTOMER_CARD_TITLE>",
+                  "subtitle": "<REQUIRED_FROM_CUSTOMER_CARD_SUBTITLE>",
+                  "imageType": "url",
+                  "imageUrl": "<REQUIRED_FROM_CUSTOMER_HTTPS_IMAGE_URL>",
+                  "buttons": [
+                    {
+                      "type": "postback",
+                      "title": "<REQUIRED_FROM_CUSTOMER_BUTTON_TITLE_0>",
+                      "data": "<REQUIRED_FROM_CUSTOMER_POSTBACK_0>",
+                      "tags": []
+                    },
+                    {
+                      "type": "postback",
+                      "title": "<REQUIRED_FROM_CUSTOMER_BUTTON_TITLE_1>",
+                      "data": "<REQUIRED_FROM_CUSTOMER_POSTBACK_1>",
+                      "tags": []
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "position": {
+        "x": 280,
+        "y": 0
+      }
+    },
+    {
+      "id": "groupClick",
+      "type": "group",
+      "data": {
+        "source": "messageCard",
+        "type": "click",
+        "clickType": "button",
+        "timeout": {
+          "value": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_VALUE>",
+          "unit": "<REQUIRED_FROM_CUSTOMER_TIMEOUT_UNIT>"
+        },
+        "allowMulti": "<REQUIRED_FROM_CUSTOMER_BOOLEAN>"
+      },
+      "position": {
+        "x": 440,
+        "y": 0
+      }
+    },
+    {
+      "id": "condYes",
+      "type": "condition",
+      "data": {
+        "groupId": "groupClick",
+        "source": "messageCard",
+        "type": "click",
+        "buttons": [
+          {
+            "index": 1,
+            "id": "tplCard001_elements.0.buttons.0"
+          }
+        ]
+      },
+      "position": {
+        "x": 600,
+        "y": -80
+      }
+    },
+    {
+      "id": "condNo",
+      "type": "condition",
+      "data": {
+        "groupId": "groupClick",
+        "source": "messageCard",
+        "type": "click",
+        "buttons": [
+          {
+            "index": 2,
+            "id": "tplCard001_elements.0.buttons.1"
+          }
+        ]
+      },
+      "position": {
+        "x": 600,
+        "y": 40
+      }
+    },
+    {
+      "id": "condTimeout",
+      "type": "condition",
+      "data": {
+        "groupId": "groupClick",
+        "source": "messageCard",
+        "type": "n-click"
+      },
+      "position": {
+        "x": 600,
+        "y": 160
+      }
+    },
+    {
+      "id": "msgYes",
+      "type": "message",
+      "data": {
+        "name": "<REQUIRED_FROM_CUSTOMER_STEP_NAME>",
+        "waitTime": "<REQUIRED_FROM_CUSTOMER_WAIT_SECONDS>",
+        "messages": [
+          {
+            "index": 0,
+            "contentType": "text/plain",
+            "data": {
+              "content": "<REQUIRED_FROM_CUSTOMER_MESSAGE_TEXT>"
+            }
+          }
+        ]
+      },
+      "position": {
+        "x": 820,
+        "y": -80
+      }
+    },
+    {
+      "id": "endYes",
+      "type": "end",
+      "position": {
+        "x": 1000,
+        "y": -80
+      }
+    },
+    {
+      "id": "endNo",
+      "type": "end",
+      "position": {
+        "x": 820,
+        "y": 40
+      }
+    },
+    {
+      "id": "endTimeout",
+      "type": "end",
+      "position": {
+        "x": 820,
+        "y": 160
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "start1",
+      "target": "triggerTag"
+    },
+    {
+      "source": "triggerTag",
+      "target": "messageCard"
+    },
+    {
+      "source": "messageCard",
+      "target": "condYes"
+    },
+    {
+      "source": "messageCard",
+      "target": "condNo"
+    },
+    {
+      "source": "messageCard",
+      "target": "condTimeout"
+    },
+    {
+      "source": "condYes",
+      "target": "msgYes"
+    },
+    {
+      "source": "msgYes",
+      "target": "endYes"
+    },
+    {
+      "source": "condNo",
+      "target": "endNo"
+    },
+    {
+      "source": "condTimeout",
+      "target": "endTimeout"
+    }
+  ]
+}

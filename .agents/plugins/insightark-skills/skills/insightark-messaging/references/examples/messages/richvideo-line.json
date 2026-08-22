@@ -1,0 +1,28 @@
+{
+  "messages": [
+    {
+      "contentType": "application/x-template",
+      "data": {
+        "templateType": "richvideo",
+        "altText": "Watch our product video",
+        "elements": [
+          {
+            "title": "Product demo",
+            "videoUrl": "https://example.com/media/demo.mp4",
+            "previewImageUrl": "https://assets.no8.io/app-api-uploader/prod/1727330921708/benson%E8%A8%AA%E8%AB%872.jpg",
+            "aspectRatio": "1:1",
+            "buttons": [
+              {
+                "type": "url",
+                "title": "Learn more",
+                "data": "https://example.com/product",
+                "tags": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "platform": "line"
+}

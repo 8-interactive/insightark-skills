@@ -9,6 +9,7 @@ This plugin provides an officially supported InsightArk connection. It packages 
 - ChatGPT / Codex
 - Claude Code
 - Cursor
+- Google Antigravity
 
 ## Capabilities
 
@@ -25,16 +26,17 @@ For example:
 >
 > 找出最近 30 天有互動的客戶，並加上 `VIP` 標籤。
 
-| Skill | Capability |
-|---|---|
+| Skill                           | Capability                                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `insightark-universal-workflow` | Shared policy (customer guidance, rich preview, write lifecycle, scheduling timezone) — prerequisite for all workflows |
-| `insightark-session` | Validate access and inspect the authenticated identity, organizations, and credit balance |
-| `insightark-investigator` | Investigate conversations and messages in read-only mode |
-| `insightark-conversations` | List and retrieve conversations and messages |
-| `insightark-customer-manager` | Search and update customers; add or remove tags |
-| `insightark-messaging` | Send and validate messages, including LINE templates |
-| `insightark-broadcast-manager` | Create and monitor broadcasts |
-| `insightark-ma-automation` | Manage marketing-automation procedures |
+| `insightark-session`            | Validate access and inspect the authenticated identity, organizations, and credit balance                              |
+| `insightark-investigator`       | Investigate conversations and messages in read-only mode                                                               |
+| `insightark-conversations`      | List and retrieve conversations and messages                                                                           |
+| `insightark-chat-groups`        | Discover LINE ChatGroups and search or analyze group conversations                                                     |
+| `insightark-customer-manager`   | Search and update customers; add or remove tags                                                                        |
+| `insightark-messaging`          | Send and validate messages, including LINE templates                                                                   |
+| `insightark-broadcast-manager`  | Create and monitor broadcasts                                                                                          |
+| `insightark-ma-automation`      | Manage marketing-automation procedures                                                                                 |
 
 ## Prerequisites
 
@@ -44,7 +46,7 @@ For example:
 
 ## Installation and authentication
 
-Install the plugin from a supported marketplace. The plugin automatically configures the bundled `insightark` MCP server; do not add it separately. MCP server authentication uses OAuth; the authorization flow differs by agent and is described in the relevant installation steps below.
+Install the plugin through the host-specific method below. Most hosts configure the bundled `insightark` MCP server with the plugin. Antigravity currently requires the MCP server to be added separately to its global or workspace MCP configuration; follow the Antigravity section below. MCP server authentication uses OAuth; the authorization flow differs by agent and is described in the relevant installation steps below.
 
 ### Marketplace source
 
@@ -114,6 +116,43 @@ When prompted, select the installation scope. OAuth opens automatically when the
 
 Uninstall the InsightArk plugin, then install it again using the steps above. Installation starts OAuth automatically.
 
+### Google Antigravity
+
+Antigravity currently discovers custom plugins from its plugin directories rather than this repository's marketplace manifests. Download the latest plugin zip:
+
+- [Download the latest Antigravity plugin](https://downloads.no8.io/main/releases/skills/insightark-skills-antigravity-latest.zip)
+
+Install it step by step:
+
+1. Download the zip for your environment and extract it. The zip root is the `insightark-skills/` plugin directory.
+2. Move the extracted directory to one of these locations:
+   - macOS/Linux workspace: `<workspace-root>/.agents/plugins/insightark-skills/`
+   - macOS/Linux global: `~/.gemini/config/plugins/insightark-skills/`
+   - Windows workspace: `<workspace-root>/.agents/plugins/insightark-skills/`
+   - Windows global: `%USERPROFILE%\.gemini\config\plugins\insightark-skills\`
+3. Add the MCP server separately. Antigravity currently does not automatically register the plugin's MCP configuration. Edit one of these files:
+   - macOS/Linux global: `~/.gemini/config/mcp_config.json`
+   - macOS/Linux workspace: `<workspace-root>/.agents/mcp_config.json`
+   - Windows global: `%USERPROFILE%\.gemini\config\mcp_config.json`
+   - Windows workspace: `<workspace-root>\.agents\mcp_config.json`
+4. Merge this entry under the existing `mcpServers` object (keep other servers):
+
+   ```json
+   {
+     "insightark": {
+       "serverUrl": "https://api-next.no8.io/mcp"
+     }
+   }
+   ```
+
+5. Reload Antigravity, open **Settings → Customizations**, and confirm `insightark` appears under **Installed MCP Servers**.
+6. Select **Authenticate** next to `insightark` and complete the OAuth flow. Antigravity uses DCR; do not enter a client ID or client secret.
+7. If every MCP call still asks for approval, add `mcp(insightark/*)` to the relevant **Global Permissions** or **Project Permissions** Allow list.
+
+#### Reauthorize
+
+Open **Settings → Customizations**, locate the `insightark` MCP server, refresh it if needed, and select **Authenticate**.
+
 ### Cursor
 
 1. Open **Customize** from the Cursor sidebar, then select **Browse Marketplace** in the upper-right corner.
@@ -165,15 +204,18 @@ To review or revoke agent access:
 InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理與數據洞察。Super 8 Studio 是雲發互動科技（Super 8）打造的 AI 驅動對話商務與行銷解決方案平台。
 
 本 plugin 提供官方支援的 InsightArk 連線能力。它將 `insightark` MCP server 與工作流程 skills 打包，讓 agent 能依自然語言指令操作 InsightArk。目前官方支援的 agent 包括：
+
 - ChatGPT / Codex
 - Claude Code
 - Cursor
+- Google Antigravity
 
 ## 功能
 
 安裝後，你可以請 agent：
 
 - 調查對話與訊息；
+- 探索 LINE 群組對話並分析群組訊息；
 - 搜尋、更新客戶及管理標籤；
 - 建立、發送與追蹤訊息或群發訊息；以及
 - 建立、驗證、啟動、暫停及查看自動旅程。
@@ -184,15 +226,17 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 >
 > 找出最近 30 天有互動的客戶，並加上 `VIP` 標籤。
 
-| Skill | 功能 |
-|---|---|
-| `insightark-session` | 驗證存取權限，查看已認證身分、組織與剩餘額度 |
-| `insightark-investigator` | 唯讀調查對話與訊息 |
-| `insightark-conversations` | 列出與取得對話及訊息 |
-| `insightark-customer-manager` | 搜尋與更新客戶，新增或移除標籤 |
-| `insightark-messaging` | 發送與驗證訊息，包含 LINE 模板 |
-| `insightark-broadcast-manager` | 建立與追蹤群發訊息 |
-| `insightark-ma-automation` | 管理自動旅程 |
+| Skill                           | 功能                                         |
+| ------------------------------- | ------------------------------------------ |
+| `insightark-universal-workflow` | 共用政策：客戶溝通、訊息預覽、寫入確認與時區規則；所有 workflow 的前置條件 |
+| `insightark-session`            | 驗證存取權限，查看已認證身分、組織與剩餘額度                     |
+| `insightark-investigator`       | 唯讀調查對話與訊息                                  |
+| `insightark-conversations`      | 列出與取得對話及訊息                                 |
+| `insightark-chat-groups`        | 探索 LINE 群組對話，搜尋與分析群組訊息                     |
+| `insightark-customer-manager`   | 搜尋與更新客戶，新增或移除標籤                            |
+| `insightark-messaging`          | 發送與驗證訊息，包含 LINE 模板                         |
+| `insightark-broadcast-manager`  | 建立與追蹤群發訊息                                  |
+| `insightark-ma-automation`      | 管理自動旅程                                     |
 
 ## 使用條件
 
@@ -202,7 +246,7 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 
 ## 安裝與認證
 
-從支援的 marketplace 安裝 plugin，Plugin 會自動設定內建的 `insightark` MCP server，請勿另外新增 MCP server。MCP server 認證走 OAuth 協定，依據不同的 agent 會有不同的認證流程，詳見各 agent 的說明。
+依照下方各 host 的方式安裝 plugin。大多數 host 會由 plugin 自動設定內建的 `insightark` MCP server；但 Antigravity 目前需要另外加入 MCP 設定，請依下方 Antigravity 說明操作。MCP server 認證走 OAuth 協定，依據不同的 agent 會有不同的認證流程，詳見各 agent 的說明。
 
 ### Marketplace 來源
 
@@ -271,6 +315,43 @@ codex plugin add insightark-skills@insightark-skills
 #### 重新授權
 
 解除安裝 InsightArk plugin，再依上述步驟重新安裝。安裝時會自動啟動 OAuth。
+
+### Google Antigravity
+
+Antigravity 目前透過 plugin 目錄探索自訂 plugin，不使用本 repository 內既有的 marketplace manifests。請下載最新 plugin zip：
+
+- [下載最新 Antigravity plugin](https://downloads.no8.io/main/releases/skills/insightark-skills-antigravity-latest.zip)
+
+請依以下步驟安裝：
+
+1. 下載對應環境的 zip 並解壓縮；zip 根目錄就是 `insightark-skills/` plugin 目錄。
+2. 將解壓後的目錄放到以下其中一處：
+   - macOS/Linux workspace：`<workspace-root>/.agents/plugins/insightark-skills/`
+   - macOS/Linux 全域：`~/.gemini/config/plugins/insightark-skills/`
+   - Windows workspace：`<workspace-root>/.agents/plugins/insightark-skills/`
+   - Windows 全域：`%USERPROFILE%\.gemini\config\plugins\insightark-skills\`
+3. 另外加入 MCP server。Antigravity 目前不會自動註冊 plugin 內的 MCP 設定，請編輯以下其中一個檔案：
+   - macOS/Linux 全域：`~/.gemini/config/mcp_config.json`
+   - macOS/Linux Workspace：`<workspace-root>/.agents/mcp_config.json`
+   - Windows 全域：`%USERPROFILE%\.gemini\config\mcp_config.json`
+   - Windows Workspace：`<workspace-root>\.agents\mcp_config.json`
+4. 在既有的 `mcpServers` 物件中合併以下項目（保留其他 server）：
+
+   ```json
+   {
+     "insightark": {
+       "serverUrl": "https://api-next.no8.io/mcp"
+     }
+   }
+   ```
+
+5. 重新載入 Antigravity，前往 **Settings → Customizations**，確認 **Installed MCP Servers** 出現 `insightark`。
+6. 點選 `insightark` 旁的 **Authenticate**，完成 OAuth。Antigravity 使用 DCR，不需填寫 client ID 或 client secret。
+7. 如果每次呼叫 MCP 都要求批准，請在對應的 **Global Permissions** 或 **Project Permissions** Allow 清單加入 `mcp(insightark/*)`。
+
+#### 重新授權
+
+前往 **Settings → Customizations**，找到 `insightark` MCP server；必要時先 refresh，再點選 **Authenticate**。
 
 ### Cursor
 
