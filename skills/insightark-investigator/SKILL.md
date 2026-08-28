@@ -1,7 +1,7 @@
 ---
 name: insightark-investigator
 description: Investigate conversations and messages through InsightArk MCP using read-only tools.
-when_to_use: When a user asks a natural language investigation question that may require session validation, organization scoping, conversation discovery, conversation inspection, or message search.
+when_to_use: When a user asks a natural language investigation question that may require session validation, organization scoping, conversation discovery, conversation inspection, message search, or compiling an FAQ / 常見問題 from customer conversations.
 allowed-mcp: true
 ---
 
@@ -53,7 +53,7 @@ across a set of conversations rather than a single lookup — load
 `QUALITATIVE_DETECTION.md` is the shared foundation (path selection + cost
 guardrails + reading rules). `messaging_message_search` is the standard path;
 `messaging_conversation_messages` is a recent context peek, not a period corpus.
-Two focused lenses build on it — load the one that matches the ask, then follow
+Focused lenses build on it — load the one that matches the ask, then follow
 the shared sample/credit caps:
 
 - **Complaint root cause / theme categorisation** → `references/ROOT_CAUSE_ANALYSIS.md`.
@@ -67,6 +67,11 @@ the shared sample/credit caps:
   Use to evaluate the **staff responder** (not the customer) and compile
   exemplary / needs-improvement cases per agent. Runs on Strategy A
   (`messaging_message_search`) because staff identity is returned only there.
+- **FAQ from customer conversations** → `references/FAQ_GENERATION.md`.
+  Use when the ask is to compile / generate / summarize 常見問題 from
+  conversations. Search with `senderTypes: ["Customer","_User"]` and
+  `groupBy: "conversation"`. Do not use opportunity discovery or CS quality
+  review as a substitute.
 
 ## Guardrails
 
@@ -81,7 +86,7 @@ the shared sample/credit caps:
 
 1. **Time-scoped asks** (year／quarter／month／“last 30 days”) → use **`messaging_message_search`** with explicit `startAt`/`endAt`. Do **not** treat `messaging_conversation_messages` as that period’s corpus.
 2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
-3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows.
+3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows. NEVER use it as an organization census or silent／no-inbound customer count — hand that off to `insightark-customer-manager` (`crm_platform_list` then per-platform `crm_customer_search`).
 4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
 5. **Long ranges:** search max **90 days**. Split longer periods into ≤90-day windows; estimate credits (`windows × 20` per conversation／org sweep, plus list／get costs) before running.
 6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.

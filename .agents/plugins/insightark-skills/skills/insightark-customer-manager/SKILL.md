@@ -17,8 +17,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 - `auth_me` — validate session (no `orgId` required)
 - `auth_organizations` — list manageable organizations (no `orgId` required)
+- `crm_platform_list` — list the org's live messaging platforms (no secrets)
 - `crm_customer_get` — get one customer by id
-- `crm_customer_search` — search customers with public filters
+- `crm_customer_search` — search customers with public filters, inbound bounds, optional `fields`, or `return: "count"`
 - `crm_tag_list` — discover organization tag inventory and rough holder counts
 - `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect saved group snapshots
 - `crm_customer_group_rename`, `crm_customer_group_delete` — rename or soft-delete customer groups (confirm first)
@@ -47,6 +48,17 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - Explicit partial-name / name-fragment / broader-match requests: pass `displayNameMatch: "contains"`.
 - If default text search returns no customers and the user still expects a match: disclose that a contains retry is a broader **additional 15-credit** read, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
 - Do not send `displayNameMatch` without a non-empty name-shaped `displayName`.
+
+## Silent / no-inbound census
+
+For “how many customers have not written / no inbound since date X” (and the matching list):
+
+1. Call `crm_platform_list` to get live org platforms.
+2. For **each** returned platform, call `crm_customer_search` with that `platform`, `lastInboundAtTo` (ISO instant with offset or `Z`), and `lastInboundAtFrom` only when the user gave a window start.
+3. When only a number is needed, pass `return: "count"` (same 15-credit cost; `fields` is ignored).
+4. When a list is needed, omitted `fields` is the slim default (`customerId`, `displayName`, `platform`, `lastInboundAt`). The list MAY pass `fields` for opt-in keys such as `tags`.
+
+NEVER use `messaging_conversation_list` as an organization census or silent-customer count. Do not invent a CRM count-only tool, a query-group create, or bulk tag for this job. Name/email/phone/tag lookup without inbound bounds does **not** require `platform`.
 
 ## Example requests
 

@@ -7,6 +7,12 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.8.0 — Conversation FAQ from investigator
+
+- `insightark-investigator`: add `references/FAQ_GENERATION.md` for compiling FAQ / 常見問題 from customer conversations (not a new skill).
+- FAQ search uses `messaging_message_search` with `senderTypes: ["Customer","_User"]` and `groupBy: "conversation"`.
+- Copilot v2 unmounts native Excel FAQ and thin-routes to this skill.
+
 ## 2.7.3 — Customer-facing glossary without CI metadata
 
 - Slim `console-terminology.md` to Console label / English / Short form / Internal·MCP (drop Banned and Evidence from the shipped glossary).

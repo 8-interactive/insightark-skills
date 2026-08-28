@@ -22,7 +22,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 | Tool | Use when | Do not use when |
 |---|---|---|
-| `messaging_conversation_list` | Inbox triage; “who was active in this period”; page older activity; list a known customer’s conversations | Message-level sentiment／complaint proportions; keyword theme search across the org |
+| `messaging_conversation_list` | Inbox triage; “who was active in this period”; page older activity; list a known customer’s conversations | Message-level sentiment／complaint proportions; keyword theme search across the org; organization census or silent／no-inbound customer counts (use `insightark-customer-manager` + `crm_platform_list` then per-platform `crm_customer_search`) |
 | `messaging_conversation_get` | You already have a `conversationId` and need a summary | Scanning many conversations |
 
 For message bodies, keyword evidence, or org-wide time-window **message** analysis, use `insightark-investigator` / `messaging_message_search` (and `messaging_conversation_messages` for one thread).
