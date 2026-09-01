@@ -1,7 +1,7 @@
 ---
 name: insightark-conversations
 description: Browse conversation lists with organization scope and supported filters via InsightArk MCP.
-when_to_use: When a user wants to browse or page inbox-style conversations by organization, customer, platform, inbox state, or Customer last-activity window (lastMessageAtFrom/To) with optional pageCursor.
+when_to_use: When a user wants to browse or page inbox-style conversations by organization, customer, platform, inbox state, or Customer last-activity window (lastMessageAtFrom/To) with optional cursor.
 allowed-mcp: true
 ---
 
@@ -31,7 +31,7 @@ For message bodies, keyword evidence, or org-wide time-window **message** analys
 
 - **List** `lastMessageAtFrom` / `lastMessageAtTo` filter Customer **`lastMessageAt`** (last activity on the conversation).
 - **Search** `startAt` / `endAt` filter message **`createdAt`** (what was said in a period).
-- Do **not** pass search’s `startAt`/`endAt` on `messaging_conversation_list`.
+- List activity bounds are `lastMessageAtFrom` / `lastMessageAtTo`. Message-search time bounds do not apply to `messaging_conversation_list`.
 
 ### List activity bounds
 
@@ -41,18 +41,19 @@ For message bodies, keyword evidence, or org-wide time-window **message** analys
 - Both → span ≤ **90 days**.
 - Neither → inbox mode (newest activity first). Customers missing `lastMessageAt` (e.g. brand-outbound-only) are excluded.
 
-### Pagination (`pageCursor`)
+### Pagination (`cursor`)
 
-- Echo `page.nextPageCursor` as the next call’s `pageCursor`. Do **not** parse or hand-craft cursors.
-- `pageCursor` is an opaque keyset continuation hint for `(lastMessageAt, _id)` — **not** an auth or signed token.
-- A short returned conversation count does not always mean “no more pages” if hydration skipped rows; trust `nextPageCursor`.
+- Echo `page.nextCursor` as the next call’s `cursor` while `page.hasMore` is true. Do **not** parse or hand-craft cursors.
+- `cursor` is an opaque keyset continuation hint for `(lastMessageAt, _id)` — **not** an auth or signed token.
+- A short returned conversation count does not always mean “no more pages” if hydration skipped rows; trust `page.hasMore` / `page.nextCursor`.
+- For `messaging_message_search` (via investigator), continue while `page.hasMore` is true with `skip = page.skip + page.limit`.
 
 Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exact `inbox` tokens come from the MCP tool schema enum.
 
 ## Workflow
 
 1. Resolve `orgId` from user context or `auth_organizations`.
-2. Call `messaging_conversation_list` with supported filters. For “active that day/week”, pass confirmed `lastMessageAtFrom`/`lastMessageAtTo` instants; page with `pageCursor` when `nextPageCursor` is present.
+2. Call `messaging_conversation_list` with supported filters. For “active that day/week”, pass confirmed `lastMessageAtFrom`/`lastMessageAtTo` instants; page with `cursor` when `page.nextCursor` is present.
 3. If the user asks to open a specific conversation, call `messaging_conversation_get` with `orgId` + `conversationId` from the list.
 4. Return the public conversation list (and optionally one conversation summary) without exposing internal query structure.
 

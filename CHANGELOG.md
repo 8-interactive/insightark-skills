@@ -7,6 +7,12 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.9.0 — Canonical MCP pagination
+
+- Document keyset continuation as `cursor` echoed from `page.nextCursor` (not `pageCursor` / `nextPageCursor`).
+- Document offset continuation as `skip = page.skip + page.limit` while `page.hasMore` is true.
+- Align conversations, chat-groups, investigator, customer-manager, ma-automation, messaging, and broadcast-manager skills with the canonical pagination envelope.
+
 ## 2.8.0 — Conversation FAQ from investigator
 
 - `insightark-investigator`: add `references/FAQ_GENERATION.md` for compiling FAQ / 常見問題 from customer conversations (not a new skill).

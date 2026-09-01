@@ -17,19 +17,19 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 - `auth_me` — validate session (no `orgId` required)
 - `auth_organizations` — list manageable organizations (no `orgId` required)
-- `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `pageCursor`)
+- `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `cursor`)
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read message timeline
-- `messaging_message_search` — time／keyword／tag／`contentKinds` message search
+- `messaging_message_search` — time／keyword／tag／`contentKinds`／`referralSource` message search
 
 ## Workflow
 
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one operational path:
-   - `messaging_conversation_list` for inbox／activity discovery and `pageCursor` paging (not message-proportion analysis)
+   - `messaging_conversation_list` for inbox／activity discovery and `cursor` paging (not message-proportion analysis)
    - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
-   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats)
+   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats); continue while `page.hasMore` is true with `skip = page.skip + page.limit`
 4. Return a concise read-only investigation result grounded in the public API response.
 
 ## Qualitative detection (intent / sentiment / complaint)
@@ -88,7 +88,7 @@ the shared sample/credit caps:
 2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
 3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows. NEVER use it as an organization census or silent／no-inbound customer count — hand that off to `insightark-customer-manager` (`crm_platform_list` then per-platform `crm_customer_search`).
 4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
-5. **Long ranges:** search max **90 days**. Split longer periods into ≤90-day windows; estimate credits (`windows × 20` per conversation／org sweep, plus list／get costs) before running.
+5. **Long ranges:** search max **90 days**. An explicit range greater than 90 days fails with `error/date-range-too-large` **before** monthly credit (`chargedCredits: 0`; RPM may still increment). Split longer periods into ≤90-day windows using known calendar bounds. Do **not** trial-and-error the cap until a charged call succeeds.
 6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.
 
 ## Message search sender filters (important)
@@ -102,9 +102,9 @@ Default (omit `senderTypes`) returns **Customer only**. Staff `userName` / `user
 | Customer messages | omit `senderTypes`, or `senderTypes: ["Customer"]` |
 | Staff / CS replies | `senderTypes: ["_User"]` |
 | Full dialogue | `senderTypes: ["Customer", "_User"]` — one tool call, one normal 20-credit charge |
-| AddOn / extension messages | `senderTypes: ["AddOn"]` |
-| Brand / org-originated (e.g. broadcast) | `senderTypes: ["Organization"]` |
-| External bot messages | `senderTypes: ["ForeignBot"]` |
+| Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules including coupon and Shopify, and a generic “system” ask for those). Payload `sender` examples (identity, not a filter): `aiBot`, `marketing_automation`, `bot_executor`, `ec_shopify` | `senderTypes: ["AddOn"]` |
+| Broadcast / campaign copy | `broadcast_list` / `broadcast_get` — not message search |
+| Facebook/Instagram third-party direct-to-customer (Messenger/IG echo); LINE inbound does not use this class | `senderTypes: ["ForeignBot"]` |
 
 Never pass singular `senderType`. Prefer one multi-class call over two searches. Narrow with `conversationId` and a small time window when possible.
 
@@ -117,7 +117,9 @@ Server **always** applies a time window on `messaging_message_search`:
 | omit both `startAt` and `endAt` | **last 14 days** ending now |
 | only `startAt` | `endAt = now` |
 | only `endAt` | `startAt = endAt − 14 days` |
-| both provided | that range, **max 90 days** (larger → `error/date-range-too-large`) |
+| both provided | that range, **max 90 days** (larger → `error/date-range-too-large` without consuming monthly credits) |
+
+Over-range windows fail **before** monthly credit debit (`chargedCredits: 0`). Do not iteratively reduce the range to discover the cap.
 
 **Do not rely on the 14-day default when the user asks for a specific period.** If the user says "last 30 days" / "this month" / a date range, always pass explicit `startAt` and `endAt` matching that ask. Omitting them silently truncates the sample to 14 days and under-covers the request.
 
@@ -129,6 +131,14 @@ When search returns structured `message_search_timeout` (`isError: true`):
 
 1. Never blind-retry identical args (credits are still charged).
 2. Split `startAt`/`endAt` into smaller windows; reduce `limit` if needed.
-3. Use only published filters: `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`.
+3. Use only published filters: `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`, `referralSource`.
 4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
 5. Do not invent unsupported message-type / `contentType` filters.
+
+## Ads inbound / 廣告來源 (Messenger referral)
+
+Console 綠線 / 廣告來源 / ads inbound maps to `messaging_message_search` with `referralSource: "ADS"` (plus explicit `startAt`/`endAt` when the user names a period). Do not invent a dedicated ads MCP tool. Do not scan with `contentKinds: ["event"]` alone when the user asked only for ads. `keyword` does not match ad titles.
+
+This filter matches Facebook / Instagram Messenger ads referral stored as `application/x-notify-event` (`data.referral.source = ADS`). LINE native ads are not this Message path; LINE orgs typically return no hits (empty is success).
+
+Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. Deduped ids MAY go to existing tag tools; batch tagging remains S8N-13155.

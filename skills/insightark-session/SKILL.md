@@ -15,13 +15,13 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
 
 - `auth_me` — authenticated developer identity and manageable organizations (no `orgId` required)
 - `auth_organizations` — list organizations the session can manage (no `orgId` required)
-- `credits_usage` — peek InsightArk MCP credit balance for an organization (requires `orgId`; does not consume credits)
+- `credits_usage` — peek InsightArk MCP monthly remaining **and** the calling user's today breakdown (`today.total`, `today.tools`, `today.clients`) for an organization (requires `orgId`; does not consume credits)
 
 ## Workflow
 
 1. Call `auth_me` to verify the MCP session and inspect the authenticated user.
 2. If `auth_me` succeeds, call `auth_organizations` when the caller also needs manageable organization context.
-3. Call `credits_usage` with `orgId` when the user asks how many InsightArk MCP credits remain, or after `429 error/credit-exhausted` to report `secondsUntilNextCredit`. This call does not consume credits (only org RPM applies).
+3. Call `credits_usage` with `orgId` when the user asks how many InsightArk MCP credits remain this month, or who / which tools / which client used credits today. For remaining-only questions, report monthly `remaining` / `used`. For today spend, report `today.tools` and `today.clients` from that result. Do not invent a today total from remaining deltas, and do not claim per-call receipts from `credits_usage`. Treat `today.clients[].label` as a self-reported app name, not verified host identity. After `429 error/credit-exhausted`, use `credits_usage` to report remaining. This call does not consume credits (only org RPM applies).
 
 ## OAuth recovery (when MCP needs authentication)
 

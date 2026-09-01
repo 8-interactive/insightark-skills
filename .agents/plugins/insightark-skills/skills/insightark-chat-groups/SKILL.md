@@ -49,14 +49,14 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 
 1. Resolve `orgId` from user context or `auth_organizations`.
 2. **Org-wide／cross-group analysis:** call `messaging_chat_group_message_search` with `orgId`, explicit time bounds when the user names a period, and optional `keyword`／`senderTypes`／`contentKinds`.
-3. **Named group:** call `messaging_chat_group_list` with `groupName` (literal substring; regex metacharacters are escaped).
+3. **Named group:** call `messaging_chat_group_list` with `groupName` (literal substring; regex metacharacters are escaped). Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`. Do **not** parse or hand-craft cursors.
 4. If multiple list hits match, **disambiguate** with the user (name, `platform`, `lastMessageAt`, `memberCount`) before analysis. Optionally call `messaging_chat_group_get` to confirm.
 5. Lock either `conversationId` or `chatGroupId` from the chosen row (not both).
 6. Analyze the locked room:
    - Recent peek only → `messaging_conversation_messages`
    - Keyword／**period**／sender／content analysis → `messaging_chat_group_message_search` with exactly one scope id
-7. Default search senders are `Group`, `_User`, `Organization`, `AddOn`. Add `ForeignBot` only when explicitly needed.
-8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows.
+7. Default search senders are `Group`, `_User`, `AddOn`. `AddOn` is Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules). Add `ForeignBot` only when explicitly needed: Facebook/Instagram third-party direct-to-customer only (Messenger/IG echo). LINE inbound does not use this class.
+8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows. Continue `messaging_chat_group_message_search` while `page.hasMore` is true with `skip = page.skip + page.limit`.
 
 ## Guardrails
 

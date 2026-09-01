@@ -63,7 +63,7 @@ Never copy catalog `templateId` or `consoleKey` into root `templateType`. Never 
 
 ### Locate journeys by customer-provided name
 
-Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma_procedure_list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above.
+Customers usually refer to **`name`**, not **`procedureId`**. For query status / publish / pause / resume / trigger when only the **旅程名稱** is known, resolve `procedureId` via `ma_procedure_list` (optionally filtering by `name`), confirm the chosen procedure with the user, then invoke the id-scoped tools above. Continue `ma_procedure_list` while `page.hasMore` is true with `skip = page.skip + page.limit`. Pagination fields live under `page`, not at the top level.
 
 ## Hard rules: no presetting business fields
 

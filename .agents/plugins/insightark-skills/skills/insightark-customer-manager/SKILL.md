@@ -32,8 +32,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped customer tool.
 3. Choose one operational path:
-   - `crm_tag_list` to discover tag names (optionally by literal `nameContains`) before searching or mutating when exact names are unknown; it returns Console-aligned `name`, `count`, `density`, and `lastUsed` when available
-   - `crm_customer_search` to list customers matching known tags, other public filters, and pagination; do not use it to browse the organization tag catalog
+   - `crm_customer_search` to list customers matching known tags, other public filters, and pagination; continue while `page.hasMore` is true with `skip = page.skip + page.limit`. Do not use it to browse the organization tag catalog
+   - `crm_tag_list` to discover tag names (optionally by literal `nameContains`) before searching or mutating when exact names are unknown; it returns Console-aligned `name`, `count`, `density`, and `lastUsed` when available. Pagination lives on `page` (`skip`, `limit`, `count`, `hasMore`, `total`); continue with `skip = page.skip + page.limit`
+   - `crm_customer_group_list` / `crm_customer_group_members_list` to inspect saved group snapshots; continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`
    - `crm_customer_get` for one customer record
    - `crm_customer_update` for supported public profile changes (confirm first)
    - `crm_customer_tag_add` to append one or more tags (confirm first)
