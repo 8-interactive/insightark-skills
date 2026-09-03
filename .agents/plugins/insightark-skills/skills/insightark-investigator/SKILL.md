@@ -121,13 +121,24 @@ Over-range windows fail **before** monthly credit debit. Do not iteratively redu
 
 When customer time language becomes `startAt`/`endAt` instant boundaries, follow `skills/insightark-universal-workflow/references/timezone-policy.md` and disclose the effective timezone. Date-only two-sided ranges need confirmed clocks; one-sided date-only endpoints need a confirmed clock, disclosure of the server-derived opposite bound (`endAt=now` or `startAt=endAt−14d`), and a ≤90-day check — never silently invent midnight. Analysis lenses reuse the canonical Strategy A rules in `references/QUALITATIVE_DETECTION.md`.
 
+## Message search tag filters (important)
+
+`includeTags` matches **current holders** of `Customer.tag` (not tag history). Omit or `"any"` is **OR** (any listed current tag).
+
+| Goal | Args |
+|---|---|
+| Any of the listed current tags (default) | `includeTags: ["觸發", "完成"]` — omit `includeTagsMode`, or `includeTagsMode: "any"` |
+| Every listed current tag (觸發 **and** 完成 together) | `includeTags: ["觸發", "完成"]` **and** `includeTagsMode: "all"` |
+
+Do **not** treat a multi-value `includeTags` list by itself as AND. Simultaneous-tag / 觸發+完成 funnels MUST pass `includeTagsMode: "all"`.
+
 ## Message search timeout (`error.code = message_search_timeout`)
 
 When search returns structured `message_search_timeout` (`isError: true`):
 
 1. Never blind-retry identical args (credits are still charged).
 2. Split `startAt`/`endAt` into smaller windows; reduce `limit` if needed.
-3. Use only published filters: `keyword`, `includeTags`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`, `referralSource`.
+3. Use only published filters: `keyword`, `includeTags`, `includeTagsMode`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`, `referralSource`.
 4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
 5. Do not invent unsupported message-type / `contentType` filters.
 

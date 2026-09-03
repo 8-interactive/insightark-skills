@@ -32,7 +32,9 @@ quality review uses `messaging_message_search`:
   `messaging_conversation_messages` — it reads the timeline but cannot name the
   agent.
 
-For a tag-segmented audience, add `includeTags` to that same search.
+For a tag-segmented audience, add `includeTags` to that same search. If every
+listed tag must currently be held, follow
+[`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) `includeTagsMode: "all"`.
 
 ## Identify the agents (no roster tool exists)
 

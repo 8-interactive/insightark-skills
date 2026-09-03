@@ -42,6 +42,8 @@ both, or cost and quality both suffer.
 
 - **Have a complaint tag / segment** (e.g. customers tagged `客訴`, `退款`,
   `VIP-申訴`) → search with `includeTags` plus bounded time/keyword filters.
+  If every listed tag must currently be held, follow
+  [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) `includeTagsMode: "all"`.
 - **No tag, want a period or keyword sweep** →
   `messaging_message_search` with a complaint-leaning `keyword` (退款 / 退貨 / 出貨
   / 到貨 / 客訴 / 投訴 / 沒收到 / 錯 / 壞 / 慢 / 態度 …), a bounded `startAt`/`endAt`,

@@ -50,6 +50,14 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - If default text search returns no customers and the user still expects a match: disclose that a contains retry is a broader **additional 15-credit** read, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
 - Do not send `displayNameMatch` without a non-empty name-shaped `displayName`.
 
+## `crm_customer_search` tag filters
+
+`includeTags` matches **current holders**. Omit or `"any"` is **OR** (any listed current tag).
+
+To list customers who currently hold **every** named tag, call `crm_customer_search` with those `includeTags` **and** `includeTagsMode: "all"`. Example: `includeTags: ["vip", "newsletter"]` with `includeTagsMode: "all"`. A multi-value `includeTags` list without the mode stays OR.
+
+Do not invent a history filter or a new search tool for this job. Cost remains 15 credits (`return: "count"` included).
+
 ## Silent / no-inbound census
 
 For “how many customers have not written / no inbound since date X” (and the matching list):

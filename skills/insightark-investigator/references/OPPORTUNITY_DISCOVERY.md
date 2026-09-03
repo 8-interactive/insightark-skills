@@ -45,7 +45,9 @@ Classify each candidate into what the customer is actually signalling:
 ## Selecting the opportunity set
 
 - **Segment by tag** (e.g. `VIP`, `回購`, a campaign audience) → use
-  `includeTags` in the same bounded message search.
+  `includeTags` in the same bounded message search. If every listed tag must
+  currently be held, follow [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md)
+  `includeTagsMode: "all"`.
 - **Sweep by period / keyword** → use positive-intent `keyword`
   seeds above, a bounded `startAt`/`endAt`, and `platform` if channel-specific.
   Follow the canonical Strategy A time-window rules in

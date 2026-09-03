@@ -5,14 +5,14 @@
     "email": "sales@no8.io"
   },
   "description": "SUPER 8 Studio InsightArk Skills \u2014 marketplace MCP plugins for agent workflows.",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "plugins": [
     {
       "name": "insightark-skills",
       "source": "./",
       "displayName": "SUPER 8 Studio InsightArk Skills",
       "description": "SUPER 8 Studio InsightArk Skills for CRM workflows. \u5b89\u88dd\u5f8c\u8acb\u5148\u7528 validate-insightark-setup \u9a57\u8b49 MCP\uff0c\u518d\u4f9d\u9700\u8981\u8abf\u67e5\u5c0d\u8a71\u3001\u7ba1\u7406\u5ba2\u6236\u6216\u5efa\u7acb\u7fa4\u767c\u8a0a\u606f\u3002",
-      "version": "2.10.0",
+      "version": "2.10.1",
       "author": {
         "name": "SUPER 8 Studio",
         "url": "https://www.no8.io"
