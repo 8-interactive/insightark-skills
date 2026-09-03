@@ -15,13 +15,27 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
 
 - `auth_me` — authenticated developer identity and manageable organizations (no `orgId` required)
 - `auth_organizations` — list organizations the session can manage (no `orgId` required)
-- `credits_usage` — peek InsightArk MCP monthly remaining **and** the calling user's today breakdown (`today.total`, `today.tools`, `today.clients`) for an organization (requires `orgId`; does not consume credits)
+- `credits_usage` — peek InsightArk MCP monthly remaining **and** this user’s `usage` for a selected window (requires `orgId`; does not consume credits). Params: `orgId`, `from`, `to`, `client`, `aggregate` (default true), `includeTools` (default false). No `date` or user identity argument. Omit `from`/`to` for this client today plus monthly peek.
 
 ## Workflow
 
 1. Call `auth_me` to verify the MCP session and inspect the authenticated user.
 2. If `auth_me` succeeds, call `auth_organizations` when the caller also needs manageable organization context.
-3. Call `credits_usage` with `orgId` when the user asks how many InsightArk MCP credits remain this month, or who / which tools / which client used credits today. For remaining-only questions, report monthly `remaining` / `used`. For today spend, report `today.tools` and `today.clients` from that result. Do not invent a today total from remaining deltas, and do not claim per-call receipts from `credits_usage`. Treat `today.clients[].label` as a self-reported app name, not verified host identity. After `429 error/credit-exhausted`, use `credits_usage` to report remaining. This call does not consume credits (only org RPM applies).
+3. Call `credits_usage` with `orgId` when the user asks about InsightArk MCP credits. Identity is the token user only — never pass `userId`, email, or a `date` argument.
+
+   Argument mapping:
+
+   - Omit `from`/`to` whenever the question is remaining, “剛剛”, or “今天” on this host. That default is this client today **and** monthly peek in one payload.
+   - “這個月還剩多少” → omit optional args; report monthly `remaining` / `used`. MUST NOT present `usage.total` as remaining.
+   - “剛剛 / 剛才操作用了多少” → omit optional args; report `usage.total`. Explain the smallest unit is a **calendar day** (this client today so far), not the last tool call. Do not treat other tool JSON as a credit receipt.
+   - “我今天用了多少” → omit optional args; report `usage.total`.
+   - “今天哪些 tool” → omit `from`/`to` + `includeTools: true`; report `usage.tools`.
+   - “過去一週合計” → `from`/`to` for that week; omit `aggregate` (backend `usage.total`). MUST NOT pass a window longer than 31 inclusive days.
+   - “過去一週每天” → same window + `aggregate: false`; report `usage.days`.
+   - “不限 client / 含 Copilot 和 Cursor” → add `client: "all"` (and `from`/`to` if not today); report `usage.clients` when `aggregate` is true.
+   - “Copilot 用了多少” on another host → `client: "copilot"`; omit `from`/`to` if the question is today.
+
+   Treat `clients[].label` as a self-reported app name, not verified host identity. After `429 error/credit-exhausted`, use `credits_usage` to report remaining. This call does not consume credits (only org RPM applies). MUST NOT infer spend from remaining-value deltas. MUST NOT claim other tools return `chargedCredits`.
 
 ## OAuth recovery (when MCP needs authentication)
 

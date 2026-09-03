@@ -42,9 +42,9 @@ The user-facing draft must state:
 - coverage (effective `startAt` / `endAt` actually searched)
 - `senderTypes` and `groupBy`
 - backend `returnedCount` (message count from the tool / Copilot envelope)
-- sum of `chargedCredits` from completed MCP calls (never a guessed table)
+- session spend from `credits_usage` `usage.total` for this client today (never a guessed table; tool JSON is not a credit receipt)
 
-Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output. On Copilot, `truncated: true` (or a `...[truncated … chars]` marker without credits) means sample/partial — do not invent `chargedCredits`.
+Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output. On Copilot, `truncated: true` (or a `...[truncated … chars]` marker) means sample/partial — do not invent `chargedCredits`.
 
 Otherwise label sample or partial. If the ask exceeds search-call / sample / 90-day guardrails, say so and point to Console CS export. Never present a bounded draft as a complete org-wide FAQ export.
 

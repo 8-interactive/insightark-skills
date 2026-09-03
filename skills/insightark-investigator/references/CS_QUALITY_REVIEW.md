@@ -81,7 +81,7 @@ These are candidate signals for a human reviewer, **not** an authoritative score
 Per agent, a small, traceable set — not a transcript dump:
 
 ```
-Sampled: N staff replies over <period> (platform), credits used: X (sum of returned chargedCredits)
+Sampled: N staff replies over <period> (platform), credits used: X (`credits_usage` `usage.total`)
 Agent (senderId · label)        | Exemplary (conversationId · createdAt · quote) | Needs-improve (conversationId · createdAt · quote)
 u_abc · 小美 <mei@…>             | conv_11 · 07-14 "已幫您加急並回報物流…"          | conv_19 · 07-16 "(顧客追問兩次才回)"
 u_def · staff (identity null)    | conv_22 · 07-15 "…"                            | —

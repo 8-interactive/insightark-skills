@@ -40,11 +40,7 @@ across a set of conversations rather than a single lookup — load
 
 - **Path selection**: time-window, keyword, and tag-segmented audiences use one
   bounded `messaging_message_search` call with its matching filters.
-- **Cost guardrails**: use each completed call's returned `chargedCredits` for
-  per-call and run-total reporting; `credits_usage` only inspects remaining
-  balance and must not be used to infer cost, especially for concurrent reads.
-  Respect hard sample caps, and never blind-retry — batch reads cost more than
-  the nominal per-call rate.
+- **Cost guardrails**: call `credits_usage` with optional args omitted to inspect monthly remaining, then after the batch call it again and report `usage.total` (this client today). Do not treat tool JSON as a receipt. `credits_usage` monthly remaining must not be used to infer cost via remaining-value deltas. Respect hard sample caps, and never blind-retry — batch reads cost more than the nominal per-call rate.
 - **Reading rules**: findings must cite specific messages, must not fabricate
   complaints, and are human-reviewable signals, not authoritative labels.
 
@@ -88,7 +84,7 @@ the shared sample/credit caps:
 2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
 3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows. NEVER use it as an organization census or silent／no-inbound customer count — hand that off to `insightark-customer-manager` (`crm_platform_list` then per-platform `crm_customer_search`).
 4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
-5. **Long ranges:** search max **90 days**. An explicit range greater than 90 days fails with `error/date-range-too-large` **before** monthly credit (`chargedCredits: 0`; RPM may still increment). Split longer periods into ≤90-day windows using known calendar bounds. Do **not** trial-and-error the cap until a charged call succeeds.
+5. **Long ranges:** search max **90 days**. An explicit range greater than 90 days fails with `error/date-range-too-large` **before** monthly credit (RPM may still increment). Split longer periods into ≤90-day windows using known calendar bounds. Do **not** trial-and-error the cap until a charged call succeeds.
 6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.
 
 ## Message search sender filters (important)
@@ -119,7 +115,7 @@ Server **always** applies a time window on `messaging_message_search`:
 | only `endAt` | `startAt = endAt − 14 days` |
 | both provided | that range, **max 90 days** (larger → `error/date-range-too-large` without consuming monthly credits) |
 
-Over-range windows fail **before** monthly credit debit (`chargedCredits: 0`). Do not iteratively reduce the range to discover the cap.
+Over-range windows fail **before** monthly credit debit. Do not iteratively reduce the range to discover the cap.
 
 **Do not rely on the 14-day default when the user asks for a specific period.** If the user says "last 30 days" / "this month" / a date range, always pass explicit `startAt` and `endAt` matching that ask. Omitting them silently truncates the sample to 14 days and under-covers the request.
 

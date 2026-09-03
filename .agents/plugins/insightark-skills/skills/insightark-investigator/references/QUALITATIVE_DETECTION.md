@@ -67,7 +67,7 @@ batch read as spending real budget.
 
 **You MUST:**
 
-1. **Check budget first.** Call `credits_usage` before a batch to inspect monthly remaining. After the batch, sum the top-level `chargedCredits` returned by each completed tool call and report that as actual consumption. Day-level questions use `credits_usage` `today` fields (`today.tools` / `today.clients`). Never use remaining-value deltas as the consumption figure; concurrent calls make that ambiguous.
+1. **Check budget first.** Call `credits_usage` before a batch with optional args omitted to inspect monthly remaining (read peek `remaining` / `used`; do not present `usage.total` as remaining). After the batch, call `credits_usage` again with optional args omitted and report `usage.total` as this-client today spend. Do not treat tool JSON as a per-call credit receipt. MUST NOT infer spend from remaining-value deltas across peeks. Concurrent peeks make those deltas ambiguous.
 2. **Respect default search caps** unless the user explicitly approves more:
    - `messaging_message_search` calls per run: **≤ 5**
    - messages returned per call: use a bounded `limit` appropriate to the task

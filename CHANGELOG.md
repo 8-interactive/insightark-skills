@@ -7,6 +7,12 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.10.0 — Omit per-call chargedCredits; windowed credits_usage
+
+- MCP tool JSON no longer includes a per-call `chargedCredits` receipt. Usage questions use `credits_usage`.
+- `credits_usage` returns monthly peek plus windowed `usage` (omit `from`/`to` = this client today). Params: `from`, `to`, `client`, `aggregate`, `includeTools`. No `date` argument. Response key `usage` replaces `today`.
+- Skills report remaining / today / weekly totals from `credits_usage`; they do not treat tool JSON as a credit receipt. The smallest unit for “剛剛” is a calendar day.
+
 ## 2.9.0 — Canonical MCP pagination
 
 - Document keyset continuation as `cursor` echoed from `page.nextCursor` (not `pageCursor` / `nextPageCursor`).

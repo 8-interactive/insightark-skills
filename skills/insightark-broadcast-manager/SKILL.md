@@ -35,7 +35,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - **Get** — `broadcast_get`; use `phase`, `deliveryOutcome`, `attention`, and `failureDiagnostics` rather than treating raw `status: done` as delivery success.
    - `broadcast_create` returns only an asynchronous receipt; inspect a later terminal outcome through get or list.
    - **List** — `broadcast_list`, optionally filtered by `status`, `platform`, `createdFrom`, `createdTo`, terminal `deliveryOutcome`, or server-computable `attention: scheduled_overdue`. Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`.
-4. Return the MCP response as-is. When reporting a call's actual credit cost, cite only its returned top-level `chargedCredits`; do not calculate it from before/after organization balances.
+4. Return the MCP response as-is. Session spend comes from `credits_usage` (`usage.total` for this client today). Tool JSON is not a credit receipt.
 
 ## Message envelope
 
