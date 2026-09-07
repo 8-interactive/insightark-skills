@@ -7,6 +7,37 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.11.0 — Hide conversation credits
+
+- Customer-facing skill copy and MCP `tools/list` descriptions no longer advertise catalog prices or volunteer remaining/used.
+- Call `credits_usage` only when the user asks about usage. Do not peek as a search or session-validation preamble.
+- On `429` with `limitType` `credit_bucket`, stop retries and use opaque EN/ZH-TW copy; do not inspect remaining unless asked.
+- Keep omit-`chargedCredits` and backend debit amounts unchanged.
+
+## 2.10.1 — includeTagsMode all for current-holder AND
+
+- `insightark-investigator`: simultaneous-tag / 觸發+完成 funnels pass `includeTagsMode: "all"` on `messaging_message_search`. Omit / `"any"` remains OR (current holders, not tag history).
+- `insightark-customer-manager`: listing customers who currently hold every named tag uses `crm_customer_search` with `includeTagsMode: "all"`.
+- Qualitative detection and downstream lenses follow the same `includeTagsMode: "all"` rule when every listed tag must currently be held.
+
+## 2.10.0 — Omit per-call chargedCredits; windowed credits_usage
+
+- MCP tool JSON no longer includes a per-call `chargedCredits` receipt. Usage questions use `credits_usage`.
+- `credits_usage` returns monthly peek plus windowed `usage` (omit `from`/`to` = this client today). Params: `from`, `to`, `client`, `aggregate`, `includeTools`. No `date` argument. Response key `usage` replaces `today`.
+- Skills report remaining / today / weekly totals from `credits_usage`; they do not treat tool JSON as a credit receipt. The smallest unit for “剛剛” is a calendar day.
+
+## 2.9.0 — Canonical MCP pagination
+
+- Document keyset continuation as `cursor` echoed from `page.nextCursor` (not `pageCursor` / `nextPageCursor`).
+- Document offset continuation as `skip = page.skip + page.limit` while `page.hasMore` is true.
+- Align conversations, chat-groups, investigator, customer-manager, ma-automation, messaging, and broadcast-manager skills with the canonical pagination envelope.
+
+## 2.8.0 — Conversation FAQ from investigator
+
+- `insightark-investigator`: add `references/FAQ_GENERATION.md` for compiling FAQ / 常見問題 from customer conversations (not a new skill).
+- FAQ search uses `messaging_message_search` with `senderTypes: ["Customer","_User"]` and `groupBy: "conversation"`.
+- Copilot v2 unmounts native Excel FAQ and thin-routes to this skill.
+
 ## 2.7.3 — Customer-facing glossary without CI metadata
 
 - Slim `console-terminology.md` to Console label / English / Short form / Internal·MCP (drop Banned and Evidence from the shipped glossary).

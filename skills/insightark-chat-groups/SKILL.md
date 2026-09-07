@@ -42,21 +42,21 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 5. **`messaging_conversation_messages`** returns the **most recent** messages only — no year filter. Never treat it as “all of 2026” (or any named period).
 6. **`messaging_chat_group_list`** returns discoverable groups that have usable `lastMessageAt`. It is **not** “every ChatGroup ever stored”. Org-wide search uses Message `isGroup: true` and MAY include rooms absent from the current list page／filter. Do not claim the list is a full historical inventory.
 7. **Non-text** rows (image／file／video／template／event) often expose only type／filename. Do **not** treat file or media counts as engagement or satisfaction.
-8. **Search cost and coverage:** each search call costs **20** credits and spans at most **90 days**. For a longer period, split into ≤90-day windows. For multi-call analysis, keep the same explicit `startAt`/`endAt`, disclose the estimate (approximately `windows × pages × 20`, plus list／get／optional timeline peeks), and report the actual coverage; do not infer complete organization-wide coverage from one full page.
+8. **Search coverage:** each search spans at most **90 days**. For a longer period, split into ≤90-day windows. For multi-call analysis, keep the same explicit `startAt`/`endAt` and report the actual coverage; do not infer complete organization-wide coverage from one full page. Do not treat a tool result as a receipt. MUST NOT claim other tools return `chargedCredits`. If the user explicitly asks about usage, hand off to `insightark-session` (`credits_usage`).
 9. **Staff identity:** MCP does **not** expose a client `includeUserContact` argument. Group search **always** enriches `_User` rows with `userName`／`userEmail` internally. `messaging_conversation_messages` does **not** enrich staff identity — if those fields are null there, say “無法歸屬／identity unavailable”, do **not** guess the sender.
 
 ## Workflow
 
 1. Resolve `orgId` from user context or `auth_organizations`.
 2. **Org-wide／cross-group analysis:** call `messaging_chat_group_message_search` with `orgId`, explicit time bounds when the user names a period, and optional `keyword`／`senderTypes`／`contentKinds`.
-3. **Named group:** call `messaging_chat_group_list` with `groupName` (literal substring; regex metacharacters are escaped).
+3. **Named group:** call `messaging_chat_group_list` with `groupName` (literal substring; regex metacharacters are escaped). Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`. Do **not** parse or hand-craft cursors.
 4. If multiple list hits match, **disambiguate** with the user (name, `platform`, `lastMessageAt`, `memberCount`) before analysis. Optionally call `messaging_chat_group_get` to confirm.
 5. Lock either `conversationId` or `chatGroupId` from the chosen row (not both).
 6. Analyze the locked room:
    - Recent peek only → `messaging_conversation_messages`
    - Keyword／**period**／sender／content analysis → `messaging_chat_group_message_search` with exactly one scope id
-7. Default search senders are `Group`, `_User`, `Organization`, `AddOn`. Add `ForeignBot` only when explicitly needed.
-8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows.
+7. Default search senders are `Group`, `_User`, `AddOn`. `AddOn` is Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules). Add `ForeignBot` only when explicitly needed: Facebook/Instagram third-party direct-to-customer only (Messenger/IG echo). LINE inbound does not use this class.
+8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows. Continue `messaging_chat_group_message_search` while `page.hasMore` is true with `skip = page.skip + page.limit`.
 
 ## Guardrails
 

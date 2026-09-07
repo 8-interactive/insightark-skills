@@ -5,16 +5,16 @@ to read a batch of conversations and judge **intent**, **sentiment**, or
 **complaints** — as opposed to a single keyword lookup.
 
 This playbook uses **only the read-only MCP tools already exposed by this skill**.
-It adds no new tool and no new skill. It is designed to be cheap, bounded, and
-honest: findings must trace back to real messages, and cost must stay inside a
-budget you can see.
+It adds no new tool and no new skill. It is designed to be bounded and honest:
+findings must trace back to real messages, and sample sizes must stay inside the
+caps below.
 
 ---
 
 ## Detection path
 
 Use `messaging_message_search` for period／keyword／tag／proportion／theme
-analysis. Combine `includeTags`／`excludeTags`, `startAt`/`endAt`, literal
+analysis. Combine `includeTags`／`excludeTags`／`includeTagsMode`, `startAt`/`endAt`, literal
 `keyword`, `senderTypes`, and `contentKinds` as needed in one bounded call.
 
 - Default sender filter (omit `senderTypes`) is **Customer only**.
@@ -34,6 +34,7 @@ analysis. Combine `includeTags`／`excludeTags`, `startAt`/`endAt`, literal
   use `event` only for join／follow-style investigation. See messaging skill for
   the exact kind→MIME table (`video`／`audio` are outside `image`／`file`).
 - `limit` default 20, max **1000**; page with `skip`.
+- **Tag-scoped corpus:** pass `includeTags` on that same `messaging_message_search`. Omit or `"any"` is **OR** (any listed current tag). When the audience must currently hold **every** listed tag (觸發 + 完成 together), pass `includeTagsMode: "all"`. This is current holders only, not tag history. Do not treat a multi-value `includeTags` list by itself as AND.
 
 **Do not** use `messaging_conversation_list` as the primary path for org-wide
 message sentiment or complaint **proportions** — list filters Customer
@@ -57,33 +58,28 @@ message sentiment or complaint **proportions** — list filters Customer
 
 ---
 
-## Cost & sample guardrails (hard limits)
+## Sample guardrails (hard limits)
 
-Read chains cost materially more than the nominal per-call number. Measured on
-staging, a small run (≈3 customers / 3 conversations / ≈8 read calls) consumed on
-the order of **~90 credits** against a monthly free allowance of **500**.
-`messaging_message_search` is billed at a higher fixed rate per call. Treat every
-batch read as spending real budget.
+Keep each qualitative batch inside the sample caps. If the user explicitly asks
+about usage, hand off to `insightark-session` (`credits_usage`). Do not treat
+tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
+Do not infer spend from remaining-value deltas.
 
 **You MUST:**
 
-1. **Use response metadata.** Sum the top-level `chargedCredits` returned by
-   each completed tool call and report that as actual consumption. You may call
-   `credits_usage` to inspect remaining balance, but never subtract balances to
-   infer a call or run cost; concurrent calls make that ambiguous.
-2. **Respect default search caps** unless the user explicitly approves more:
+1. **Respect default search caps** unless the user explicitly approves more:
    - `messaging_message_search` calls per run: **≤ 5**
    - messages returned per call: use a bounded `limit` appropriate to the task
    - time windows: split into sequential ≤90-day windows; keep each as narrow as the ask permits
    These are defaults, not hard locks — you may raise them, but only after the
-   user explicitly agrees, and you should restate the expected extra cost first.
-3. **Never blind-retry.** If a call fails or times out
-   (`message_search_timeout`), do not resend identical arguments — credits are
-   still charged. Narrow the time window / lower `limit` / add a filter, or stop.
-4. **Busy is not timeout.** `message_search_in_progress` means the same user has
-   another search in that organization; it is zero-charge. Wait for it to finish
+   user explicitly agrees, and you should restate the extra sample size first.
+2. **Never blind-retry.** If a call fails or times out
+   (`message_search_timeout`), do not resend identical arguments.
+   Narrow the time window / lower `limit` / add a filter, or stop.
+3. **Busy is not timeout.** `message_search_in_progress` means the same user has
+   another search in that organization. Wait for it to finish
    before one retry — do not fan out parallel work.
-5. **Stop at the cap, report, then ask.** On reaching any cap or a stated budget,
+4. **Stop at the cap, report, then ask.** On reaching any cap,
    halt and report what you covered and what remains. Do not keep fetching.
 
 If the user needs full coverage of a large audience, say so plainly and route the

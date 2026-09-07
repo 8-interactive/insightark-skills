@@ -17,8 +17,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 - `auth_me` — validate session (no `orgId` required)
 - `auth_organizations` — list manageable organizations (no `orgId` required)
+- `crm_platform_list` — list the org's live messaging platforms (no secrets)
 - `crm_customer_get` — get one customer by id
-- `crm_customer_search` — search customers with public filters
+- `crm_customer_search` — search customers with public filters, inbound bounds, optional `fields`, or `return: "count"`
 - `crm_tag_list` — discover organization tag inventory and rough holder counts
 - `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect saved group snapshots
 - `crm_customer_group_rename`, `crm_customer_group_delete` — rename or soft-delete customer groups (confirm first)
@@ -31,8 +32,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped customer tool.
 3. Choose one operational path:
-   - `crm_tag_list` to discover tag names (optionally by literal `nameContains`) before searching or mutating when exact names are unknown; it returns Console-aligned `name`, `count`, `density`, and `lastUsed` when available
-   - `crm_customer_search` to list customers matching known tags, other public filters, and pagination; do not use it to browse the organization tag catalog
+   - `crm_customer_search` to list customers matching known tags, other public filters, and pagination; continue while `page.hasMore` is true with `skip = page.skip + page.limit`. Do not use it to browse the organization tag catalog
+   - `crm_tag_list` to discover tag names (optionally by literal `nameContains`) before searching or mutating when exact names are unknown; it returns Console-aligned `name`, `count`, `density`, and `lastUsed` when available. Pagination lives on `page` (`skip`, `limit`, `count`, `hasMore`, `total`); continue with `skip = page.skip + page.limit`
+   - `crm_customer_group_list` / `crm_customer_group_members_list` to inspect saved group snapshots; continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`
    - `crm_customer_get` for one customer record
    - `crm_customer_update` for supported public profile changes (confirm first)
    - `crm_customer_tag_add` to append one or more tags (confirm first)
@@ -45,8 +47,27 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - Treat name-search results as candidate matches, not a uniquely identified customer.
 - Phone or email lookup: use `cellPhone` or `email`.
 - Explicit partial-name / name-fragment / broader-match requests: pass `displayNameMatch: "contains"`.
-- If default text search returns no customers and the user still expects a match: disclose that a contains retry is a broader **additional 15-credit** read, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
+- If default text search returns no customers and the user still expects a match: disclose that a contains retry is a **broader search**, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
 - Do not send `displayNameMatch` without a non-empty name-shaped `displayName`.
+
+## `crm_customer_search` tag filters
+
+`includeTags` matches **current holders**. Omit or `"any"` is **OR** (any listed current tag).
+
+To list customers who currently hold **every** named tag, call `crm_customer_search` with those `includeTags` **and** `includeTagsMode: "all"`. Example: `includeTags: ["vip", "newsletter"]` with `includeTagsMode: "all"`. A multi-value `includeTags` list without the mode stays OR.
+
+Do not invent a history filter or a new search tool for this job. `return: "count"` is included.
+
+## Silent / no-inbound census
+
+For “how many customers have not written / no inbound since date X” (and the matching list):
+
+1. Call `crm_platform_list` to get live org platforms.
+2. For **each** returned platform, call `crm_customer_search` with that `platform`, `lastInboundAtTo` (ISO instant with offset or `Z`), and `lastInboundAtFrom` only when the user gave a window start.
+3. When only a number is needed, pass `return: "count"` (`fields` is ignored).
+4. When a list is needed, omitted `fields` is the slim default (`customerId`, `displayName`, `platform`, `lastInboundAt`). The list MAY pass `fields` for opt-in keys such as `tags`.
+
+NEVER use `messaging_conversation_list` as an organization census or silent-customer count. Do not invent a CRM count-only tool, a query-group create, or bulk tag for this job. Name/email/phone/tag lookup without inbound bounds does **not** require `platform`.
 
 ## Example requests
 
@@ -64,7 +85,7 @@ Exact editable fields and enum values come from the `crm_customer_update` MCP to
 - Patch only published public fields (displayName, cellPhone, email, birthday, gender, language, …).
 - `gender` / `language` must match the schema allowlists when set.
 - `email` must be a valid email; `birthday` must be ISO 8601.
-- Unsupported or empty patches fail before credit charge — fix args rather than retrying identical payloads.
+- Unsupported or empty patches fail before debit — fix args rather than retrying identical payloads.
 
 ## Guardrails
 

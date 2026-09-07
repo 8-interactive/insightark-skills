@@ -18,4 +18,5 @@ If the write involves preview-required content, complete the Rich Preview Gate f
 
 - Authentication missing/expired/`401`/`403` → hand off to `insightark-session` for host OAuth recovery.
 - Network / timeout / `5xx` → diagnose connectivity; do not treat as OAuth.
-- Credit exhaustion / `429` → stop retry loops; report remaining credits via `credits_usage` when useful.
+- `429` with `limitType` `credit_bucket` → do not retry; do not inspect remaining via `credits_usage` unless the user then asks. Customer-facing text MUST be exactly `This operation could not complete. Please try again later.` / `這次操作無法完成，請稍後再試。`.
+- `429` with `limitType` `rpm` → you MAY name a rate limit; MUST NOT use the `credit_bucket` opaque strings.

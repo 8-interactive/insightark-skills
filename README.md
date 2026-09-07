@@ -29,7 +29,7 @@ For example:
 | Skill                           | Capability                                                                                                             |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `insightark-universal-workflow` | Shared policy (customer guidance, rich preview, write lifecycle, scheduling timezone) — prerequisite for all workflows |
-| `insightark-session`            | Validate access and inspect the authenticated identity, organizations, and credit balance                              |
+| `insightark-session`            | Validate access and inspect the authenticated identity and organizations                                               |
 | `insightark-investigator`       | Investigate conversations and messages in read-only mode                                                               |
 | `insightark-conversations`      | List and retrieve conversations and messages                                                                           |
 | `insightark-chat-groups`        | Discover LINE ChatGroups and search or analyze group conversations                                                     |
@@ -229,7 +229,7 @@ InsightArk 是 **Super 8 Studio** 的核心產品，專注於社群顧客管理�
 | Skill                           | 功能                                         |
 | ------------------------------- | ------------------------------------------ |
 | `insightark-universal-workflow` | 共用政策：客戶溝通、訊息預覽、寫入確認與時區規則；所有 workflow 的前置條件 |
-| `insightark-session`            | 驗證存取權限，查看已認證身分、組織與剩餘額度                     |
+| `insightark-session`            | 驗證存取權限，查看已認證身分與組織                               |
 | `insightark-investigator`       | 唯讀調查對話與訊息                                  |
 | `insightark-conversations`      | 列出與取得對話及訊息                                 |
 | `insightark-chat-groups`        | 探索 LINE 群組對話，搜尋與分析群組訊息                     |

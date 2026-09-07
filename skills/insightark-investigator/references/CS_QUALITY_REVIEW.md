@@ -7,7 +7,7 @@ needs-improvement cases as training material — e.g. "看看每個客服回得�
 
 This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
-credit/sample guardrails, same traceable / non-fabricated reading rules. It adds
+sample guardrails, same traceable / non-fabricated reading rules. It adds
 no new tool and no new skill. What is different here is the **axis**: the other
 lenses read the *customer*; this one evaluates the **staff responder** (`_User`).
 
@@ -32,7 +32,9 @@ quality review uses `messaging_message_search`:
   `messaging_conversation_messages` — it reads the timeline but cannot name the
   agent.
 
-For a tag-segmented audience, add `includeTags` to that same search.
+For a tag-segmented audience, add `includeTags` to that same search. If every
+listed tag must currently be held, follow
+[`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) `includeTagsMode: "all"`.
 
 ## Identify the agents (no roster tool exists)
 
@@ -81,7 +83,7 @@ These are candidate signals for a human reviewer, **not** an authoritative score
 Per agent, a small, traceable set — not a transcript dump:
 
 ```
-Sampled: N staff replies over <period> (platform), credits used: X (sum of returned chargedCredits)
+Sampled: N staff replies over <period> (platform)
 Agent (senderId · label)        | Exemplary (conversationId · createdAt · quote) | Needs-improve (conversationId · createdAt · quote)
 u_abc · 小美 <mei@…>             | conv_11 · 07-14 "已幫您加急並回報物流…"          | conv_19 · 07-16 "(顧客追問兩次才回)"
 u_def · staff (identity null)    | conv_22 · 07-15 "…"                            | —
@@ -92,6 +94,6 @@ Rules (inherited from the shared reading rules):
 - **Trace every case** to a specific message (`conversationId` + `createdAt` +
   quote). No evidence → not a case.
 - **Do not fabricate** a quality problem or praise; absence of an issue is valid.
-- Report sample size and measured credit cost; label output as human-reviewable.
+- Report sample size only; label output as human-reviewable. If the user explicitly asks about usage, hand off to `insightark-session` (`credits_usage`).
 - For full monthly coverage of every reply, route the human to the Console CS
   export; use MCP for **sampling**, within the shared caps.
