@@ -7,7 +7,7 @@ suggestions, recurring questions, purchase intent, and unmet needs — e.g. "從
 
 This lens **reuses the shared data layer** in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
-one message-search path, same cost/sample guardrails, same traceable /
+one message-search path, same sample guardrails, same traceable /
 non-fabricated reading rules. It adds no new tool and no new skill. Everything
 below is the *opportunity lens* on top of that foundation.
 
@@ -25,8 +25,8 @@ run as **separate, scoped passes**:
 | Keyword seed (Strategy A) | 退款/延遲/客訴/壞/慢/態度… | 想要/有沒有/什麼時候有/可以…嗎/推薦/回購/敲碗/預購/缺貨補貨… |
 | Output | 主題 → 根因 → 改善 | 機會點 → 依據 → 行動建議 |
 
-**Do not** reuse one broad "pull everything" read for both — it inflates cost and
-dilutes quality (this is exactly the concern raised in the ticket). Decide the
+**Do not** reuse one broad "pull everything" read for both — it dilutes quality
+(this is exactly the concern raised in the ticket). Decide the
 lens first, seed the audience for *that* lens, and honour the same sample caps.
 
 ## Opportunity signal types
@@ -62,7 +62,7 @@ Return a compact, reviewable opportunity list — **not** a scoring engine
 (explicitly out of scope), just organised, traceable signals for a human to act on:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (`credits_usage` `usage.total`)
+Sampled: N conversations (period / tag)
 Opportunity (theme)        | Signal type      | Evidence (conversationId · createdAt) | Suggested action
 大包裝需求                 | 功能/商品需求    | conv_abc · 07-14  "有沒有家庭號..."     | 評估大容量SKU / 預購測水溫
 補貨時間常被問             | 重複詢問         | conv_def·07-15, conv_ghi·07-16          | 補貨通知/到貨預告內容
@@ -76,4 +76,4 @@ Rules (inherited from the shared reading rules):
 - **Do not inflate.** A neutral question is not automatically demand; a single
   offhand comment is a weak signal — say so. Frame confidence modestly and mark
   the whole output as human-reviewable candidate signals.
-- Report sample size and measured credit cost.
+- Report sample size only. If the user explicitly asks about usage, hand off to `insightark-session` (`credits_usage`).

@@ -1,6 +1,6 @@
 ---
 name: insightark-session
-description: Validate InsightArk MCP session context and inspect the authenticated developer identity, manageable organizations, and credit balance.
+description: Validate InsightArk MCP session context and inspect the authenticated developer identity and manageable organizations.
 when_to_use: When a user needs to verify MCP authentication works, inspect the authenticated user, or confirm accessible organizations before deeper investigation. Also use when another InsightArk skill fails because MCP authentication is missing, expired, or required.
 allowed-mcp: true
 ---
@@ -15,19 +15,19 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
 
 - `auth_me` — authenticated developer identity and manageable organizations (no `orgId` required)
 - `auth_organizations` — list organizations the session can manage (no `orgId` required)
-- `credits_usage` — peek InsightArk MCP monthly remaining **and** this user’s `usage` for a selected window (requires `orgId`; does not consume credits). Params: `orgId`, `from`, `to`, `client`, `aggregate` (default true), `includeTools` (default false). No `date` or user identity argument. Omit `from`/`to` for this client today plus monthly peek.
+- `credits_usage` — peek InsightArk MCP monthly remaining **and** this user’s `usage` for a selected window (requires `orgId`; this lookup does not debit). Params: `orgId`, `from`, `to`, `client`, `aggregate` (default true), `includeTools` (default false). No `date` or user identity argument. Omit `from`/`to` for this client today plus monthly peek. Call only when the user explicitly asks about usage.
 
 ## Workflow
 
 1. Call `auth_me` to verify the MCP session and inspect the authenticated user.
 2. If `auth_me` succeeds, call `auth_organizations` when the caller also needs manageable organization context.
-3. Call `credits_usage` with `orgId` when the user asks about InsightArk MCP credits. Identity is the token user only — never pass `userId`, email, or a `date` argument.
+3. Session validation is `auth_me` / `auth_organizations` only. Call `credits_usage` with `orgId` only when the user explicitly asks about usage. Identity is the token user only — never pass `userId`, email, or a `date` argument.
 
    Argument mapping:
 
    - Omit `from`/`to` whenever the question is remaining, “剛剛”, or “今天” on this host. That default is this client today **and** monthly peek in one payload.
    - “這個月還剩多少” → omit optional args; report monthly `remaining` / `used`. MUST NOT present `usage.total` as remaining.
-   - “剛剛 / 剛才操作用了多少” → omit optional args; report `usage.total`. Explain the smallest unit is a **calendar day** (this client today so far), not the last tool call. Do not treat other tool JSON as a credit receipt.
+   - “剛剛 / 剛才操作用了多少” → omit optional args; report `usage.total`. Explain the smallest unit is a **calendar day** (this client today so far), not the last tool call. Do not treat other tool JSON as a receipt.
    - “我今天用了多少” → omit optional args; report `usage.total`.
    - “今天哪些 tool” → omit `from`/`to` + `includeTools: true`; report `usage.tools`.
    - “過去一週合計” → `from`/`to` for that week; omit `aggregate` (backend `usage.total`). MUST NOT pass a window longer than 31 inclusive days.
@@ -35,7 +35,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
    - “不限 client / 含 Copilot 和 Cursor” → add `client: "all"` (and `from`/`to` if not today); report `usage.clients` when `aggregate` is true.
    - “Copilot 用了多少” on another host → `client: "copilot"`; omit `from`/`to` if the question is today.
 
-   Treat `clients[].label` as a self-reported app name, not verified host identity. After `429 error/credit-exhausted`, use `credits_usage` to report remaining. This call does not consume credits (only org RPM applies). MUST NOT infer spend from remaining-value deltas. MUST NOT claim other tools return `chargedCredits`.
+   Treat `clients[].label` as a self-reported app name, not verified host identity. On `429` with `limitType` `credit_bucket`: do not retry; do not inspect remaining via `credits_usage` unless the user then asks about usage. Customer-facing text MUST be exactly `This operation could not complete. Please try again later.` / `這次操作無法完成，請稍後再試。`. This lookup does not debit (only org RPM applies). MUST NOT infer spend from remaining-value deltas. MUST NOT claim other tools return `chargedCredits`.
 
 ## OAuth recovery (when MCP needs authentication)
 
@@ -57,4 +57,4 @@ After the user completes OAuth, retry `auth_me` before continuing other InsightA
 - Stay read-only.
 - Do not attempt password collection or TOTP completion in chat.
 - Do not paste, export, or request InsightArk MCP session tokens.
-- After credit exhaustion, use `credits_usage` instead of retrying costly endpoints to probe balance.
+- After `credit_bucket` `429`, do not retry; call `credits_usage` only if the user then asks about usage.

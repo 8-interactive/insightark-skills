@@ -10,9 +10,10 @@ no new skill. Before selecting or reading conversations, follow that playbook fo
 
 - **Path selection** — one bounded `messaging_message_search` using tag,
   time-window, and/or literal keyword filters.
-- **Cost & sample guardrails** — session spend from `credits_usage` `usage.total`
-  (this client today); do not treat tool JSON as a credit receipt.
-  default sample caps, no blind retry, stop-and-report at the cap.
+- **Sample guardrails** — default sample caps, no blind retry, stop-and-report
+  at the cap. Do not treat tool JSON as a receipt. MUST NOT claim other tools
+  return `chargedCredits`. If the user explicitly asks about usage, hand off
+  to `insightark-session` (`credits_usage`).
 - **Reading rules** — trace every finding to real messages, do not fabricate
   complaints, treat null `_User` identity (S8N-13049) as a known limitation,
   present findings as human-reviewable.
@@ -36,7 +37,7 @@ counting sentiment.
 Run this as its own scoped pass. If the ask also wants positive signals, do the
 opportunity lens ([`OPPORTUNITY_DISCOVERY.md`](./OPPORTUNITY_DISCOVERY.md)) as a
 **separate** run with its own audience seed — do not share one broad pull for
-both, or cost and quality both suffer.
+both, or quality of both suffers.
 
 ## Selecting the complaint set
 
@@ -55,7 +56,7 @@ both, or cost and quality both suffer.
 - Enrich context only when it changes the categorisation: `crm_customer_get`
   for the customer's tags / order-relevant profile, and each message's
   `createdAt` for sequence and timing. Do not fan out extra reads "just in case"
-  — every read spends credits.
+  — stay within the shared sample caps.
 
 ## Theme categorisation
 
@@ -91,12 +92,12 @@ For each theme that appears, produce:
 Return a compact, reviewable summary, not a long transcript dump:
 
 ```
-Sampled: N conversations (period / tag), credits used: X (`credits_usage` `usage.total`)
+Sampled: N conversations (period / tag)
 Theme                | Cases | Representative (conversationId · createdAt) | Likely cause → Suggested fix
 物流／出貨            |   6   | conv_abc · 07-14  "到貨過三天還沒..."       | 出貨後無主動通知 → 補出貨/延遲通知
 服務／客服回覆        |   3   | conv_def · 07-15  "已讀不回..."             | 尖峰時段回覆量能不足 → 值班/自動回覆
 ...
 ```
 
-Always state the sample size and measured credit cost, and label the result as
+Always state the sample size, and label the result as
 human-reviewable signals rather than an authoritative audit.

@@ -6,7 +6,7 @@ e.g. "幫我把上週的客服對話整理成 FAQ".
 
 This reuses the shared data layer in
 [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
-credit/sample guardrails, same traceable / non-fabricated reading rules. It adds
+sample guardrails, same traceable / non-fabricated reading rules. It adds
 no new tool and no new skill.
 
 Do **not** use `OPPORTUNITY_DISCOVERY.md` (recurring-question *gaps*) or
@@ -42,7 +42,6 @@ The user-facing draft must state:
 - coverage (effective `startAt` / `endAt` actually searched)
 - `senderTypes` and `groupBy`
 - backend `returnedCount` (message count from the tool / Copilot envelope)
-- session spend from `credits_usage` `usage.total` for this client today (never a guessed table; tool JSON is not a credit receipt)
 
 Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output. On Copilot, `truncated: true` (or a `...[truncated … chars]` marker) means sample/partial — do not invent `chargedCredits`.
 

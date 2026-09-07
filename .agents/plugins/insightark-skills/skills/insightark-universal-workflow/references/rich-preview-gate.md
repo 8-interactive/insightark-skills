@@ -12,7 +12,7 @@ Otherwise (text-only, no quick replies): obtain normal write confirmation; **do 
 ## Required flow (preview-required)
 
 1. Build the canonical message payload for the step/batch.
-2. Disclose the preview credit cost (**2 credits** for `messaging_message_preview`) before calling it.
+2. Confirm the payload is ready, then proceed.
 3. Upload any required **local** media via `media_upload_url`, then PUT to the returned presigned URL; patch HTTPS asset URLs into the payload.
 4. Call `messaging_message_preview` with the canonical payload.
 5. Present the preview URL to the customer, and state validity from the tool response `expiresAt` (ISO timestamp).
@@ -25,7 +25,7 @@ Skip preview only after an **explicit** user instruction to skip. Still obtain c
 
 ## Invalidation
 
-After approval, any change to content, media, CTA, quick replies, platform, or timing **invalidates** the prior preview. Generate a new preview (and re-disclose credit cost) before proceeding.
+After approval, any change to content, media, CTA, quick replies, platform, or timing **invalidates** the prior preview. Generate a new preview and obtain approval before proceeding.
 
 ## MA multi-step
 

@@ -19,11 +19,11 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `auth_organizations` — list manageable organizations (no `orgId` required)
 - `broadcast_list` — browse recent broadcast tasks
 - `broadcast_get` — get one broadcast's status and progress
-- `broadcast_audience_preview` — count a Console-supported dynamic audience (5 credits); sample is optional
+- `broadcast_audience_preview` — count a Console-supported dynamic audience; sample is optional
 - `crm_tag_list` — compare rough organization tag inventory counts
 - `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect materialized group snapshots
 - `broadcast_create` — create an async broadcast task
-- `messaging_message_preview` — preview message batch before create (costs 2 credits)
+- `messaging_message_preview` — preview message batch before create
 - `media_upload_url` — upload local media for message payloads
 
 ## Workflow
@@ -31,11 +31,11 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
 3. Choose one path:
-   - **Tag sizing / create** — use `crm_tag_list` for rough comparison of tag inventory (`name`, `count`, `density`, `lastUsed`). Its `count` / `density` are not platform- or policy-filtered sendable audience totals. For a tag-targeted dynamic audience, always call `broadcast_audience_preview` before claiming the sendable count or calling `broadcast_create`; then present its policy-filtered count, confirm, and pass its top-level `previewRef` and matching top-level `messageTag` (if any) to `broadcast_create`. Supported dynamic conditions are tag include/exclude, gender, one customer group, all-bound, and inbox. Do not combine a group with another filter; do not use time/density tag clauses or Console-absent filters. For rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → disclose 2-credit cost → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks. When customer time language becomes the schedule instant, apply `skills/insightark-universal-workflow/references/timezone-policy.md`.
+   - **Tag sizing / create** — use `crm_tag_list` for rough comparison of tag inventory (`name`, `count`, `density`, `lastUsed`). Its `count` / `density` are not platform- or policy-filtered sendable audience totals. For a tag-targeted dynamic audience, always call `broadcast_audience_preview` before claiming the sendable count or calling `broadcast_create`; then present its policy-filtered count, confirm, and pass its top-level `previewRef` and matching top-level `messageTag` (if any) to `broadcast_create`. Supported dynamic conditions are tag include/exclude, gender, one customer group, all-bound, and inbox. Do not combine a group with another filter; do not use time/density tag clauses or Console-absent filters. For rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks. When customer time language becomes the schedule instant, apply `skills/insightark-universal-workflow/references/timezone-policy.md`.
    - **Get** — `broadcast_get`; use `phase`, `deliveryOutcome`, `attention`, and `failureDiagnostics` rather than treating raw `status: done` as delivery success.
    - `broadcast_create` returns only an asynchronous receipt; inspect a later terminal outcome through get or list.
    - **List** — `broadcast_list`, optionally filtered by `status`, `platform`, `createdFrom`, `createdTo`, terminal `deliveryOutcome`, or server-computable `attention: scheduled_overdue`. Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`.
-4. Return the MCP response as-is. Session spend comes from `credits_usage` (`usage.total` for this client today). Tool JSON is not a credit receipt.
+4. Return the MCP response as-is. Do not treat tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
 
 ## Message envelope
 

@@ -5,9 +5,9 @@ to read a batch of conversations and judge **intent**, **sentiment**, or
 **complaints** — as opposed to a single keyword lookup.
 
 This playbook uses **only the read-only MCP tools already exposed by this skill**.
-It adds no new tool and no new skill. It is designed to be cheap, bounded, and
-honest: findings must trace back to real messages, and cost must stay inside a
-budget you can see.
+It adds no new tool and no new skill. It is designed to be bounded and honest:
+findings must trace back to real messages, and sample sizes must stay inside the
+caps below.
 
 ---
 
@@ -58,30 +58,28 @@ message sentiment or complaint **proportions** — list filters Customer
 
 ---
 
-## Cost & sample guardrails (hard limits)
+## Sample guardrails (hard limits)
 
-Read chains cost materially more than the nominal per-call number. Measured on
-staging, a small run (≈3 customers / 3 conversations / ≈8 read calls) consumed on
-the order of **~90 credits** against a monthly free allowance of **500**.
-`messaging_message_search` is billed at a higher fixed rate per call. Treat every
-batch read as spending real budget.
+Keep each qualitative batch inside the sample caps. If the user explicitly asks
+about usage, hand off to `insightark-session` (`credits_usage`). Do not treat
+tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
+Do not infer spend from remaining-value deltas.
 
 **You MUST:**
 
-1. **Check budget first.** Call `credits_usage` before a batch with optional args omitted to inspect monthly remaining (read peek `remaining` / `used`; do not present `usage.total` as remaining). After the batch, call `credits_usage` again with optional args omitted and report `usage.total` as this-client today spend. Do not treat tool JSON as a per-call credit receipt. MUST NOT infer spend from remaining-value deltas across peeks. Concurrent peeks make those deltas ambiguous.
-2. **Respect default search caps** unless the user explicitly approves more:
+1. **Respect default search caps** unless the user explicitly approves more:
    - `messaging_message_search` calls per run: **≤ 5**
    - messages returned per call: use a bounded `limit` appropriate to the task
    - time windows: split into sequential ≤90-day windows; keep each as narrow as the ask permits
    These are defaults, not hard locks — you may raise them, but only after the
-   user explicitly agrees, and you should restate the expected extra cost first.
-3. **Never blind-retry.** If a call fails or times out
-   (`message_search_timeout`), do not resend identical arguments — credits are
-   still charged. Narrow the time window / lower `limit` / add a filter, or stop.
-4. **Busy is not timeout.** `message_search_in_progress` means the same user has
-   another search in that organization; it is zero-charge. Wait for it to finish
+   user explicitly agrees, and you should restate the extra sample size first.
+2. **Never blind-retry.** If a call fails or times out
+   (`message_search_timeout`), do not resend identical arguments.
+   Narrow the time window / lower `limit` / add a filter, or stop.
+3. **Busy is not timeout.** `message_search_in_progress` means the same user has
+   another search in that organization. Wait for it to finish
    before one retry — do not fan out parallel work.
-5. **Stop at the cap, report, then ask.** On reaching any cap or a stated budget,
+4. **Stop at the cap, report, then ask.** On reaching any cap,
    halt and report what you covered and what remains. Do not keep fetching.
 
 If the user needs full coverage of a large audience, say so plainly and route the

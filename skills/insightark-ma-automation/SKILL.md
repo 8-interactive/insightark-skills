@@ -124,7 +124,7 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
    - Preserve catalog `templateId`/`version` in your explanation for drift diagnosis.
    - For customer-derived `startTime` / `endTime` instants, follow `skills/insightark-universal-workflow/references/timezone-policy.md` (default Asia/Taipei when timezone omitted; never invent date-only clock bounds).
 4. Show a compact final field table and get explicit customer sign-off. For schedule fields include **customer intent** and **MCP input** (and note equivalent UTC storage when helpful).
-5. For any preview-required message step (non-`text/plain` or quick replies), follow `skills/insightark-universal-workflow/references/rich-preview-gate.md` (disclose 2-credit cost, preview + journey timing, wait for approval). Text-only steps without quick replies need confirmation only.
+5. For any preview-required message step (non-`text/plain` or quick replies), follow `skills/insightark-universal-workflow/references/rich-preview-gate.md` (preview + journey timing, wait for approval). Text-only steps without quick replies need confirmation only.
 6. Call `ma_procedure_validate` with `orgId` and `payload`; if `valid === false`, parse `errors` (array of `{ path, code, message, featureKey? }`) and **逐條用客戶語言說明**. See **Validate error remediation** below.
 7. After successful validate, confirm with the user, then call `ma_procedure_create` with `orgId` and `payload` (**draft only**). Cap at **three** validate-fix rounds.
 8. Publish only with explicit approval via `ma_procedure_publish`.

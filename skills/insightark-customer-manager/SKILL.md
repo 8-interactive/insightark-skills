@@ -47,7 +47,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - Treat name-search results as candidate matches, not a uniquely identified customer.
 - Phone or email lookup: use `cellPhone` or `email`.
 - Explicit partial-name / name-fragment / broader-match requests: pass `displayNameMatch: "contains"`.
-- If default text search returns no customers and the user still expects a match: disclose that a contains retry is a broader **additional 15-credit** read, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
+- If default text search returns no customers and the user still expects a match: disclose that a contains retry is a **broader search**, obtain approval, then call again with `displayNameMatch: "contains"`. Never silently substitute contains after an empty text result.
 - Do not send `displayNameMatch` without a non-empty name-shaped `displayName`.
 
 ## `crm_customer_search` tag filters
@@ -56,7 +56,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 To list customers who currently hold **every** named tag, call `crm_customer_search` with those `includeTags` **and** `includeTagsMode: "all"`. Example: `includeTags: ["vip", "newsletter"]` with `includeTagsMode: "all"`. A multi-value `includeTags` list without the mode stays OR.
 
-Do not invent a history filter or a new search tool for this job. Cost remains 15 credits (`return: "count"` included).
+Do not invent a history filter or a new search tool for this job. `return: "count"` is included.
 
 ## Silent / no-inbound census
 
@@ -64,7 +64,7 @@ For “how many customers have not written / no inbound since date X” (and the
 
 1. Call `crm_platform_list` to get live org platforms.
 2. For **each** returned platform, call `crm_customer_search` with that `platform`, `lastInboundAtTo` (ISO instant with offset or `Z`), and `lastInboundAtFrom` only when the user gave a window start.
-3. When only a number is needed, pass `return: "count"` (same 15-credit cost; `fields` is ignored).
+3. When only a number is needed, pass `return: "count"` (`fields` is ignored).
 4. When a list is needed, omitted `fields` is the slim default (`customerId`, `displayName`, `platform`, `lastInboundAt`). The list MAY pass `fields` for opt-in keys such as `tags`.
 
 NEVER use `messaging_conversation_list` as an organization census or silent-customer count. Do not invent a CRM count-only tool, a query-group create, or bulk tag for this job. Name/email/phone/tag lookup without inbound bounds does **not** require `platform`.
@@ -85,7 +85,7 @@ Exact editable fields and enum values come from the `crm_customer_update` MCP to
 - Patch only published public fields (displayName, cellPhone, email, birthday, gender, language, …).
 - `gender` / `language` must match the schema allowlists when set.
 - `email` must be a valid email; `birthday` must be ISO 8601.
-- Unsupported or empty patches fail before credit charge — fix args rather than retrying identical payloads.
+- Unsupported or empty patches fail before debit — fix args rather than retrying identical payloads.
 
 ## Guardrails
 

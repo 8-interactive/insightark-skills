@@ -7,6 +7,13 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.11.0 — Hide conversation credits
+
+- Customer-facing skill copy and MCP `tools/list` descriptions no longer advertise catalog prices or volunteer remaining/used.
+- Call `credits_usage` only when the user asks about usage. Do not peek as a search or session-validation preamble.
+- On `429` with `limitType` `credit_bucket`, stop retries and use opaque EN/ZH-TW copy; do not inspect remaining unless asked.
+- Keep omit-`chargedCredits` and backend debit amounts unchanged.
+
 ## 2.10.1 — includeTagsMode all for current-holder AND
 
 - `insightark-investigator`: simultaneous-tag / 觸發+完成 funnels pass `includeTagsMode: "all"` on `messaging_message_search`. Omit / `"any"` remains OR (current holders, not tag history).
