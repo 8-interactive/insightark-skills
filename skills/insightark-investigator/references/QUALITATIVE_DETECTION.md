@@ -34,6 +34,9 @@ analysis. Combine `includeTags`／`excludeTags`／`includeTagsMode`, `startAt`/`
   use `event` only for join／follow-style investigation. See messaging skill for
   the exact kind→MIME table (`video`／`audio` are outside `image`／`file`).
 - `limit` default 20, max **1000**; page with `skip`.
+- **Lean `fields`:** Before a corpus／analysis search, pass `fields` listing only keys needed (at least `data`, `conversationId`, `createdAt` for qualitative ranking; add `platform` to split channels). Do not omit `fields` unless the full default blob is required.
+- **Gate A:** For corpus／analysis with no keyword, call `return: "count"` first. Denominator = the `limit` you will use on list calls (omit → tool default **20**). If `ceil(count / that-limit) > 5`, ask before listing (e.g. count **101**／omitted limit → ask; count **100**／`limit: 20` → do not ask under Gate A).
+- **Gate B / paging:** Only when `truncated === true` and `keptCount < returnedCount`: next `skip = page.skip + keptCount`, and if `ceil(count / keptCount) > 5` ask even when Gate A passed. If `keptCount === returnedCount` (or no `truncated`), Gate B does not apply — use `skip = page.skip + page.limit`.
 - **Tag-scoped corpus:** pass `includeTags` on that same `messaging_message_search`. Omit or `"any"` is **OR** (any listed current tag). When the audience must currently hold **every** listed tag (觸發 + 完成 together), pass `includeTagsMode: "all"`. This is current holders only, not tag history. Do not treat a multi-value `includeTags` list by itself as AND.
 
 **Do not** use `messaging_conversation_list` as the primary path for org-wide

@@ -29,7 +29,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 3. Choose one operational path:
    - `messaging_conversation_list` for inbox／activity discovery and `cursor` paging (not message-proportion analysis)
    - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
-   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats); continue while `page.hasMore` is true with `skip = page.skip + page.limit`
+   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats); continue while `page.hasMore` is true — if the envelope has `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`
 4. Return a concise read-only investigation result grounded in the public API response.
 
 ## Qualitative detection (intent / sentiment / complaint)
@@ -149,3 +149,13 @@ Console 綠線 / 廣告來源 / ads inbound maps to `messaging_message_search` w
 This filter matches Facebook / Instagram Messenger ads referral stored as `application/x-notify-event` (`data.referral.source = ADS`). LINE native ads are not this Message path; LINE orgs typically return no hits (empty is success).
 
 Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. Deduped ids MAY go to existing tag tools; batch tagging remains S8N-13155.
+
+## Message search fields, count, and gates (important)
+
+Before a corpus／analysis `messaging_message_search`, pass `fields` listing only keys needed for that ask. Do **not** omit `fields` unless the full default blob (including `platform`) is required. Qualitative ranking SHOULD include at least `data`, `conversationId`, `createdAt`; add `platform` to split channels; keep `data` whole for rich-menu／events.
+
+**Gate A (all hosts):** For corpus／analysis searches with no keyword, call `return: "count"` first. The denominator is the `limit` you **will** pass on the following list calls. If that list `limit` is omitted, use the tool default **20**. If `ceil(count / that-limit) > 5`, ask the user before listing. Example: count **101** with list `limit` omitted → `ceil(101/20) = 6 > 5` → ask. Example: count **100** with `limit: 20` → `ceil(100/20) = 5` (not `> 5`) → do not ask under Gate A.
+
+**Gate B (truncated envelopes only):** Apply only when the list envelope has `truncated === true` **and** `keptCount < returnedCount`. Then remaining trips are `ceil(count / keptCount)` (need `count` from a prior count call, or stop and count). If that is `> 5`, ask even when Gate A passed. If `truncated` is true and `keptCount === returnedCount`, Gate B does **not** apply. Hosts with no `truncated`／`keptCount` ignore Gate B and keep `skip = page.skip + page.limit`.
+
+**Paging:** while `page.hasMore`, if `truncated === true` and `keptCount < returnedCount`, next `skip = page.skip + keptCount` (example: `page.skip = 280`, `keptCount = 20` → `skip = 300`). Otherwise `skip = page.skip + page.limit`. Do not advance by `page.count`.

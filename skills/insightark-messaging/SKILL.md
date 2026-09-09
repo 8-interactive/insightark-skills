@@ -23,7 +23,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 1. Call `auth_me` or `auth_organizations` when session context is not yet trusted.
 2. Resolve `orgId` before any org-scoped tool.
-3. For inbox browsing, hand off to `insightark-conversations`; for message search, sender class filters, ads inbound / 廣告來源, or analysis, hand off to `insightark-investigator`. Continue while `page.hasMore` is true with `skip = page.skip + page.limit`.
+3. For inbox browsing, hand off to `insightark-conversations`; for message search, sender class filters, ads inbound / 廣告來源, or analysis, hand off to `insightark-investigator`. Continue while `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
 4. Build the outbound payload; optionally use `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required (non-`text/plain` or quick replies) → `messaging_message_preview` → approval → `messaging_customer_send_message`; text-only without quick replies → confirmation only (no preview); skip preview only when the user explicitly asks.
 5. Return the MCP response as-is.
 

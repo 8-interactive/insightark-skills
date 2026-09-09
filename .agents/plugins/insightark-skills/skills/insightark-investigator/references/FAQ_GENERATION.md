@@ -22,6 +22,7 @@ Use **one** `messaging_message_search` call with:
 - `groupBy: "conversation"` — the backend returns flat `messages` plus `conversations` keyed by `conversationId`, each group sorted by `createdAt` ascending.
 - Explicit `startAt` / `endAt` when the user gives a period. If they omit dates, existing investigator windows apply (omit both → last 14 days; max 90 days).
 - Honour QUALITATIVE_DETECTION sample caps (`messaging_message_search` calls ≤ 5 per run unless the user approves more).
+- **`fields`:** FAQ generation MAY omit `fields` (full default, including `platform`). If you pass `fields`, keep enough keys to cite Q/A: at least `conversationId`, `createdAt`, `senderType`, `data` (and `_User` identity keys when claiming a real CS reply). Content-only projections such as `fields: ["data"]` MUST NOT be used to claim cited CS replies or full-dialogue FAQ.
 
 Do not loop search to rebuild an Excel workbook. Full human export is Console CS export.
 
@@ -43,7 +44,7 @@ The user-facing draft must state:
 - `senderTypes` and `groupBy`
 - backend `returnedCount` (message count from the tool / Copilot envelope)
 
-Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output. On Copilot, `truncated: true` (or a `...[truncated … chars]` marker) means sample/partial — do not invent `chargedCredits`.
+Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output (`truncated` is false or absent). On hosts that emit truncation metadata, `truncated: true` (or a `...[truncated … chars]` marker) means sample/partial — do not invent `chargedCredits`. `keptCount` alone does **not** create a **full** coverage label.
 
 Otherwise label sample or partial. If the ask exceeds search-call / sample / 90-day guardrails, say so and point to Console CS export. Never present a bounded draft as a complete org-wide FAQ export.
 

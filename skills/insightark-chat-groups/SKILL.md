@@ -56,7 +56,15 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
    - Recent peek only → `messaging_conversation_messages`
    - Keyword／**period**／sender／content analysis → `messaging_chat_group_message_search` with exactly one scope id
 7. Default search senders are `Group`, `_User`, `AddOn`. `AddOn` is Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules). Add `ForeignBot` only when explicitly needed: Facebook/Instagram third-party direct-to-customer only (Messenger/IG echo). LINE inbound does not use this class.
-8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows. Continue `messaging_chat_group_message_search` while `page.hasMore` is true with `skip = page.skip + page.limit`.
+8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows. Continue `messaging_chat_group_message_search` while `page.hasMore` is true — if `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
+
+## Fields, count, and gates (important)
+
+Before a corpus／analysis `messaging_chat_group_message_search`, pass lean `fields` (at least `data`, `conversationId`, `createdAt`; add `platform` when splitting channels). Do not omit `fields` unless the full default (including `platform`) is required.
+
+**Gate A:** For corpus／analysis with no keyword, call `return: "count"` first. Denominator = planned list `limit` (omit → **20**). If `ceil(count / that-limit) > 5`, ask before listing. Example: count **101** with list limit omitted → ask. Example: count **100** with `limit: 20` → do not ask under Gate A.
+
+**Gate B:** Only when `truncated === true` and `keptCount < returnedCount` — then `skip = page.skip + keptCount` and ask if `ceil(count / keptCount) > 5`. If `keptCount === returnedCount` or there is no `truncated`, Gate B does not apply; use `skip = page.skip + page.limit`.
 
 ## Guardrails
 

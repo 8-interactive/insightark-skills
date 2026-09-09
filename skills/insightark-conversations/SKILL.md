@@ -46,7 +46,7 @@ For message bodies, keyword evidence, or org-wide time-window **message** analys
 - Echo `page.nextCursor` as the next call’s `cursor` while `page.hasMore` is true. Do **not** parse or hand-craft cursors.
 - `cursor` is an opaque keyset continuation hint for `(lastMessageAt, _id)` — **not** an auth or signed token.
 - A short returned conversation count does not always mean “no more pages” if hydration skipped rows; trust `page.hasMore` / `page.nextCursor`.
-- For `messaging_message_search` (via investigator), continue while `page.hasMore` is true with `skip = page.skip + page.limit`.
+- For `messaging_message_search` (via investigator), continue while `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`. Do not advance by `page.count`. When `keptCount === returnedCount` (or no `truncated`), Gate B does not apply — keep `skip += page.limit`.
 
 Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exact `inbox` tokens come from the MCP tool schema enum.
 

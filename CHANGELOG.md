@@ -7,6 +7,13 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.12.0 — Message search fields, count, and paging gates
+
+- `messaging_message_search` / `messaging_chat_group_message_search`: allowlisted `fields` projection and `return: "count"` preflight (same filters as list; `{ count }` only).
+- Investigator + chat-groups + QUALITATIVE_DETECTION: lean `fields` picking; Gate A (`ceil(count / planned-list-limit) > 5` → ask; omitted list `limit` uses tool default **20**); Gate B / `skip += keptCount` only when `truncated === true` and `keptCount < returnedCount`.
+- Conversations / messaging continuation: `skip += keptCount` when truncated with `keptCount < returnedCount`; otherwise `skip += page.limit`.
+- FAQ: omit `fields` OK (full default including `platform`); content-only `fields` cannot claim cited CS replies; `keptCount` does not create **full** coverage.
+
 ## 2.11.0 — Hide conversation credits
 
 - Customer-facing skill copy and MCP `tools/list` descriptions no longer advertise catalog prices or volunteer remaining/used.
