@@ -15,6 +15,8 @@ Use `messaging_message_search` (not `messaging_conversation_list`) for period／
 - For full customer+staff dialogue, pass both `senderTypes` classes in one call (never singular `senderType`).
 - When the user names a period, pass explicit `startAt`/`endAt` (do not rely on **omit-both-dates**).
 - Put tag audience filters on the same search. When every listed current tag must be held, pass `includeTagsMode: "all"` (a multi-value list alone is OR; current holders only). Period-tagged customer listing uses `insightark-customer-manager` / `crm_customer_search` `taggedAtFrom` / `taggedAtTo`.
+- Lean `fields`: for analysis pass `fields` listing only keys needed (at least `data`, `conversationId`, `createdAt` for qualitative ranking). Do not omit `fields` unless the full default blob is required.
+- Gate A: for corpus／analysis with no keyword, call `return: "count"` first. Denominator = the `limit` you will use on list calls (omit → tool default **20**). If `ceil(count / that-limit) > 5`, ask before listing (e.g. count **101**／omitted limit → ask; count **100**／`limit: 20` → do not ask under Gate A).
 
 ### Decision tree
 
