@@ -64,9 +64,28 @@ These distinctions are easy to miss when reading a single tool schema; choosing 
 
 **Senders:** Use only `senderTypes`. Never pass singular `senderType`. Exact allowed class strings come from the MCP tool schema. Prefer one multi-class call over two searches. Super8 automatic outbound → `senderTypes: ["AddOn"]`. Facebook/Instagram third-party DMs → `senderTypes: ["ForeignBot"]`. For broadcast／campaign copy, use `broadcast_list`／`broadcast_get`, not message search.
 
+## Message search sender filters (important)
+
+Use only `senderTypes` (string array). Exact allowed class strings come from the MCP tool schema `senderTypes.items.enum`.
+
+Default (omit `senderTypes`) returns **Customer only**. Staff `userName` / `userEmail` only appear on `_User` rows.
+
+| Goal | Args |
+|---|---|
+| Customer messages | omit `senderTypes`, or `senderTypes: ["Customer"]` |
+| Staff / CS replies | `senderTypes: ["_User"]` |
+| Full dialogue | `senderTypes: ["Customer", "_User"]` — one tool call |
+| Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules including coupon and Shopify, and a generic “system” ask for those). Payload `sender` examples (identity, not a filter): `aiBot`, `marketing_automation`, `bot_executor`, `ec_shopify` | `senderTypes: ["AddOn"]` |
+| Broadcast / campaign copy | `broadcast_list` / `broadcast_get` — not message search |
+| Facebook/Instagram third-party direct-to-customer (Messenger/IG echo); LINE inbound does not use this class | `senderTypes: ["ForeignBot"]` |
+
+Never pass singular `senderType`. Prefer one multi-class call over two searches. Narrow with `conversationId` and a small time window when possible.
+
 **Time:** Always pass explicit `startAt`/`endAt` when the user names a period — omitting both falls back to the schema default and under-covers the ask. For date-only or one-sided language, follow `skills/insightark-universal-workflow/references/timezone-policy.md`, confirm clocks, and never invent midnight. Analysis lenses follow `references/QUALITATIVE_DETECTION.md`.
 
-**Tags:** `includeTags` matches **current** holders, not tag history. A multi-value list alone is OR; for 觸發+完成／every listed tag together, pass `includeTagsMode: "all"`. Period-tagged **customer** listing (“who received tag X during this date window”) is not that current-holder combinator — hand off to `insightark-customer-manager` and `crm_customer_search` with that one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
+**Tags:** `includeTags` matches **current** holders, not tag history. A multi-value list alone is OR; for 觸發+完成／every listed tag together, pass `includeTagsMode: "all"`.
+
+Period-tagged customer listing is not that current-holder combinator. Hand off to `insightark-customer-manager` and `crm_customer_search` with one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
 
 **Timeout (`message_search_timeout`):** Never blind-retry identical arguments. Narrow the time window or filters first; lower `limit` only after a large page already failed. If it still fails, stop and ask the user or point to Console. Do not invent unsupported `contentType` filters.
 

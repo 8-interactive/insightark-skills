@@ -52,7 +52,7 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 3. For a named group, call `messaging_chat_group_list` with a literal `groupName` substring. Continue paging only by setting `cursor` to `page.nextCursor` — do not hand-craft cursors. If several hits match, disambiguate with the user; optionally confirm with `messaging_chat_group_get`.
 4. Lock exactly one of `conversationId` or `chatGroupId`.
 5. For a recent peek, use `messaging_conversation_messages`. For period／keyword／sender／content analysis, call `messaging_chat_group_message_search` with that one scope id.
-6. Default search senders are `Group`, `_User`, `AddOn`; add `ForeignBot` only when needed (Messenger／IG third-party; not LINE inbound).
+6. Default search senders are `Group`, `_User`, `AddOn` (Super8 automatic outbound: bots, marketing automation, AI Agent, game/coupon modules); add `ForeignBot` only when needed (Facebook/Instagram third-party direct-to-customer; Messenger／IG echo; not LINE inbound).
 7. While `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, set `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
 
 ## Fields, limit, and gates
