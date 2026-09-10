@@ -1,37 +1,53 @@
 # FAQ generation from customer conversations
 
-Load this reference when compiling FAQ／常見問題 from conversations (for example, "整理上週客服對話成 FAQ").
+On-demand reference for `insightark-investigator`. Load this when a user asks to
+compile, generate, or summarize an FAQ / 常見問題 from customer conversations —
+e.g. "幫我把上週的客服對話整理成 FAQ".
 
-This playbook reuses [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) budgets and reading rules.
-Do **not** substitute `OPPORTUNITY_DISCOVERY.md` or `CS_QUALITY_REVIEW.md` for FAQ Q&A.
+This reuses the shared data layer in
+[`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md) — same tools, same
+sample guardrails, same traceable / non-fabricated reading rules. It adds
+no new tool and no new skill.
+
+Do **not** use `OPPORTUNITY_DISCOVERY.md` (recurring-question *gaps*) or
+`CS_QUALITY_REVIEW.md` (staff-reply scoring) as a substitute for FAQ Q&A.
+
+---
 
 ## Call shape
 
-Use one `messaging_message_search` call with:
+Use **one** `messaging_message_search` call with:
 
-- `senderTypes: ["Customer", "_User"]` — omitting `senderTypes` defaults to Customer only and cannot cite real CS replies
-- `groupBy: "conversation"`
-- Explicit `startAt`/`endAt` when the user names a period
-- Prefer few calls and a large schema-legal `limit` (QUALITATIVE budget)
-- `fields`: you MAY omit `fields` for the full default. If you set `fields`, keep enough keys to cite Q/A and staff identity. `fields: ["data"]` alone MUST NOT be used to claim cited CS replies.
+- `senderTypes: ["Customer", "_User"]` — do not omit `senderTypes` (omit defaults to Customer only).
+- `groupBy: "conversation"` — the backend returns flat `messages` plus `conversations` keyed by `conversationId`, each group sorted by `createdAt` ascending.
+- Explicit `startAt` / `endAt` when the user gives a period. If they omit dates, existing investigator windows apply (omit both → last 14 days; max 90 days).
+- Honour QUALITATIVE_DETECTION sample caps (`messaging_message_search` calls ≤ 5 per run unless the user approves more).
+- **`fields`:** FAQ generation MAY omit `fields` (full default, including `platform`). If you pass `fields`, keep enough keys to cite Q/A: at least `conversationId`, `createdAt`, `senderType`, `data` (and `_User` identity keys when claiming a real CS reply). Content-only projections such as `fields: ["data"]` MUST NOT be used to claim cited CS replies or full-dialogue FAQ.
 
-Do not rebuild an Excel workbook via MCP; full human export uses Console CS export.
+Do not loop search to rebuild an Excel workbook. Full human export is Console CS export.
 
-## Read `conversations`
+## How to read `conversations`
 
-Use the grouped `conversations` payload, not a self-made reshuffle of the flat `messages` list.
+Use the grouped `conversations` payload, not a self-made reshuffle of the flat list.
 
-- A claim that CS **actually replied** may cite only a `_User` message in the **same** `conversationId`, with `createdAt` **after** the question.
-- If that conversation has no later `_User` message, treat it as unanswered in the sample; do not invent an answer or borrow a reply from another conversation.
-- Label cross-conversation synthesis as **綜合／建議**; never present it as one real reply.
-- If the sample has Customer messages and zero `_User` messages, say so and do not fabricate answers.
+- A claim that an answer is how CS **actually replied** may cite only a `_User` message in the **same** `conversationId` as the customer question, with `createdAt` **after** that question.
+- If that conversation has no later `_User` message, treat the question as unanswered / no staff reply in sample. Do not invent a CS answer. Do not borrow a reply from another conversation.
+- Cross-conversation synthesis must be labeled **綜合／建議**. It must not be presented as a single real reply.
 
-## Coverage
+If the sample has Customer messages and zero `_User` messages, say so and do not present invented CS answers as real replies.
 
-State the effective window, `senderTypes`, `groupBy`, and `returnedCount`.
+## Coverage (sample / partial / full)
 
-Label **full** for that window only when paging is exhausted (`returnedCount` < `limit`) **and** the host did not truncate (`truncated` is false or absent). If `truncated: true`, label sample／partial. `keptCount` alone does not create a **full** label. If the ask exceeds budget, say so and point to Console. Never present a bounded draft as an org-wide complete FAQ.
+The user-facing draft must state:
+
+- coverage (effective `startAt` / `endAt` actually searched)
+- `senderTypes` and `groupBy`
+- backend `returnedCount` (message count from the tool / Copilot envelope)
+
+Label **full** for that window only when paging is exhausted (`returnedCount` strictly less than `limit`) **and** the host did not truncate the tool output (`truncated` is false or absent). On hosts that emit truncation metadata, `truncated: true` (or a `...[truncated … chars]` marker) means sample/partial — do not invent `chargedCredits`. `keptCount` alone does **not** create a **full** coverage label.
+
+Otherwise label sample or partial. If the ask exceeds search-call / sample / 90-day guardrails, say so and point to Console CS export. Never present a bounded draft as a complete org-wide FAQ export.
 
 ## Output
 
-Return an in-chat FAQ draft grounded in returned messages. Do not emit a `/copilot/faq/:id` download URL, and do not reconstruct Excel from MCP search.
+Return an in-chat FAQ draft (question / answer pairs grounded in returned messages). Do not emit a `/copilot/faq/:id` download URL and do not reconstruct Excel from MCP search.

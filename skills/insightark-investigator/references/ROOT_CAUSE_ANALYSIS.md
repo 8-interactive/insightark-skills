@@ -1,4 +1,4 @@
-# Complaint root-cause & theme playbook
+# Complaint root-cause & theme playbook (US-2)
 
 On-demand reference for `insightark-investigator`. Load this when a user asks you
 not just to *detect* complaints but to **categorise them by theme and organise
@@ -15,7 +15,7 @@ no new skill. Before selecting or reading conversations, follow that playbook fo
   return `chargedCredits`. If the user explicitly asks about usage, hand off
   to `insightark-session` (`credits_usage`).
 - **Reading rules** — trace every finding to real messages, do not fabricate
-  complaints, treat null `_User` identity as a known limitation,
+  complaints, treat null `_User` identity (S8N-13049) as a known limitation,
   present findings as human-reviewable.
 
 Everything below is the *root-cause lens* on top of that shared foundation.
@@ -48,8 +48,8 @@ both, or quality of both suffers.
 - **No tag, want a period or keyword sweep** →
   `messaging_message_search` with a complaint-leaning `keyword` (退款 / 退貨 / 出貨
   / 到貨 / 客訴 / 投訴 / 沒收到 / 錯 / 壞 / 慢 / 態度 …), a bounded `startAt`/`endAt`,
-  and `platform` if the ask is channel-specific. Follow the time-window and
-  sample-budget rules in [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
+  and `platform` if the ask is channel-specific. Follow the canonical Strategy A
+  time-window rules in [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
 - Read the **full conversation timeline** (`messaging_conversation_messages`, or
   `senderTypes: ["Customer","_User"]` on search) so a root cause is judged from
   the exchange, not one line in isolation.

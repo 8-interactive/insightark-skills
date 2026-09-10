@@ -1,4 +1,4 @@
-# Opportunity discovery playbook — positive intent
+# Opportunity discovery playbook — positive intent (US-3)
 
 On-demand reference for `insightark-investigator`. Load this when a user wants to
 mine conversations for **product / marketing / service opportunities** — customer
@@ -22,11 +22,12 @@ run as **separate, scoped passes**:
 | | Complaint / root cause | Opportunity discovery |
 |---|---|---|
 | Looking for | dissatisfaction, failure, risk | interest, requests, unmet needs |
-| Keyword seed | 退款/延遲/客訴/壞/慢/態度… | 想要/有沒有/什麼時候有/可以…嗎/推薦/回購/敲碗/預購/缺貨補貨… |
+| Keyword seed (Strategy A) | 退款/延遲/客訴/壞/慢/態度… | 想要/有沒有/什麼時候有/可以…嗎/推薦/回購/敲碗/預購/缺貨補貨… |
 | Output | 主題 → 根因 → 改善 | 機會點 → 依據 → 行動建議 |
 
-**Do not** reuse one broad "pull everything" read for both — it dilutes quality.
-Decide the lens first, seed the audience for *that* lens, and honour the same sample caps.
+**Do not** reuse one broad "pull everything" read for both — it dilutes quality
+(this is exactly the concern raised in the ticket). Decide the
+lens first, seed the audience for *that* lens, and honour the same sample caps.
 
 ## Opportunity signal types
 
@@ -49,7 +50,7 @@ Classify each candidate into what the customer is actually signalling:
   `includeTagsMode: "all"`.
 - **Sweep by period / keyword** → use positive-intent `keyword`
   seeds above, a bounded `startAt`/`endAt`, and `platform` if channel-specific.
-  Follow the time-window and sample-budget rules in
+  Follow the canonical Strategy A time-window rules in
   [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
 - Prefer reading the **customer turns** (`senderTypes: ["Customer"]` / omit) for
   raw voice-of-customer; pull staff replies only when the response context

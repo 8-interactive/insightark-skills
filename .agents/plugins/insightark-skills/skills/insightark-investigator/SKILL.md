@@ -11,58 +11,81 @@ allowed-mcp: true
 
 This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
 
-**Audience:** Use this skill for 1:1 Customer conversations. For LINE ChatGroup discovery or group-message analysis, hand off to `insightark-chat-groups` (do not use `messaging_conversation_list` for groups).
+**Audience:** 1:1 / Customer conversations. For LINE **ChatGroup** discovery or group-message analysis, hand off to `insightark-chat-groups` (do not use `messaging_conversation_list` as group discovery).
 
 ## MCP Tools
 
-- `auth_me` / `auth_organizations` — validate session or list orgs (no `orgId`)
-- `messaging_conversation_list` — browse inbox／activity by Customer `lastMessageAt` (`cursor`)
+- `auth_me` — validate session (no `orgId` required)
+- `auth_organizations` — list manageable organizations (no `orgId` required)
+- `messaging_conversation_list` — browse／page conversations by Customer last activity (`lastMessageAtFrom`/`To`, `cursor`)
 - `messaging_conversation_get` — get one conversation summary
-- `messaging_conversation_messages` — read the recent timeline (not a period corpus)
-- `messaging_message_search` — search by period／keyword／tag／`contentKinds`／`referralSource`
+- `messaging_conversation_messages` — read message timeline
+- `messaging_message_search` — time／keyword／tag／`contentKinds`／`referralSource` message search
 
 ## Workflow
 
-1. Call `auth_me`／`auth_organizations` only when the session is not yet trusted; resolve `orgId` before any org-scoped call.
-2. Pick a path:
-   - Inbox／who was active recently → `messaging_conversation_list`
-   - One thread → `messaging_conversation_get` + `messaging_conversation_messages`
-   - Period／keyword／theme evidence → `messaging_message_search` (prefer this for qualitative stats)
-3. While `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, set next `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
-4. Answer from returned public fields only — keep it concise, and do not invent internal fields.
+1. Call `auth_me` or `auth_organizations` when the caller's session context is not yet trusted.
+2. Resolve `orgId` before any org-scoped tool.
+3. Choose one operational path:
+   - `messaging_conversation_list` for inbox／activity discovery and `cursor` paging (not message-proportion analysis)
+   - `messaging_conversation_get` and `messaging_conversation_messages` for one conversation and its timeline
+   - `messaging_message_search` for time-window／keyword／`contentKinds` evidence (prefer for qualitative stats); continue while `page.hasMore` is true — if the envelope has `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`
+4. Return a concise read-only investigation result grounded in the public API response.
 
-## Qualitative / lenses (load on demand)
+## Qualitative detection (intent / sentiment / complaint)
 
-For batch intent／sentiment／complaint reading, load `references/QUALITATIVE_DETECTION.md`.
+For batch qualitative reading — judging customer intent, sentiment, or complaints
+across a set of conversations rather than a single lookup — load
+`references/QUALITATIVE_DETECTION.md` on demand and follow it. It covers:
 
-| Ask | Load |
-| --- | ---- |
-| Themes／root cause／how to improve | `references/ROOT_CAUSE_ANALYSIS.md` |
-| Opportunities／recurring asks／purchase intent | `references/OPPORTUNITY_DISCOVERY.md` (run as a separate pass from complaints) |
-| Per-agent CS reply quality | `references/CS_QUALITY_REVIEW.md` (needs `messaging_message_search` for `_User` identity) |
-| FAQ／常見問題 from conversations | `references/FAQ_GENERATION.md` (`senderTypes: ["Customer","_User"]`, `groupBy: "conversation"`) |
+- **Path selection**: time-window, keyword, and tag-segmented audiences use one
+  bounded `messaging_message_search` call with its matching filters.
+- **Sample guardrails**: respect hard sample caps, and never blind-retry. If the user explicitly asks about usage, hand off to `insightark-session` (`credits_usage`). Do not treat tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
+- **Reading rules**: findings must cite specific messages, must not fabricate
+  complaints, and are human-reviewable signals, not authoritative labels.
+
+### Analysis lenses (same tools, same guardrails)
+
+`QUALITATIVE_DETECTION.md` is the shared foundation (path selection + sample
+guardrails + reading rules). `messaging_message_search` is the standard path;
+`messaging_conversation_messages` is a recent context peek, not a period corpus.
+Focused lenses build on it — load the one that matches the ask, then follow
+the shared sample caps:
+
+- **Complaint root cause / theme categorisation** → `references/ROOT_CAUSE_ANALYSIS.md`.
+  Use when the ask is not just "how many complaints" but "which themes, why, and
+  how to improve", with traceable representative cases.
+- **Opportunity discovery / positive intent** → `references/OPPORTUNITY_DISCOVERY.md`.
+  Use for product / marketing / service opportunities (suggestions, recurring
+  questions, purchase intent, unmet needs). Run it as a **separate scoped pass**
+  from complaint analysis — do not share one broad pull for both.
+- **CS reply-quality review / per-agent training material** → `references/CS_QUALITY_REVIEW.md`.
+  Use to evaluate the **staff responder** (not the customer) and compile
+  exemplary / needs-improvement cases per agent. Runs on Strategy A
+  (`messaging_message_search`) because staff identity is returned only there.
+- **FAQ from customer conversations** → `references/FAQ_GENERATION.md`.
+  Use when the ask is to compile / generate / summarize 常見問題 from
+  conversations. Search with `senderTypes: ["Customer","_User"]` and
+  `groupBy: "conversation"`. Do not use opportunity discovery or CS quality
+  review as a substitute.
 
 ## Guardrails
 
-- Do not call write MCP tools. Do not collect credentials or attempt login bootstrap.
-- If authentication is missing, expired, revoked, or the host reports `401`／`403`／authentication-required, hand off to `insightark-session` for OAuth recovery. Network／timeout／`5xx` failures are not OAuth problems.
-- Prefer `messaging_message_search` for analysis. Do not rebuild Excel via repeated MCP search; full human export uses Console CS export.
-- Do not invent hidden or repository-only fields.
-- Run `messaging_message_search` serially for a given user／org — it shares a one-at-a-time lock with `messaging_chat_group_message_search` and Console findMessage. Do not call them in parallel. On `message_search_in_progress`, wait and retry once (zero-charge; not a timeout).
+- Do not call write endpoints (`messaging_customer_send_message`, `broadcast_create`, CRM mutations, MA mutations).
+- Do not collect credentials or attempt login bootstrap.
+- If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.
+- Do not depend on repository-local code or hidden internal fields.
+- Prefer `messaging_message_search` for analysis. Do not rebuild Excel via repeated MCP search; human downloads use Console CS export.
+- Page sizes: search／conversation_messages max 1000; conversation_list max 100.
 
-## Path pitfalls (important)
+## Period vs timeline vs list (important)
 
-These distinctions are easy to miss when reading a single tool schema; choosing the wrong tool produces the wrong answer:
-
-1. **Named period** (“last 30 days”, month／quarter／year): use `messaging_message_search` with explicit `startAt`/`endAt`. Never treat `messaging_conversation_messages` as that period’s corpus (it is recent-only and has no year filter).
-2. **`messaging_conversation_list`** returns activity ordered by `lastMessageAt` (customers missing `lastMessageAt` are excluded). It is not a DB census, not message-`createdAt` proportions, and not a silent／no-inbound count — hand those off to `insightark-customer-manager` (`crm_platform_list`, then `crm_customer_search`).
-3. **Media／file／event counts** are not engagement or satisfaction metrics.
-4. On **`error/date-range-too-large`**, the call fails **before the search runs** (before debit). Split into sequential schema-legal windows from known calendar bounds. Do not discover the max by trial-and-error retries.
-5. **Staff attribution:** only `messaging_message_search` enriches `_User` with `userName`／`userEmail`. The timeline tool does not — report 「無法歸屬」 and do not guess. There is no client `includeUserContact` argument.
-
-## Message search decisions
-
-**Senders:** Use only `senderTypes`. Never pass singular `senderType`. Exact allowed class strings come from the MCP tool schema. Prefer one multi-class call over two searches. Super8 automatic outbound → `senderTypes: ["AddOn"]`. Facebook/Instagram third-party DMs → `senderTypes: ["ForeignBot"]`. For broadcast／campaign copy, use `broadcast_list`／`broadcast_get`, not message search.
+1. **Time-scoped asks** (year／quarter／month／“last 30 days”) → use **`messaging_message_search`** with explicit `startAt`/`endAt`. Do **not** treat `messaging_conversation_messages` as that period’s corpus.
+2. **`messaging_conversation_messages`** is **recent timeline only** (no year filter). It may include messages outside the asked period — never use it as a full-year／full-month sample.
+3. **`messaging_conversation_list`** is Customer **activity** discovery ordered by `lastMessageAt`. Customers missing `lastMessageAt` are excluded. It is **not** “all historical conversations in the DB”, and list activity bounds are **not** message `createdAt` windows. NEVER use it as an organization census or silent／no-inbound customer count — hand that off to `insightark-customer-manager` (`crm_platform_list` then per-platform `crm_customer_search`).
+4. **Non-text** hits (image／file／video／template／event) often lack analyzable text. Do not treat media／file counts as engagement or satisfaction.
+5. **Long ranges:** search max **90 days**. An explicit range greater than 90 days fails with `error/date-range-too-large` **before the search runs**. Split longer periods into ≤90-day windows using known calendar bounds. Do **not** trial-and-error the cap until a call succeeds.
+6. **Staff identity:** MCP does **not** expose client `includeUserContact`. `messaging_message_search` always enriches `_User` with `userName`／`userEmail` internally — request `_User` via `senderTypes` when you need attribution. `messaging_conversation_messages` does **not** enrich staff identity; if fields are null, report “無法歸屬”, do not guess.
 
 ## Message search sender filters (important)
 
@@ -81,22 +104,62 @@ Default (omit `senderTypes`) returns **Customer only**. Staff `userName` / `user
 
 Never pass singular `senderType`. Prefer one multi-class call over two searches. Narrow with `conversationId` and a small time window when possible.
 
-**Time:** Always pass explicit `startAt`/`endAt` when the user names a period — omitting both falls back to the schema default and under-covers the ask. For date-only or one-sided language, follow `skills/insightark-universal-workflow/references/timezone-policy.md`, confirm clocks, and never invent midnight. Analysis lenses follow `references/QUALITATIVE_DETECTION.md`.
+## Message search time window (important)
 
-**Tags:** `includeTags` matches **current** holders, not tag history. A multi-value list alone is OR; for 觸發+完成／every listed tag together, pass `includeTagsMode: "all"`.
+Server **always** applies a time window on `messaging_message_search`:
 
-Period-tagged customer listing is not that current-holder combinator. Hand off to `insightark-customer-manager` and `crm_customer_search` with one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
+| Args | Effective window |
+|---|---|
+| omit both `startAt` and `endAt` | **last 14 days** ending now |
+| only `startAt` | `endAt = now` |
+| only `endAt` | `startAt = endAt − 14 days` |
+| both provided | that range, **max 90 days** (larger → `error/date-range-too-large` before the search runs) |
 
-Use only published filters: `keyword`, `includeTags`, `includeTagsMode`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`, `referralSource`.
+Over-range windows fail **before debit**. Do not iteratively reduce the range to discover the cap.
 
-**Timeout (`message_search_timeout`):** Never blind-retry identical arguments. Narrow the time window or filters first; lower `limit` only after a large page already failed. If it still fails, stop and ask the user or point to Console. Do not invent unsupported `contentType` filters.
+**Do not rely on the 14-day default when the user asks for a specific period.** If the user says "last 30 days" / "this month" / a date range, always pass explicit `startAt` and `endAt` matching that ask. Omitting them silently truncates the sample to 14 days and under-covers the request.
 
-**Ads／綠線／廣告來源:** Use `referralSource: "ADS"` (plus explicit dates when the user names a period). Do not invent a separate ads tool; do not scan with only `contentKinds: ["event"]`; `keyword` does not match ad titles. This filter matches Facebook / Instagram Messenger ads referral stored as `application/x-notify-event` (`data.referral.source = ADS`). LINE native ads are not this Message path; LINE orgs typically return no hits (empty is success). Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. When the user asks to tag those unique customers, hand off to `insightark-customer-manager` for batch tagging (`crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` and `crm_system_task_get`). Investigator MUST NOT list or invoke those three tools.
+When customer time language becomes `startAt`/`endAt` instant boundaries, follow `skills/insightark-universal-workflow/references/timezone-policy.md` and disclose the effective timezone. Date-only two-sided ranges need confirmed clocks; one-sided date-only endpoints need a confirmed clock, disclosure of the server-derived opposite bound (`endAt=now` or `startAt=endAt−14d`), and a ≤90-day check — never silently invent midnight. Analysis lenses reuse the canonical Strategy A rules in `references/QUALITATIVE_DETECTION.md`.
 
-**`fields`:** For analysis, pass only the keys needed for the ask (at least `data`, `conversationId`, `createdAt` for qualitative ranking). Omit `fields` only when the full default blob is required. Keep `data` whole — do not project dotted paths.
+## Message search tag filters (important)
 
-**`limit`:** Prefer the largest schema-legal page size so fewer list calls are needed. Shrink only when the user asks, the host truncates／memory is tight, a timeout forces it, or Gate A/B leads to a smaller scope — not merely to look conservative.
+`includeTags` matches **current holders** of `Customer.tag` (not tag history). Omit or `"any"` is **OR** (any listed current tag).
 
-**Gate A:** For corpus／analysis searches with no keyword, call `return: "count"` first when that parameter exists on the schema. The denominator is the `limit` you will pass on the following list calls. If that list `limit` is omitted, use the tool default **20**. If `ceil(count / that-limit) > 5`, ask the user before listing. Example: count **101** with list `limit` omitted → `ceil(101/20) = 6 > 5` → ask. Example: count **100** with `limit: 20` → `ceil(100/20) = 5` (not `> 5`) → do not ask under Gate A. After Gate A passes or the user approves, still use a large page.
+| Goal | Args |
+|---|---|
+| Any of the listed current tags (default) | `includeTags: ["觸發", "完成"]` — omit `includeTagsMode`, or `includeTagsMode: "any"` |
+| Every listed current tag (觸發 **and** 完成 together) | `includeTags: ["觸發", "完成"]` **and** `includeTagsMode: "all"` |
 
-**Gate B:** Apply only when `truncated === true` and `keptCount < returnedCount`: ask if `ceil(count / keptCount) > 5`, and set next `skip = page.skip + keptCount`. If `keptCount === returnedCount` or truncation fields are absent, Gate B does not apply — use `skip = page.skip + page.limit`. Never advance by `page.count`.
+Do **not** treat a multi-value `includeTags` list by itself as AND. Simultaneous-tag / 觸發+完成 funnels MUST pass `includeTagsMode: "all"`.
+
+Period-tagged **customer** listing (“who received tag X during this date window”) is not that current-holder combinator.
+
+Hand off to `insightark-customer-manager` and call `crm_customer_search` with that one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
+
+## Message search timeout (`error.code = message_search_timeout`)
+
+When search returns structured `message_search_timeout` (`isError: true`):
+
+1. Never blind-retry identical args.
+2. Split `startAt`/`endAt` into smaller windows; reduce `limit` if needed.
+3. Use only published filters: `keyword`, `includeTags`, `includeTagsMode`, `excludeTags`, `conversationId`, `platform`, `senderTypes`, `senderIds`, `contentKinds`, `referralSource`.
+4. Limit automatic splits; if still failing, stop and ask the user to narrow scope or use Console.
+5. Do not invent unsupported message-type / `contentType` filters.
+
+## Ads inbound / 廣告來源 (Messenger referral)
+
+Console 綠線 / 廣告來源 / ads inbound maps to `messaging_message_search` with `referralSource: "ADS"` (plus explicit `startAt`/`endAt` when the user names a period). Do not invent a dedicated ads MCP tool. Do not scan with `contentKinds: ["event"]` alone when the user asked only for ads. `keyword` does not match ad titles.
+
+This filter matches Facebook / Instagram Messenger ads referral stored as `application/x-notify-event` (`data.referral.source = ADS`). LINE native ads are not this Message path; LINE orgs typically return no hits (empty is success).
+
+Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. When the user asks to tag the unique customers, hand off to `insightark-customer-manager` for batch tagging (`crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` and `crm_system_task_get`). Investigator MUST NOT list or invoke those three tools.
+
+## Message search fields, count, and gates (important)
+
+Before a corpus／analysis `messaging_message_search`, pass `fields` listing only keys needed for that ask. Do **not** omit `fields` unless the full default blob (including `platform`) is required. Qualitative ranking SHOULD include at least `data`, `conversationId`, `createdAt`; add `platform` to split channels; keep `data` whole for rich-menu／events.
+
+**Gate A (all hosts):** For corpus／analysis searches with no keyword, call `return: "count"` first. The denominator is the `limit` you **will** pass on the following list calls. If that list `limit` is omitted, use the tool default **20**. If `ceil(count / that-limit) > 5`, ask the user before listing. Example: count **101** with list `limit` omitted → `ceil(101/20) = 6 > 5` → ask. Example: count **100** with `limit: 20` → `ceil(100/20) = 5` (not `> 5`) → do not ask under Gate A.
+
+**Gate B (truncated envelopes only):** Apply only when the list envelope has `truncated === true` **and** `keptCount < returnedCount`. Then remaining trips are `ceil(count / keptCount)` (need `count` from a prior count call, or stop and count). If that is `> 5`, ask even when Gate A passed. If `truncated` is true and `keptCount === returnedCount`, Gate B does **not** apply. Hosts with no `truncated`／`keptCount` ignore Gate B and keep `skip = page.skip + page.limit`.
+
+**Paging:** while `page.hasMore`, if `truncated === true` and `keptCount < returnedCount`, next `skip = page.skip + keptCount` (example: `page.skip = 280`, `keptCount = 20` → `skip = 300`). Otherwise `skip = page.skip + page.limit`. Do not advance by `page.count`.

@@ -42,32 +42,36 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 5. **`messaging_conversation_messages`** returns the **most recent** messages only — no year filter. Never treat it as “all of 2026” (or any named period).
 6. **`messaging_chat_group_list`** returns discoverable groups that have usable `lastMessageAt`. It is **not** “every ChatGroup ever stored”. Org-wide search uses Message `isGroup: true` and MAY include rooms absent from the current list page／filter. Do not claim the list is a full historical inventory.
 7. **Non-text** rows (image／file／video／template／event) often expose only type／filename. Do **not** treat file or media counts as engagement or satisfaction.
-8. **Search coverage:** On `error/date-range-too-large`, split into sequential schema-legal windows. Keep the same explicit `startAt`/`endAt` across pages and report actual coverage — do not infer complete organization-wide coverage from one full page. If the user asks about usage, hand off to `insightark-session` (`credits_usage`); do not treat tool JSON as a receipt; MUST NOT claim other tools return `chargedCredits`.
-9. **Staff attribution:** Group search enriches `_User` identity; `messaging_conversation_messages` does not — report 「無法歸屬」 and do not guess. There is no client `includeUserContact` argument.
+8. **Search coverage:** each search spans at most **90 days**. For a longer period, split into ≤90-day windows. For multi-call analysis, keep the same explicit `startAt`/`endAt` and report the actual coverage; do not infer complete organization-wide coverage from one full page. Do not treat a tool result as a receipt. MUST NOT claim other tools return `chargedCredits`. If the user explicitly asks about usage, hand off to `insightark-session` (`credits_usage`).
+9. **Staff identity:** MCP does **not** expose a client `includeUserContact` argument. Group search **always** enriches `_User` rows with `userName`／`userEmail` internally. `messaging_conversation_messages` does **not** enrich staff identity — if those fields are null there, say “無法歸屬／identity unavailable”, do **not** guess the sender.
 
 ## Workflow
 
-1. Resolve `orgId` from context or `auth_organizations`.
-2. For org-wide／cross-group analysis, call `messaging_chat_group_message_search` without scope ids, and pass explicit dates when the user names a period.
-3. For a named group, call `messaging_chat_group_list` with a literal `groupName` substring. Continue paging only by setting `cursor` to `page.nextCursor` — do not hand-craft cursors. If several hits match, disambiguate with the user; optionally confirm with `messaging_chat_group_get`.
-4. Lock exactly one of `conversationId` or `chatGroupId`.
-5. For a recent peek, use `messaging_conversation_messages`. For period／keyword／sender／content analysis, call `messaging_chat_group_message_search` with that one scope id.
-6. Default search senders are `Group`, `_User`, `AddOn` (Super8 automatic outbound: bots, marketing automation, AI Agent, game/coupon modules); add `ForeignBot` only when needed (Facebook/Instagram third-party direct-to-customer; Messenger／IG echo; not LINE inbound).
-7. While `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, set `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
+1. Resolve `orgId` from user context or `auth_organizations`.
+2. **Org-wide／cross-group analysis:** call `messaging_chat_group_message_search` with `orgId`, explicit time bounds when the user names a period, and optional `keyword`／`senderTypes`／`contentKinds`.
+3. **Named group:** call `messaging_chat_group_list` with `groupName` (literal substring; regex metacharacters are escaped). Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`. Do **not** parse or hand-craft cursors.
+4. If multiple list hits match, **disambiguate** with the user (name, `platform`, `lastMessageAt`, `memberCount`) before analysis. Optionally call `messaging_chat_group_get` to confirm.
+5. Lock either `conversationId` or `chatGroupId` from the chosen row (not both).
+6. Analyze the locked room:
+   - Recent peek only → `messaging_conversation_messages`
+   - Keyword／**period**／sender／content analysis → `messaging_chat_group_message_search` with exactly one scope id
+7. Default search senders are `Group`, `_User`, `AddOn`. `AddOn` is Super8 automatic outbound (bots, marketing automation, AI Agent, game/coupon modules). Add `ForeignBot` only when explicitly needed: Facebook/Instagram third-party direct-to-customer only (Messenger/IG echo). LINE inbound does not use this class.
+8. Time window: omit `startAt`/`endAt` → last **14** days; explicit range max **90** days. Pass explicit bounds when the user asks for a specific period; split longer ranges into ≤90-day windows. Continue `messaging_chat_group_message_search` while `page.hasMore` is true — if `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
 
-## Fields, limit, and gates
+## Fields, count, and gates (important)
 
-**`fields`:** For analysis, pass only the keys needed for the ask (at least `data`, `conversationId`, `createdAt`). Omit `fields` only when the full default is required. Keep `data` whole.
+Before a corpus／analysis `messaging_chat_group_message_search`, pass lean `fields` (at least `data`, `conversationId`, `createdAt`; add `platform` when splitting channels). Do not omit `fields` unless the full default (including `platform`) is required.
 
-**`limit`:** Prefer the largest schema-legal page size. Shrink only for user request, truncation／memory, timeout, or Gate scope reduction — not merely to look conservative.
+**Gate A:** For corpus／analysis with no keyword, call `return: "count"` first. Denominator = planned list `limit` (omit → **20**). If `ceil(count / that-limit) > 5`, ask before listing. Example: count **101** with list limit omitted → ask. Example: count **100** with `limit: 20` → do not ask under Gate A.
 
-**Gate A:** For no-keyword corpus／analysis, call `return: "count"` first when that parameter exists on the schema. If that list `limit` is omitted, use the tool default **20**. If `ceil(count / that-limit) > 5`, ask before listing. Example: count **101** with omitted limit → ask; count **100** with `limit: 20` → do not ask under Gate A. After approval, still use a large page.
-
-**Gate B:** Apply only when `truncated === true` and `keptCount < returnedCount`: ask if `ceil(count / keptCount) > 5`, and set `skip = page.skip + keptCount`. Otherwise use `skip = page.skip + page.limit`. Never advance by `page.count`.
+**Gate B:** Only when `truncated === true` and `keptCount < returnedCount` — then `skip = page.skip + keptCount` and ask if `ceil(count / keptCount) > 5`. If `keptCount === returnedCount` or there is no `truncated`, Gate B does not apply; use `skip = page.skip + page.limit`.
 
 ## Guardrails
 
 - Stay within the published InsightArk MCP surface.
 - Do not assume a group id until list/get returns it (for named-room work).
-- Run `messaging_chat_group_message_search` serially for a given user／org — it shares a one-at-a-time lock with `messaging_message_search` and Console findMessage. Do not call them in parallel. On `message_search_in_progress`, wait and retry once (zero-charge; not a timeout).
+- `message_search_in_progress` means you already have another message search in
+  this organization (including Console) in progress. It is zero-charge: wait
+  for completion, then retry once; do not send parallel retries or treat it as
+  a timeout.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying.

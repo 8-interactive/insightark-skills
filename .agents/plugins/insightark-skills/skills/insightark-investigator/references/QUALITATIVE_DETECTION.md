@@ -1,45 +1,114 @@
 # Qualitative detection playbook (intent / sentiment / complaint)
 
-Load this reference for batch **intent／sentiment／complaint** reading (not a single keyword lookup).
-Use only the read-only tools already exposed by this skill. Findings must cite real messages and stay inside the budgets below.
+On-demand reference for `insightark-investigator`. Load this when a user asks you
+to read a batch of conversations and judge **intent**, **sentiment**, or
+**complaints** — as opposed to a single keyword lookup.
 
-Canonical time／fields／limit／Gate rules live in `skills/insightark-investigator/SKILL.md`.
-For date-only or one-sided clocks, follow `skills/insightark-universal-workflow/references/timezone-policy.md`.
-Do not silently invent midnight. Stay inside the tool schema max range for `startAt`/`endAt`.
+This playbook uses **only the read-only MCP tools already exposed by this skill**.
+It adds no new tool and no new skill. It is designed to be bounded and honest:
+findings must trace back to real messages, and sample sizes must stay inside the
+caps below.
 
-## Path
+---
 
-Use `messaging_message_search` (not `messaging_conversation_list`) for period／keyword／tag／proportion／theme corpora. Conversation list filters Customer `lastMessageAt` activity, not message `createdAt`.
+## Detection path
 
-- Prefer `contentKinds: ["text"]` for sentiment／complaints (less notify-event noise). Add `template` when templates matter; use `event` only for join／follow-style asks.
-- For full customer+staff dialogue, pass both `senderTypes` classes in one call (never singular `senderType`).
-- When the user names a period, pass explicit `startAt`/`endAt` (do not rely on **omit-both-dates**).
-- Put tag audience filters on the same search. When every listed current tag must be held, pass `includeTagsMode: "all"` (a multi-value list alone is OR; current holders only). Period-tagged customer listing uses `insightark-customer-manager` / `crm_customer_search` `taggedAtFrom` / `taggedAtTo`.
-- Lean `fields`: for analysis pass `fields` listing only keys needed (at least `data`, `conversationId`, `createdAt` for qualitative ranking). Do not omit `fields` unless the full default blob is required.
-- Gate A: for corpus／analysis with no keyword, call `return: "count"` first. Denominator = the `limit` you will use on list calls (omit → tool default **20**). If `ceil(count / that-limit) > 5`, ask before listing (e.g. count **101**／omitted limit → ask; count **100**／`limit: 20` → do not ask under Gate A).
+Use `messaging_message_search` for period／keyword／tag／proportion／theme
+analysis. Combine `includeTags`／`excludeTags`／`includeTagsMode`, `startAt`/`endAt`, literal
+`keyword`, `senderTypes`, and `contentKinds` as needed in one bounded call.
+
+- Default sender filter (omit `senderTypes`) is **Customer only**.
+  For full customer+staff dialogue pass `senderTypes: ["Customer","_User"]` in a
+  single call — do not pass both `senderType` and `senderTypes`.
+- Time window is **always** applied server-side: omit both dates → last **14 days**;
+  only `startAt` → `endAt = now`; only `endAt` → `startAt = endAt − 14 days`;
+  both provided → max **90 days**. If the user asks for a specific period (e.g. 30
+  days), pass matching `startAt`/`endAt` — do not rely on the 14-day default.
+- When customer time language becomes `startAt`/`endAt` instant boundaries,
+  follow `skills/insightark-universal-workflow/references/timezone-policy.md` and
+  disclose the effective timezone. For date-only bounds, confirm clocks; for a
+  one-sided bound, also disclose the server-derived opposite bound and enforce
+  the 90-day maximum. Do not silently invent midnight.
+- Prefer `contentKinds: ["text"]` for customer sentiment／complaint detection
+  (drops notify-event noise). Include `template` when staff／bot templates matter;
+  use `event` only for join／follow-style investigation. See messaging skill for
+  the exact kind→MIME table (`video`／`audio` are outside `image`／`file`).
+- `limit` default 20, max **1000**; page with `skip`.
+- **Lean `fields`:** Before a corpus／analysis search, pass `fields` listing only keys needed (at least `data`, `conversationId`, `createdAt` for qualitative ranking; add `platform` to split channels). Do not omit `fields` unless the full default blob is required.
+- **Gate A:** For corpus／analysis with no keyword, call `return: "count"` first. Denominator = the `limit` you will use on list calls (omit → tool default **20**). If `ceil(count / that-limit) > 5`, ask before listing (e.g. count **101**／omitted limit → ask; count **100**／`limit: 20` → do not ask under Gate A).
+- **Gate B / paging:** Only when `truncated === true` and `keptCount < returnedCount`: next `skip = page.skip + keptCount`, and if `ceil(count / keptCount) > 5` ask even when Gate A passed. If `keptCount === returnedCount` (or no `truncated`), Gate B does not apply — use `skip = page.skip + page.limit`.
+- **Tag-scoped corpus:** pass `includeTags` on that same `messaging_message_search`. Omit or `"any"` is **OR** (any listed current tag). When the audience must currently hold **every** listed tag (觸發 + 完成 together), pass `includeTagsMode: "all"`. This is current holders only, not tag history. Do not treat a multi-value `includeTags` list by itself as AND. Period-tagged customer listing uses `insightark-customer-manager` / `crm_customer_search` `taggedAtFrom` / `taggedAtTo`.
+
+**Do not** use `messaging_conversation_list` as the primary path for org-wide
+message sentiment or complaint **proportions** — list filters Customer
+`lastMessageAt` (who was active), not message `createdAt` corpora.
 
 ### Decision tree
 
-1. **Proportion／trend** over a window → search **without** keyword, preferably text, then classify client-side.
-2. **Find a known theme／urgency** → run a keyword search after a keyword bank exists (from the user or from calibration).
-3. **Optional calibration** when vocabulary is unknown → one large-page text pull under Gate A／call budget, then keyword or second-pass classify. Skip if the user already gave keywords.
-4. **No redundant re-search** of the same window solely to recompute statistics already in hand.
+1. **Proportion／overall sentiment／trend** over a time window → one (or few)
+   `messaging_message_search` calls **without** keyword (mutually exclusive filters
+   only), preferably `contentKinds: ["text"]`, then classify **client-side**.
+2. **Find complaints／urgency／a known theme** → keyword search after a keyword
+   bank exists (from the user or from calibration). Prefer `contentKinds: ["text"]`.
+3. **Optional Phase 0 (calibration)** when brand／product vocabulary is unknown →
+   one bounded text-oriented pull (respect sample caps, e.g. limit a few hundred)
+   to learn terms, then keyword or second-pass classify. Skip if the user already
+   supplied keywords.
+4. **No redundant same-window re-search** → after a time-window corpus is already
+   in hand, do **not** issue more `messaging_message_search` calls solely to
+   recompute statistics already computable client-side. At most a small number of
+   keyword calls to demonstrate re-queryability when the user needs that proof.
 
-## Sample budget
+---
 
-- Default ceiling is about **5** search calls (count＋list) per run unless the user approves more. Prefer a **large** schema-legal `limit` so the budget buys coverage, not many tiny pages.
-- Never blind-retry on timeout; narrow the window or filters instead.
-- Run message searches serially for a given user／org (shared lock with chat-group search and Console). Do not fan out parallel searches. `message_search_in_progress` means another search is already running — wait, then retry once; it is not a timeout.
-- When you hit the ceiling, stop, report coverage, and ask. For huge full-export needs, point to Console CS export instead of paginating the whole org over MCP.
-- If the user asks about usage, hand off to `insightark-session` (`credits_usage`). Do not treat tool JSON as a receipt; MUST NOT claim other tools return `chargedCredits`.
+## Sample guardrails (hard limits)
 
-## Reading rules
+Keep each qualitative batch inside the sample caps. If the user explicitly asks
+about usage, hand off to `insightark-session` (`credits_usage`). Do not treat
+tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
+Do not infer spend from remaining-value deltas.
 
-- Cite evidence (`createdAt` + sender／quote). If you cannot point to a message, do not assert the finding.
-- Do not invent complaints; absence of a complaint is a valid result.
-- Null `_User` identity is a known limitation — attribute by staff role, not as a data error.
-- Frame output as human-reviewable signals, not authoritative labels.
+**You MUST:**
 
-## Auth
+1. **Respect default search caps** unless the user explicitly approves more:
+   - `messaging_message_search` calls per run: **≤ 5**
+   - messages returned per call: use a bounded `limit` appropriate to the task
+   - time windows: split into sequential ≤90-day windows; keep each as narrow as the ask permits
+   These are defaults, not hard locks — you may raise them, but only after the
+   user explicitly agrees, and you should restate the extra sample size first.
+2. **Never blind-retry.** If a call fails or times out
+   (`message_search_timeout`), do not resend identical arguments.
+   Narrow the time window / lower `limit` / add a filter, or stop.
+3. **Busy is not timeout.** `message_search_in_progress` means the same user has
+   another search in that organization. Wait for it to finish
+   before one retry — do not fan out parallel work.
+4. **Stop at the cap, report, then ask.** On reaching any cap,
+   halt and report what you covered and what remains. Do not keep fetching.
 
-If a tool returns `401`／`403`／authentication-required, hand off to `insightark-session` for OAuth recovery. Network／timeout／`5xx` are not OAuth problems — apply the retry rules above instead.
+If the user needs full coverage of a large audience, say so plainly and route the
+human to the Console CS export rather than paginating the whole org over MCP.
+
+---
+
+## Reading rules (traceable, non-fabricated, human-reviewable)
+
+- **Trace every finding to evidence.** Each detected intent / sentiment /
+  complaint MUST cite the specific message(s) it is grounded in (quote or
+  reference by `createdAt` + sender). If you cannot point to a message, do not
+  assert the finding.
+- **Do not invent complaints.** Absence of a complaint is a valid result. Never
+  upgrade a neutral question into a complaint to produce a "finding".
+- **Staff identity may be missing.** `_User` (staff) messages can return null
+  `userEmail` / `userName` — this is a known limitation (tracked as S8N-13049),
+  **not** a data error. Attribute by role ("staff reply") when identity is null.
+- **Frame output as human-reviewable.** Present findings as candidate signals for
+  a human to confirm — counts, representative quotes, and per-conversation notes —
+  not as an authoritative classification. Detection quality has not yet been
+  stress-tested on real-complaint corpora, so keep confidence claims modest.
+
+## Auth failures
+
+If a tool returns authentication-required / `401` / `403` (missing, expired, or
+revoked session), hand off to `insightark-session` for host OAuth recovery before
+retrying. Network / timeout / `5xx` are not OAuth problems — apply the retry
+rules above instead.
