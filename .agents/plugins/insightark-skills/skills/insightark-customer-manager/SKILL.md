@@ -26,6 +26,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `crm_customer_update` — patch supported profile fields
 - `crm_customer_tag_add` — add tags to a customer
 - `crm_customer_tag_remove` — remove tags from a customer
+- `crm_customer_tag_batch_add` — enqueue the same tags on an explicit list of platform `customerIds` (maximum 1000)
+- `crm_customer_tag_batch_remove` — enqueue removing the same tags from an explicit list of platform `customerIds` (maximum 1000)
+- `crm_system_task_get` — poll an in-org add-tags / del-tags task until Mongo `done` or `error`
 
 ## Workflow
 
@@ -37,8 +40,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - `crm_customer_group_list` / `crm_customer_group_members_list` to inspect saved group snapshots; continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`
    - `crm_customer_get` for one customer record
    - `crm_customer_update` for supported public profile changes (confirm first)
-   - `crm_customer_tag_add` to append one or more tags (confirm first)
-   - `crm_customer_tag_remove` to remove one or more tags (confirm first)
+   - `crm_customer_tag_add` to append one or more tags on a single known `customerId` (confirm first)
+   - `crm_customer_tag_remove` to remove one or more tags on a single known `customerId` (confirm first)
+   - `crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` for the same tags on an explicit `customerIds` list already obtained from search (confirm first), then poll `crm_system_task_get`
 4. Return the result grounded in the published MCP / public customer schema response.
 
 ## `crm_customer_search` name routing
@@ -56,7 +60,33 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 
 To list customers who currently hold **every** named tag, call `crm_customer_search` with those `includeTags` **and** `includeTagsMode: "all"`. Example: `includeTags: ["vip", "newsletter"]` with `includeTagsMode: "all"`. A multi-value `includeTags` list without the mode stays OR.
 
+Do not pass `taggedAtFrom` or `taggedAtTo` for that current-holder ask.
+
 Do not invent a history filter or a new search tool for this job. `return: "count"` is included.
+
+## `crm_customer_search` period-tagged listing
+
+To list **who / how many people received tag X during a calendar period**, use the same `crm_customer_search` with that **one** `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as Asia/Taipei calendar dates `YYYY-MM-DD`. Example: `includeTags: ["觸發"]`, `taggedAtFrom: "2026-08-01"`, `taggedAtTo: "2026-08-31"`.
+
+This is Console include+dates density replay (tagged-then-deleted inside the window does not match). It is not current-holder `includeTags` / `includeTagsMode`, and not “any add event.”
+
+Do not pass `includeTagsMode: "all"` with taggedAt. Do not invent a new MCP endpoint.
+
+Both bounds are required when either is present. Inclusive window is at most 90 calendar days. Over-range fails with `error/date-range-too-large` **before the search runs**. Do not trial-and-error the cap until a later call succeeds. Invalid dates fail with `error/invalid-tagged-at-date`; one-sided or inverted windows fail with `error/invalid-tagged-at-window`.
+
+These bounds are calendar dates. Do not apply `timezone-policy.md` instant encoding (`+08:00` / clock confirmation) to `taggedAtFrom` / `taggedAtTo`. `return: "count"` remains the count path.
+
+## Explicit-list batch tagging
+
+When the user wants the same tags on an **explicit** customer list already obtained from `crm_customer_search` and/or unique Super8 `customerId`s from `messaging_message_search` (including an investigator ads-referral handoff):
+
+1. Confirm the organization, the tags, and the explicit `customerIds` list. Obtain explicit write confirmation before any batch write.
+2. If the list is longer than 1000, stop and ask before any further calls. MUST NOT silently issue multiple batch tools.
+3. Call `crm_customer_tag_batch_add` or `crm_customer_tag_batch_remove` once with those platform `customerIds` and the tags. Keep `crm_customer_tag_add` / `crm_customer_tag_remove` for a single known `customerId`.
+4. After a receipt with `taskId`, poll `crm_system_task_get`. While Mongo `status` is `started`, `working`, or `pending`, wait and poll again. `done` and `error` are terminal: stop polling and report that status (and progress). Any other Mongo status SHALL stop polling and be reported.
+5. MUST NOT retry `crm_customer_tag_batch_add` or `crm_customer_tag_batch_remove` solely because poll is not terminal. MUST NOT assume tags are applied until `status` is `done`.
+
+MUST NOT invent Console customer-center filter constructors (`platforms`, empty `tagDensity`, group filters, `allCustomers.query`) as MCP batch-tag arguments. Require an explicit `customerIds` list from search tools first. If the user asks to tag “everyone matching the customer-center filter”, refuse that path and collect an explicit list from search first.
 
 ## Silent / no-inbound census
 

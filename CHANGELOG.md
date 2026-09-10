@@ -13,12 +13,19 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
-## 2.12.0 — Message search fields, count, and paging gates
+## 2.12.0 — Message search fields/count/paging; taggedAt listing; batch tag enqueue
 
 - `messaging_message_search` / `messaging_chat_group_message_search`: allowlisted `fields` projection and `return: "count"` preflight (same filters as list; `{ count }` only).
 - Investigator + chat-groups + QUALITATIVE_DETECTION: lean `fields` picking; Gate A (`ceil(count / planned-list-limit) > 5` → ask; omitted list `limit` uses tool default **20**); Gate B / `skip += keptCount` only when `truncated === true` and `keptCount < returnedCount`.
 - Conversations / messaging continuation: `skip += keptCount` when truncated with `keptCount < returnedCount`; otherwise `skip += page.limit`.
 - FAQ: omit `fields` OK (full default including `platform`); content-only `fields` cannot claim cited CS replies; `keptCount` does not create **full** coverage.
+- `insightark-customer-manager`: period-tagged listing (“who / how many received tag X during this calendar window”) uses existing `crm_customer_search` with `taggedAtFrom` / `taggedAtTo` (`YYYY-MM-DD`) and exactly one `includeTags` value. Console include+dates density replay; not current holders.
+- Current-holder AND remains `includeTagsMode: "all"` without taggedAt.
+- `insightark-investigator`: simultaneous-tag 觸發+完成 funnels stay `includeTagsMode: "all"`; period-tagged customer asks hand off to customer-manager / taggedAt.
+- Over-range taggedAt windows fail with `error/date-range-too-large` before the search runs. Do not trial-and-error the cap.
+- `insightark-customer-manager`: enqueue the same tags on an explicit search `customerIds` list via `crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove`, then poll `crm_system_task_get` until Mongo `done` or `error`.
+- One-customer `crm_customer_tag_add` / `crm_customer_tag_remove` remain for a single known id.
+- Investigator ads-referral unique ids hand off tagging to customer-manager; investigator and messaging do not call the batch or poll tools.
 
 ## 2.11.0 — Hide conversation credits
 

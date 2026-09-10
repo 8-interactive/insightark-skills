@@ -14,7 +14,7 @@ Use `messaging_message_search` (not `messaging_conversation_list`) for period／
 - Prefer `contentKinds: ["text"]` for sentiment／complaints (less notify-event noise). Add `template` when templates matter; use `event` only for join／follow-style asks.
 - For full customer+staff dialogue, pass both `senderTypes` classes in one call (never singular `senderType`).
 - When the user names a period, pass explicit `startAt`/`endAt` (do not rely on **omit-both-dates**).
-- Put tag audience filters on the same search. When every listed current tag must be held, pass `includeTagsMode: "all"` (a multi-value list alone is OR; current holders only).
+- Put tag audience filters on the same search. When every listed current tag must be held, pass `includeTagsMode: "all"` (a multi-value list alone is OR; current holders only). Period-tagged customer listing uses `insightark-customer-manager` / `crm_customer_search` `taggedAtFrom` / `taggedAtTo`.
 
 ### Decision tree
 

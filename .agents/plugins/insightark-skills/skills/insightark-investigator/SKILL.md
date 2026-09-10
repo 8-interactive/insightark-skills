@@ -66,11 +66,11 @@ These distinctions are easy to miss when reading a single tool schema; choosing 
 
 **Time:** Always pass explicit `startAt`/`endAt` when the user names a period — omitting both falls back to the schema default and under-covers the ask. For date-only or one-sided language, follow `skills/insightark-universal-workflow/references/timezone-policy.md`, confirm clocks, and never invent midnight. Analysis lenses follow `references/QUALITATIVE_DETECTION.md`.
 
-**Tags:** `includeTags` matches **current** holders, not tag history. A multi-value list alone is OR; for 觸發+完成／every listed tag together, pass `includeTagsMode: "all"`.
+**Tags:** `includeTags` matches **current** holders, not tag history. A multi-value list alone is OR; for 觸發+完成／every listed tag together, pass `includeTagsMode: "all"`. Period-tagged **customer** listing (“who received tag X during this date window”) is not that current-holder combinator — hand off to `insightark-customer-manager` and `crm_customer_search` with that one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
 
 **Timeout (`message_search_timeout`):** Never blind-retry identical arguments. Narrow the time window or filters first; lower `limit` only after a large page already failed. If it still fails, stop and ask the user or point to Console. Do not invent unsupported `contentType` filters.
 
-**Ads／綠線／廣告來源:** Use `referralSource: "ADS"` (plus explicit dates when the user names a period). Do not invent a separate ads tool; do not scan with only `contentKinds: ["event"]`; `keyword` does not match ad titles. LINE native ads usually return empty (that is success). Hits are message-level — unique customers require deduping `conversationId` → `messaging_conversation_get` → `customerId` (search rows have no `customerId`; `sender` is not the Super8 customer id).
+**Ads／綠線／廣告來源:** Use `referralSource: "ADS"` (plus explicit dates when the user names a period). Do not invent a separate ads tool; do not scan with only `contentKinds: ["event"]`; `keyword` does not match ad titles. LINE native ads usually return empty (that is success). Hits are message-level — unique customers require deduping `conversationId` → `messaging_conversation_get` → `customerId` (search rows have no `customerId`; `sender` is not the Super8 customer id). When the user asks to tag those unique customers, hand off to `insightark-customer-manager` for batch tagging (`crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` and `crm_system_task_get`). Investigator MUST NOT list or invoke those three tools.
 
 **`fields`:** For analysis, pass only the keys needed for the ask. Omit `fields` only when the full default blob is required. Keep `data` whole — do not project dotted paths.
 
