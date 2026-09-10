@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `npm run validate` also runs server Jest suites that read `skills/` (`validate:server-contracts`), so skill-copy contracts fail locally instead of only on staging `yarn test:unit`.
+- Slim MCP tool `description` fields across `tools.js`: keep purpose, cross-tool routing, and non-schema pitfalls; drop details already on param descriptions (message-search sender／time／groupBy, MA click-timeout → payload, etc.).
+- Investigator／chat-groups P2 cleanup: drop US-*／Strategy A leftovers; align zero-charge and Gate B `page.count` wording.
+- Slim `messaging_message_search`／`messaging_chat_group_message_search` tool descriptions: keep purpose, routing, staff identity, and one-at-a-time lock; drop duplicated sender／groupBy／time-window details already on param descriptions.
+- Document one-at-a-time message-search lock on `messaging_message_search`／`messaging_chat_group_message_search` tool descriptions and investigator／chat-groups skills (do not call in parallel; wait on `message_search_in_progress`).
+- `insightark-investigator`: aggressive trim — keep cross-tool pitfalls, Gate A/B, fields／limit guidelines, domain quirks; drop schema-restating prose and redundant tables.
+- QUALITATIVE／FAQ／chat-groups: align to the same minimal bar (load-on-demand; no “Schema first” essays).
 - Add a Google Antigravity plugin bundle under `.agents/plugins/insightark-skills/` in generated customer trees.
 - Configure the hosted InsightArk MCP with Antigravity's DCR-only `serverUrl` schema; no static OAuth client ID or secret is included.
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.

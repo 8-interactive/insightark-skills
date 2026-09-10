@@ -1,4 +1,4 @@
-# CS reply-quality & training-material playbook (US-6)
+# CS reply-quality & training-material playbook
 
 On-demand reference for `insightark-investigator`. Load this when a user wants to
 review **customer-service reply quality by agent** and compile exemplary /
@@ -23,12 +23,9 @@ quality review uses `messaging_message_search`:
 - To read the exchange for judging a reply in context, use
   `senderTypes: ["Customer","_User"]` in one search call.
 - To pull only staff replies, use `senderTypes: ["_User"]`.
-- Narrow with `startAt`/`endAt`, `platform`, and `conversationId` as usual, and
-  honour the shared sample caps (`messaging_message_search` calls ≤ 5 per run).
-  Follow the canonical Strategy A time-window rules in
-  [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
-- **Single conversation** ("誰處理這通、回得好不好?") is still Strategy A: search
-  narrowed by `conversationId` (+ `senderTypes`). Do **not** reach for
+- Honour the shared sample budgets and time-window rules in [`QUALITATIVE_DETECTION.md`](./QUALITATIVE_DETECTION.md).
+- **Single conversation** ("誰處理這通、回得好不好?"): search narrowed by
+  `conversationId` (+ `senderTypes`). Do **not** reach for
   `messaging_conversation_messages` — it reads the timeline but cannot name the
   agent.
 
@@ -56,14 +53,9 @@ username fallback — do not treat it as a guaranteed mailbox.
 ## Staff identity null boundary
 
 If a `_User` record has neither name nor email/username, `userName` / `userEmail`
-come back null (S8N-13049 hardened this, but it is rare and can still happen).
-Then attribute by role ("staff reply") and **still group by `sender` objectId** —
+may be null. Attribute by role ("staff reply") and **still group by `sender` objectId** —
 treat missing identity as a known limitation, not an error (same rule as the
 shared reading rules).
-
-> Dependency note: the staff-identity fields ship in `messaging_message_search`
-> already (merged in code); their end-to-end staging verification is a follow-up
-> tracked with S8N-13049, not a gap in this playbook.
 
 ## Judging reply quality
 
