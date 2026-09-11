@@ -57,9 +57,9 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 
 ## Fields, limit, and gates
 
-**`fields`:** For analysis, pass only the keys needed for the ask. Omit `fields` only when the full default is required. Keep `data` whole.
+**`fields`:** For analysis, suggest passing only the strictly necessary keys for the ask to save bandwidth. Omit `fields` only when the full default blob is required. Keep `data` whole — do not project dotted paths.
 
-**`limit`:** Prefer the largest schema-legal page size. Shrink only for user request, truncation／memory, timeout, or Gate scope reduction — not merely to look conservative.
+**`limit`:** Prefer the largest schema-legal page size so fewer list calls are needed. Shrink only for user request, truncation／memory, timeout, or Gate scope reduction — not merely to look conservative.
 
 **Gate A:** For no-keyword corpus／analysis, call `return: "count"` first when that parameter exists on the schema. If `ceil(count / planned-list-limit) > 5`, ask before listing (omitted list `limit` uses the schema default). After approval, still use a large page.
 

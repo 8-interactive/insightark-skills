@@ -74,7 +74,7 @@ Who received a tag during a date window is not that combinator — hand off to `
 
 **Ads／綠線／廣告來源:** Use `referralSource: "ADS"` (plus explicit dates when the user names a period). Do not invent a separate ads tool; do not scan with only `contentKinds: ["event"]`; `keyword` does not match ad titles. LINE native ads usually return empty (that is success). Hits are message-level — unique customers require deduping `conversationId` → `messaging_conversation_get` → `customerId` (search rows have no `customerId`; `sender` is not the Super8 customer id). When tagging those unique customers, hand off to `insightark-customer-manager` (`crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` and `crm_system_task_get`). Investigator MUST NOT list or invoke those three tools.
 
-**`fields`:** For analysis, pass only the keys needed for the ask. Omit `fields` only when the full default blob is required. Keep `data` whole — do not project dotted paths.
+**`fields`:** For analysis, suggest passing only the strictly necessary keys for the ask to save bandwidth. Omit `fields` only when the full default blob is required. Keep `data` whole — do not project dotted paths.
 
 **`limit`:** Prefer the largest schema-legal page size so fewer list calls are needed. Shrink only when the user asks, the host truncates／memory is tight, a timeout forces it, or Gate A/B leads to a smaller scope — not merely to look conservative.
 
