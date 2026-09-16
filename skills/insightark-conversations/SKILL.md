@@ -50,6 +50,20 @@ For message bodies, keyword evidence, or org-wide time-window **message** analys
 
 Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exact `inbox` tokens come from the MCP tool schema enum.
 
+### `inbox` semantics (Console folders)
+
+`inbox` filters Customers whose **current** `Customer.inbox` array **contains** that token — the same folders as Console 訊息中心. It is **folder membership**, not “has anyone replied”.
+
+| Value | Console | Meaning / how it is set |
+|---|---|---|
+| `unassigned` | 未指派 | Not assigned to a staff member (`['all','unassigned']`). **Not** “unreplied” / “nobody handled yet”. |
+| `done` | 完成 | Marked finished / closed (`['all','done']`). |
+| `private` | 所有已指派 | Assigned to an org member (`['all','private', <userId>]`). |
+| `bot` | 聊天機器人 | Currently in a bot / robot flow (`['all','bot']`). |
+| `spam` | 垃圾匣 | Marked spam (`['spam']`). |
+
+**Unreplied / miss-reply triage:** do **not** use `inbox: "unassigned"`. Page `messaging_conversation_list` (optionally with activity bounds) and inspect `lastMessage.senderType` (e.g. last activity still `Customer`). A conversation can stay `unassigned` after a human reply, a customer 👍, or system events such as `application/x-notify-event` (`event/customer-block`).
+
 ## Workflow
 
 1. Resolve `orgId` from user context or `auth_organizations`.
@@ -60,7 +74,7 @@ Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exac
 ## Guardrails
 
 - Stay within the published read-side InsightArk MCP / public schema surface.
-- `inbox` must be a published schema value (e.g. unassigned / done / private / bot / spam — confirm against schema).
+- `inbox` must be a published schema value (unassigned / done / private / bot / spam — confirm against schema). Never treat `unassigned` as unreplied.
 - `platform` is a Super8 channel id string (e.g. line, facebook); do not invent channels.
 - The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance).
 - This skill covers **1:1 Customer conversations only**. For LINE ChatGroups (find by group name, analyze group messages), use `insightark-chat-groups` — do **not** treat `messaging_conversation_list` with `platform=line` as group discovery.

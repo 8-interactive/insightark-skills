@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `insightark-conversations` + `messaging_conversation_list` `inbox` param: document Console folder semantics for unassigned／done／private／bot／spam; unassigned ≠ unreplied (use `lastMessage.senderType`).
 - `npm run validate` also runs server Jest suites that read `skills/` (`validate:server-contracts`), so skill-copy contracts fail locally instead of only on staging `yarn test:unit`.
 - Slim MCP tool `description` fields across `tools.js`: keep purpose, cross-tool routing, and non-schema pitfalls; drop details already on param descriptions (message-search sender／time／groupBy, MA click-timeout → payload, etc.).
 - Investigator／chat-groups P2 cleanup: drop US-*／Strategy A leftovers; align zero-charge and Gate B `page.count` wording.
