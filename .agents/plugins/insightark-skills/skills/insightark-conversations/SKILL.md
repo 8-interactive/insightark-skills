@@ -31,38 +31,13 @@ For message bodies, keyword evidence, or org-wide time-window **message** analys
 
 - **List** `lastMessageAtFrom` / `lastMessageAtTo` filter Customer **`lastMessageAt`** (last activity on the conversation).
 - **Search** `startAt` / `endAt` filter message **`createdAt`** (what was said in a period).
-- List activity bounds are `lastMessageAtFrom` / `lastMessageAtTo`. Message-search time bounds do not apply to `messaging_conversation_list`.
-
-### List activity bounds
-
-- Instants MUST include an explicit offset or `Z`. Reject date-only at the tool; follow `skills/insightark-universal-workflow/references/timezone-policy.md` when encoding customer calendar language (confirm clock boundaries; do not invent midnight).
-- Only `From` → server sets `To = now`; span must be ≤ **90 days**.
-- Only `To` → server sets `From = To − 90 days`.
-- Both → span ≤ **90 days**.
-- Neither → inbox mode (newest activity first). Customers missing `lastMessageAt` (e.g. brand-outbound-only) are excluded.
+- For customer calendar language, follow `skills/insightark-universal-workflow/references/timezone-policy.md` (confirm clock boundaries; do not invent midnight).
 
 ### Pagination (`cursor`)
 
-- Echo `page.nextCursor` as the next call’s `cursor` while `page.hasMore` is true. Do **not** parse or hand-craft cursors.
-- `cursor` is an opaque keyset continuation hint for `(lastMessageAt, _id)` — **not** an auth or signed token.
 - A short returned conversation count does not always mean “no more pages” if hydration skipped rows; trust `page.hasMore` / `page.nextCursor`.
-- For `messaging_message_search` (via investigator), continue while `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, use `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`. Do not advance by `page.count`. When `keptCount === returnedCount` (or no `truncated`), Gate B does not apply — keep `skip += page.limit`.
 
-Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exact `inbox` tokens come from the MCP tool schema enum.
-
-### `inbox` semantics (Console folders)
-
-`inbox` filters Customers whose **current** `Customer.inbox` array **contains** that token — the same folders as Console 訊息中心. It is **folder membership**, not “has anyone replied”.
-
-| Value | Console | Meaning / how it is set |
-|---|---|---|
-| `unassigned` | 未指派 | Not assigned to a staff member (`['all','unassigned']`). **Not** “unreplied” / “nobody handled yet”. |
-| `done` | 完成 | Marked finished / closed (`['all','done']`). |
-| `private` | 所有已指派 | Assigned to an org member (`['all','private', <userId>]`). |
-| `bot` | 聊天機器人 | Currently in a bot / robot flow (`['all','bot']`). |
-| `spam` | 垃圾匣 | Marked spam (`['spam']`). |
-
-**Unreplied / miss-reply triage:** do **not** use `inbox: "unassigned"`. Page `messaging_conversation_list` (optionally with activity bounds) and inspect `lastMessage.senderType` (e.g. last activity still `Customer`). A conversation can stay `unassigned` after a human reply, a customer 👍, or system events such as `application/x-notify-event` (`event/customer-block`).
+For miss-reply / unreplied triage, page `messaging_conversation_list` (optionally with activity bounds) and inspect `lastMessage.senderType` (e.g. last activity still `Customer`).
 
 ## Workflow
 
@@ -74,11 +49,8 @@ Optional filters: `customerId`, `platform`, `inbox`, `limit` (max **100**). Exac
 ## Guardrails
 
 - Stay within the published read-side InsightArk MCP / public schema surface.
-- `inbox` must be a published schema value (unassigned / done / private / bot / spam — confirm against schema). Never treat `unassigned` as unreplied.
-- `platform` is a Super8 channel id string (e.g. line, facebook); do not invent channels.
-- The list is **customer-activity driven**: results are ordered by customer `lastMessageAt` (not full-text relevance).
 - This skill covers **1:1 Customer conversations only**. For LINE ChatGroups (find by group name, analyze group messages), use `insightark-chat-groups` — do **not** treat `messaging_conversation_list` with `platform=line` as group discovery.
-- Do **not** describe list results as “all historical conversations in the database”: Customers missing `lastMessageAt` are excluded, and there is no full-history inventory mode.
-- For **period／year message analysis**, hand off to `insightark-investigator` (or `insightark-chat-groups` for LINE groups). `messaging_conversation_list` filters Customer activity, not message `createdAt`.
+- Do **not** describe list results as a full-history inventory of every conversation.
+- For **period／year message analysis**, hand off to `insightark-investigator` (or `insightark-chat-groups` for LINE groups).
 - Do not assume a conversation id until it is returned by the API.
 - If authentication is missing, expired, revoked, or the host reports `401` / `403` / authentication-required, hand off to `insightark-session` for host OAuth recovery before retrying. Do not treat network/timeout/`5xx` failures as OAuth problems.
