@@ -15,6 +15,12 @@
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
 
+## 2.12.1 — Broadcast list/get accounting + templateAccounting
+
+- `insightark-broadcast-manager`: after `broadcast_list` / `broadcast_get`, report open/click via `accounting.read` / `accounting.click` (delivered = top-level `success`). Rate **formulas** live on the MCP tool descriptions; the skill tells agents to follow those tools and present 開封率／點擊率 to the user.
+- On `broadcast_get`, use nested `templateAccounting` paths → `{ uv, pv }` (uv=unique, pv=including repeats); `elements.i.buttons.j` maps to `options.messages` interactive template element i / button j. `{}` when accounting is unavailable.
+- When `accounting` is `null`, state that open/click stats are not available yet. MUST NOT invent rates from delivery counters alone.
+
 ## 2.12.0 — Message search fields/count/paging; taggedAt listing; batch tag enqueue
 
 - `messaging_message_search` / `messaging_chat_group_message_search`: allowlisted `fields` projection and `return: "count"` preflight (same filters as list; `{ count }` only).
