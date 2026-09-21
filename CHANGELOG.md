@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.13.0 — Conversation inbox semantics, slimmed tool/skill copy, Antigravity plugin bundle
 
 - `messaging_conversation_list` `inbox` param: Console folder semantics（五值）. `insightark-conversations` routes miss-reply triage via `lastMessage.senderType`.
 - `npm run validate` also runs server Jest suites that read `skills/` (`validate:server-contracts`), so skill-copy contracts fail locally instead of only on staging `yarn test:unit`.
