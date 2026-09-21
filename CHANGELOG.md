@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.13.1 — Republish after Copilot MCP Phase II skill deltas
+
+- Bump VERSION so main can republish after S8N-13128 merged further message-search / investigator / inbox skill copy under already-tagged `v2.13.0`.
+- Loosen unit tests that hard-pinned pack VERSION so future bumps only need metadata sync, not per-suite pin updates.
+
 ## 2.13.0 — Conversation inbox semantics, slimmed tool/skill copy, Antigravity plugin bundle
 
 - `messaging_conversation_list` `inbox` param: Console folder semantics（五值）. `insightark-conversations` routes miss-reply triage via `lastMessage.senderType`.
