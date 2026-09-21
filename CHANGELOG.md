@@ -2,10 +2,38 @@
 
 ## Unreleased
 
+- `messaging_conversation_list` `inbox` param: Console folder semantics（五值）. `insightark-conversations` routes miss-reply triage via `lastMessage.senderType`.
+- `npm run validate` also runs server Jest suites that read `skills/` (`validate:server-contracts`), so skill-copy contracts fail locally instead of only on staging `yarn test:unit`.
+- Slim MCP tool `description` fields across `tools.js`: keep purpose, cross-tool routing, and non-schema pitfalls; drop details already on param descriptions (message-search sender／time／groupBy, MA click-timeout → payload, etc.).
+- Investigator／chat-groups P2 cleanup: drop US-*／Strategy A leftovers; align zero-charge and Gate B `page.count` wording.
+- Slim `messaging_message_search`／`messaging_chat_group_message_search` tool descriptions: keep purpose, routing, staff identity, and one-at-a-time lock; drop duplicated sender／groupBy／time-window details already on param descriptions.
+- Document one-at-a-time message-search lock on `messaging_message_search`／`messaging_chat_group_message_search` tool descriptions and investigator／chat-groups skills (do not call in parallel; wait on `message_search_in_progress`).
+- `insightark-investigator`: aggressive trim — keep cross-tool pitfalls, Gate A/B, fields／limit guidelines, domain quirks; drop schema-restating prose and redundant tables.
+- QUALITATIVE／FAQ／chat-groups: align to the same minimal bar (load-on-demand; no “Schema first” essays).
 - Add a Google Antigravity plugin bundle under `.agents/plugins/insightark-skills/` in generated customer trees.
 - Configure the hosted InsightArk MCP with Antigravity's DCR-only `serverUrl` schema; no static OAuth client ID or secret is included.
 - Document workspace/global installation and validate that the bundled skills match the canonical skills tree.
 - Publish a dedicated `insightark-skills-antigravity-*.zip` artifact so Antigravity installs can consume the plugin root directly.
+
+## 2.12.1 — Broadcast list/get accounting + templateAccounting
+
+- `insightark-broadcast-manager`: after `broadcast_list` / `broadcast_get`, report open/click via `accounting.read` / `accounting.click` (delivered = top-level `success`). Rate **formulas** live on the MCP tool descriptions; the skill tells agents to follow those tools and present 開封率／點擊率 to the user.
+- On `broadcast_get`, use nested `templateAccounting` paths → `{ uv, pv }` (uv=unique, pv=including repeats); `elements.i.buttons.j` maps to `options.messages` interactive template element i / button j. `{}` when accounting is unavailable.
+- When `accounting` is `null`, state that open/click stats are not available yet. MUST NOT invent rates from delivery counters alone.
+
+## 2.12.0 — Message search fields/count/paging; taggedAt listing; batch tag enqueue
+
+- `messaging_message_search` / `messaging_chat_group_message_search`: allowlisted `fields` projection and `return: "count"` preflight (same filters as list; `{ count }` only).
+- Investigator + chat-groups + QUALITATIVE_DETECTION: lean `fields` picking; Gate A (`ceil(count / planned-list-limit) > 5` → ask; omitted list `limit` uses tool default **20**); Gate B / `skip += keptCount` only when `truncated === true` and `keptCount < returnedCount`.
+- Conversations / messaging continuation: `skip += keptCount` when truncated with `keptCount < returnedCount`; otherwise `skip += page.limit`.
+- FAQ: omit `fields` OK (full default including `platform`); content-only `fields` cannot claim cited CS replies; `keptCount` does not create **full** coverage.
+- `insightark-customer-manager`: period-tagged listing (“who / how many received tag X during this calendar window”) uses existing `crm_customer_search` with `taggedAtFrom` / `taggedAtTo` (`YYYY-MM-DD`) and exactly one `includeTags` value. Console include+dates density replay; not current holders.
+- Current-holder AND remains `includeTagsMode: "all"` without taggedAt.
+- `insightark-investigator`: simultaneous-tag 觸發+完成 funnels stay `includeTagsMode: "all"`; period-tagged customer asks hand off to customer-manager / taggedAt.
+- Over-range taggedAt windows fail with `error/date-range-too-large` before the search runs. Do not trial-and-error the cap.
+- `insightark-customer-manager`: enqueue the same tags on an explicit search `customerIds` list via `crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove`, then poll `crm_system_task_get` until Mongo `done` or `error`.
+- One-customer `crm_customer_tag_add` / `crm_customer_tag_remove` remain for a single known id.
+- Investigator ads-referral unique ids hand off tagging to customer-manager; investigator and messaging do not call the batch or poll tools.
 
 ## 2.11.0 — Hide conversation credits
 

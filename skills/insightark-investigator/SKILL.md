@@ -132,6 +132,10 @@ When customer time language becomes `startAt`/`endAt` instant boundaries, follow
 
 Do **not** treat a multi-value `includeTags` list by itself as AND. Simultaneous-tag / 觸發+完成 funnels MUST pass `includeTagsMode: "all"`.
 
+Period-tagged **customer** listing (“who received tag X during this date window”) is not that current-holder combinator.
+
+Hand off to `insightark-customer-manager` and call `crm_customer_search` with that one `includeTags` value plus `taggedAtFrom` / `taggedAtTo` as `YYYY-MM-DD`.
+
 ## Message search timeout (`error.code = message_search_timeout`)
 
 When search returns structured `message_search_timeout` (`isError: true`):
@@ -148,4 +152,4 @@ Console 綠線 / 廣告來源 / ads inbound maps to `messaging_message_search` w
 
 This filter matches Facebook / Instagram Messenger ads referral stored as `application/x-notify-event` (`data.referral.source = ADS`). LINE native ads are not this Message path; LINE orgs typically return no hits (empty is success).
 
-Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. Deduped ids MAY go to existing tag tools; batch tagging remains S8N-13155.
+Hits are message-level (follow + referral ADS MAY duplicate a customer). Obtain Super8 `customerId` via `conversationId` → `messaging_conversation_get` → `conversation.customerId`. Unique customer count is client-side dedupe of that `customerId`, not the search result count. Do not treat `sender` as Super8 `customerId`. Search hits do not include `customerId`. When the user asks to tag the unique customers, hand off to `insightark-customer-manager` for batch tagging (`crm_customer_tag_batch_add` / `crm_customer_tag_batch_remove` and `crm_system_task_get`). Investigator MUST NOT list or invoke those three tools.

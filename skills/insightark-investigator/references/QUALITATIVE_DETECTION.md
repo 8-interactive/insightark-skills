@@ -34,7 +34,7 @@ analysis. Combine `includeTags`／`excludeTags`／`includeTagsMode`, `startAt`/`
   use `event` only for join／follow-style investigation. See messaging skill for
   the exact kind→MIME table (`video`／`audio` are outside `image`／`file`).
 - `limit` default 20, max **1000**; page with `skip`.
-- **Tag-scoped corpus:** pass `includeTags` on that same `messaging_message_search`. Omit or `"any"` is **OR** (any listed current tag). When the audience must currently hold **every** listed tag (觸發 + 完成 together), pass `includeTagsMode: "all"`. This is current holders only, not tag history. Do not treat a multi-value `includeTags` list by itself as AND.
+- **Tag-scoped corpus:** pass `includeTags` on that same `messaging_message_search`. Omit or `"any"` is **OR** (any listed current tag). When the audience must currently hold **every** listed tag (觸發 + 完成 together), pass `includeTagsMode: "all"`. This is current holders only, not tag history. Do not treat a multi-value `includeTags` list by itself as AND. Period-tagged customer listing uses `insightark-customer-manager` / `crm_customer_search` `taggedAtFrom` / `taggedAtTo`.
 
 **Do not** use `messaging_conversation_list` as the primary path for org-wide
 message sentiment or complaint **proportions** — list filters Customer
