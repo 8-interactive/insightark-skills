@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.14.0 — crm_customer_search joinedAt window and missing-phone filter
+
+- `crm_customer_search` accepts `joinedAtFrom` / `joinedAtTo`: inclusive ISO-8601 instants with an explicit offset or `Z` (date-only rejected with `error/invalid-joined-at-instant`; inverted windows with `error/invalid-joined-at-window`). They do not require `platform`.
+- `crm_customer_search` accepts boolean `cellPhoneMissing`: `true` matches a missing, null, or empty basic-profile `cellPhone`; `false` / omitted adds no filter. It cannot be combined with `cellPhone` (`error/conflicting-cell-phone-filter`).
+- `insightark-customer-manager`: "joined / became friends during a date range" asks use `joinedAtFrom` / `joinedAtTo` (plus `platform`), `return: "count"` for numbers, and paging only inside the window. Do not page all customers and filter joinedAt client-side. "No phone in the basic profile" asks use `cellPhoneMissing: true`.
+- Ships with the matching InsightArk MCP server release (S8N-13235).
+
 ## 2.13.1 — Republish after Copilot MCP Phase II skill deltas
 
 - Bump VERSION so main can republish after S8N-13128 merged further message-search / investigator / inbox skill copy under already-tagged `v2.13.0`.
