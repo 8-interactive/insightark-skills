@@ -1,6 +1,6 @@
 ---
 name: insightark-broadcast-manager
-description: Investigate and operate on broadcast tasks through InsightArk MCP — session validation, org scoping, broadcast create (default preview for rich batches), get, and list.
+description: Investigate and operate on broadcast tasks through InsightArk MCP — session validation, org scoping, broadcast create (default preview for rich batches), get, list, and pause/resume of a scheduled broadcast.
 when_to_use: When a user wants a single broadcast-oriented workflow that can validate MCP readiness, resolve organization scope, launch a broadcast, inspect one broadcast's progress, or browse recent broadcasts.
 allowed-mcp: true
 ---
@@ -23,6 +23,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `crm_tag_list` — compare rough organization tag inventory counts
 - `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect materialized group snapshots
 - `broadcast_create` — create an async broadcast task
+- `broadcast_update` — pause a scheduled broadcast into a draft, or resume a draft (see the pause and resume section)
 - `messaging_message_preview` — preview message batch before create
 - `media_upload_url` — upload local media for message payloads
 
@@ -33,9 +34,37 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 3. Choose one path:
    - **Tag sizing / create** — use `crm_tag_list` for rough comparison of tag inventory (`name`, `count`, `density`, `lastUsed`). Its `count` / `density` are not platform- or policy-filtered sendable audience totals. For a tag-targeted dynamic audience, always call `broadcast_audience_preview` before claiming the sendable count or calling `broadcast_create`; then present its policy-filtered count, confirm, and pass its top-level `previewRef` and matching top-level `messageTag` (if any) to `broadcast_create`. Supported dynamic conditions are tag include/exclude, gender, one customer group, all-bound, and inbox. Do not combine a group with another filter; do not use time/density tag clauses or Console-absent filters. For rich / `application/x-template` payloads, hand construction to `insightark-messaging` and its `references/TEMPLATE_GUIDELINES.md` (do not copy schema here); optionally `media_upload_url`. Follow the universal **Rich Preview Gate** (`skills/insightark-universal-workflow/references/rich-preview-gate.md`): preview-required → `messaging_message_preview` → approval → `broadcast_create`; text-only without quick replies → confirmation only; skip preview only when the user explicitly asks. When customer time language becomes the schedule instant, apply `skills/insightark-universal-workflow/references/timezone-policy.md`.
    - **Get** — `broadcast_get`; use `phase`, `deliveryOutcome`, `attention`, and `failureDiagnostics` rather than treating raw `status: done` as delivery success. For 開封/點擊 performance, use `accounting` and (on get) `templateAccounting`.
-   - `broadcast_create` returns only an asynchronous receipt; inspect a later terminal outcome through get or list.
+   - `broadcast_create` returns only an acceptance, never a delivery claim; inspect a later terminal outcome through get or list (see the completion section).
    - **List** — `broadcast_list`, optionally filtered by `status`, `platform`, `createdFrom`, `createdTo`, terminal `deliveryOutcome`, or server-computable `attention: scheduled_overdue`. Continue while `page.hasMore` is true by echoing `page.nextCursor` as `cursor`. Prefer each item’s `accounting` when reporting open/click performance.
-4. Return the MCP response as-is. Do not treat tool JSON as a receipt. MUST NOT claim other tools return `chargedCredits`.
+4. Return the MCP response as-is. Report a create response as an acceptance, not as proof of delivery. MUST NOT claim other tools return `chargedCredits`.
+
+<!-- schema-separation:start -->
+## Pausing and resuming a 群發訊息
+
+This section covers only when and why to use `broadcast_update`. How it works (parameters, rules, failures) is defined by the tool itself, so follow the tool and do not guess.
+
+- **When to pause.** The customer wants to 暫停 or 停止 a scheduled 群發訊息 before it goes out, usually after spotting a mistake in the audience, timing, or copy. Pausing is reversible and deletes nothing.
+- **Look before acting.** Read the task with `broadcast_get` before any `broadcast_update` call, and act only when its `allowedActions` includes the action you intend. When `allowedActions` is empty, report the current `phase` to the customer and stop; do not retry or hunt for workarounds.
+- **Confirm every write.** Obtain explicit customer confirmation before each `broadcast_update` call, naming the 群發訊息 and the action.
+- **After a pause.** Tell the customer the 群發訊息 is now a 草稿 that will not go out until someone resumes it.
+- **Content changes belong to the Console.** If the customer wants different message text, audience, or platform, you may pause on request, then hand the editing to the Super8 Console. Never try to change content through MCP.
+- **When to resume.** Only when the customer asks to send a 草稿 again. Ask whether it should go out now or at a specific time. For a specific time, show the local time, timezone, and resolved instant per the timezone policy. For now, say plainly that it will go out immediately. In both cases tell the customer how many recipients the draft holds, and call `broadcast_update` only after they confirm.
+- **Drafts the customer did not just pause.** When the 草稿 was not paused earlier in this conversation, including one authored in the Console, describe it first (name, platform, recipient count, message content) and get explicit confirmation, because it may be unfinished work.
+- **What not to claim.** After a resume, say the 群發訊息 was scheduled or started, not that it was delivered; judge completion afterwards with `broadcast_get` as in the status section. Do not promise that a pause is still possible close to the send time; trust `allowedActions`.
+<!-- schema-separation:end -->
+
+<!-- schema-separation:start -->
+## Confirming that a 群發訊息 finished
+
+This section covers when and why to follow up after `broadcast_create`; the checking schedule, stop rules, and the meaning of each phase and outcome come from the tool descriptions, so follow those and do not restate them here.
+
+- **A create response is only an acceptance.** It tells you the task was taken in. It is not a delivery claim, so never tell the customer the messages arrived on the strength of it.
+- **Follow up only when the customer wants the outcome.** Then use `broadcast_get` and answer from `phase` and `deliveryOutcome` alone. If the customer asks right after creation whether it arrived, call `broadcast_get` first; when the phase is not terminal, say the 群發訊息 is still in progress.
+- **Stop where the tool tells you to.** When the tool-defined limit is reached while the 群發訊息 is still going, report the phase and progress you saw, say completion is unconfirmed, and hand off to the Console or support with the `taskId`. Do not call it a failure.
+- **A draft or an unrecognised state ends the follow-up.** Report it plainly and let the customer decide.
+- **`success` is not a receipt.** Do not say customers received or read a message because of `success`; use `accounting` for open and click claims.
+- **Terminal failures** keep the stop-and-ask behaviour of the status section below.
+<!-- schema-separation:end -->
 
 ## Message envelope
 
@@ -51,9 +80,9 @@ For rich templates or quick replies, use `insightark-messaging` and `references/
 - **Preparing / dispatching** — describe this as audience-resolution work. `dispatching` has no delivery-progress comparison; do not infer a send stall from unchanged counters.
 - **Working** — first require `liveProgressAvailable: true`. When asked whether it is progressing, take a snapshot with `broadcast_get` (or a narrowly filtered `broadcast_list`), wait approximately 60 seconds, then read again. If `completed` increased, report both counts and `observedAt` values as evidence of progress. If it did not increase while both snapshots remain working, report `no_progress_observed` as an attention signal only; do not claim a cause. If the phase changed, evaluate the new phase or terminal outcome instead.
 - **Terminal** — report `deliveryOutcome`: `delivered`, `done_with_failures`, `no_recipients`, or `delivery_incomplete`. For failures, report `failureDiagnostics.classificationAvailability`, allowlisted aggregate code/category/retryability when present, `unclassifiedFailedCount`, and `taskId` as the support reference. State when classification is unavailable or partial; never expose or infer recipient details, raw provider codes, or provider payloads. An allowlisted normalized code may be looked up in public provider documentation outside this skill.
-- **Open / click (`accounting`)** — after a successful `broadcast_list` or `broadcast_get`, when `accounting` is non-null use `accounting.read` (unique opens), `accounting.click` (unique clicks), and top-level `success` (delivered). Compute open/click **rates** only with the formulas on those tools’ MCP descriptions (do not re-derive other denominators). Present results to the user as 開封率／點擊率 percentages where applicable. When `accounting` is `null` (non-done, still sending, or analytics unavailable), state that open/click stats are not available yet. MUST NOT invent open/click rates from `success` / `total` alone.
+- **Open / click (`accounting`)** — after a successful `broadcast_list` or `broadcast_get`, when `accounting` is non-null use `accounting.read` (unique opens), `accounting.click` (unique clicks), and top-level `success` as the denominator the tool descriptions name. Compute open/click **rates** only with the formulas on those tools’ MCP descriptions (do not re-derive other denominators). Present results to the user as 開封率／點擊率 percentages where applicable. When `accounting` is `null` (non-done, still sending, or analytics unavailable), state that open/click stats are not available yet. MUST NOT invent open/click rates from `success` / `total` alone.
 - **Per-element clicks (get only)** — on `broadcast_get`, use nested `templateAccounting` (empty `{}` when accounting is unavailable). Top-level keys are template ids, `quick`, `share`, or `url*`. Under a template id (or `quick` / `share`), paths such as `elements.0.buttons.0` index into the matching interactive payload in `options.messages` (usually an `application/x-template` / card-like message): `elements.<i>` is the i-th element (0-based), `buttons.<j>` is that element’s j-th button (0-based). Use the message’s button title/label when explaining the click to the user. Each leaf is `{ uv, pv }` — **uv** = unique clicks, **pv** = clicks including repeats. Cite uv/pv when the user asks about individual buttons, URLs, quick replies, or share. Performance numbers are only under `templateAccounting`, not inside `options.messages`. Per-element rate denominators follow the `broadcast_get` tool description.
-- **Terminal failure action** — stop and ask for user direction. There is no public resend, draft, cancel, or export lifecycle tool. Do not automatically create a replacement broadcast; require fresh explicit confirmation before any new `broadcast_create`, and cite `taskId` for Super8 Console/support handoff when useful.
+- **Terminal failure action** — stop and ask for user direction. There is no public resend, cancel, delete, or export tool; `broadcast_update` is the only lifecycle control and covers reversible pause and resume only. Do not automatically create a replacement broadcast; require fresh explicit confirmation before any new `broadcast_create`, and cite `taskId` for Super8 Console/support handoff when useful.
 
 Golden reporting examples are maintained in `references/BROADCAST_STATUS_GOLDEN_CASES.md`.
 
