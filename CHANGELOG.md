@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.15.0 — Broadcast pause / resume (`broadcast_update`), `draft` phase, `allowedActions`
+
+- New MCP tool `broadcast_update` (write scope): `action: pause | resume` changes broadcast lifecycle state only. Pause turns a far-enough scheduled broadcast into a draft; resume turns a complete draft into a scheduled or immediately started broadcast. Content edits stay in the Super8 Console.
+- `broadcast_list` / `broadcast_get`: new `draft` phase (long-lived, distinct from the transitional `preparing`), read-only `allowedActions`, and `publishedAt: null` while a broadcast is a draft. The state transitions now live once in the tool descriptions.
+- `insightark-broadcast-manager`: WHEN/WHY guidance for pausing and resuming (confirm first, confirm before resuming a draft the customer did not just pause, content edits go to the Console). Replaces the stale claim that no draft lifecycle tool exists. The skill never repeats tool schema text; a Jest suite under `validate:server-contracts` enforces it.
+- Completion guidance (S8N-13232): `broadcast_create` description now defines the asynchronous acceptance response and one polling contract with stop conditions; `broadcast_get` / `broadcast_list` define every phase and `deliveryOutcome` value and describe `success` as the platform-accepted count, not proof of customer receipt.
+- `broadcast_create` result gains additive `phase`, `deliveryOutcome: null`, and `nextAction`; existing fields are unchanged.
+- `insightark-broadcast-manager`: WHEN/WHY completion guardrails (create response is an acceptance, follow up with `broadcast_get`, stop at the tool-defined limit and report completion as unconfirmed, `success` is not a receipt claim).
+- Ships with the matching InsightArk MCP server release.
+
 ## 2.14.0 — crm_customer_search joinedAt window and missing-phone filter
 
 - `crm_customer_search` accepts `joinedAtFrom` / `joinedAtTo`: inclusive ISO-8601 instants with an explicit offset or `Z` (date-only rejected with `error/invalid-joined-at-instant`; inverted windows with `error/invalid-joined-at-window`). They do not require `platform`.
