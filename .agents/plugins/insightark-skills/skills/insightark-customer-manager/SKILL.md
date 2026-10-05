@@ -19,7 +19,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `auth_organizations` — list manageable organizations (no `orgId` required)
 - `crm_platform_list` — list the org's live messaging platforms (no secrets)
 - `crm_customer_get` — get one customer by id
-- `crm_customer_search` — search customers with public filters, inbound bounds, optional `fields`, or `return: "count"`
+- `crm_customer_search` — search customers with public filters, inbound bounds, joinedAt bounds, `cellPhoneMissing`, optional `fields`, or `return: "count"`
 - `crm_tag_list` — discover organization tag inventory and rough holder counts
 - `crm_customer_group_list`, `crm_customer_group_get`, `crm_customer_group_members_list` — inspect saved group snapshots
 - `crm_customer_group_rename`, `crm_customer_group_delete` — rename or soft-delete customer groups (confirm first)
@@ -75,6 +75,22 @@ Do not pass `includeTagsMode: "all"` with taggedAt. Do not invent a new MCP endp
 Both bounds are required when either is present. Inclusive window is at most 90 calendar days. Over-range fails with `error/date-range-too-large` **before the search runs**. Do not trial-and-error the cap until a later call succeeds. Invalid dates fail with `error/invalid-tagged-at-date`; one-sided or inverted windows fail with `error/invalid-tagged-at-window`.
 
 These bounds are calendar dates. Do not apply `timezone-policy.md` instant encoding (`+08:00` / clock confirmation) to `taggedAtFrom` / `taggedAtTo`. `return: "count"` remains the count path.
+
+## `crm_customer_search` joined-in-window listing
+
+For **who / how many customers joined (added the account / became friends) during a date range**, call `crm_customer_search` with `joinedAtFrom` / `joinedAtTo`, plus `platform` when the user names a channel. Both bounds are **inclusive** ISO-8601 instants with an explicit offset or `Z`; follow the generic timezone-conversion rule. Example for LINE customers who joined 9/25–9/28 (Asia/Taipei calendar days): `platform: "line"`, `joinedAtFrom: "2026-09-25T00:00:00+08:00"`, `joinedAtTo: "2026-09-28T23:59:59.999+08:00"`.
+
+- When only a number is needed, pass `return: "count"`.
+- For the list, page only inside that window: continue while `page.hasMore` is true with `skip = page.skip + page.limit`.
+- Do not page all customers with `skip` and filter joinedAt client-side. The joinedAt bounds are the date filter.
+- Date-only bounds (`YYYY-MM-DD`) fail with `error/invalid-joined-at-instant`; `joinedAtFrom` later than `joinedAtTo` fails with `error/invalid-joined-at-window`. joinedAt bounds do not require `platform`.
+
+## `crm_customer_search` missing-phone listing
+
+For customers with **no phone in the basic profile** (`cellPhone` missing, null, or empty), pass `cellPhoneMissing: true`. It can be combined with `platform`, joinedAt bounds, and `return: "count"`.
+
+- `cellPhoneMissing` cannot be combined with `cellPhone` (the call fails with `error/conflicting-cell-phone-filter`). Use `cellPhone` only for a phone lookup.
+- `cellPhoneMissing: false` or omitted adds no filter; it does not mean "has a phone".
 
 ## Explicit-list batch tagging
 
