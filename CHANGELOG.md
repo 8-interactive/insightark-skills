@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.15.1 — MA `limits.message: 0` means unlimited (S8CS-345)
+
+- `insightark-ma-automation`: when the customer asks for 不限訊息則數, the skill now confirms `limits.message: 0` (no total message cap) and proceeds instead of replying that unlimited is unsupported. `per_customer: 0` stays a hard stop and is never described as unlimited.
+- E2E: `ma-validate-pause` now sends `limits.message: 0` and asserts it on `ma_procedure_validate` / `ma_procedure_create`.
+
 ## 2.15.0 — Broadcast pause / resume (`broadcast_update`), `draft` phase, `allowedActions`
 
 - New MCP tool `broadcast_update` (write scope): `action: pause | resume` changes broadcast lifecycle state only. Pause turns a far-enough scheduled broadcast into a draft; resume turns a complete draft into a scheduled or immediately started broadcast. Content edits stay in the Super8 Console.
