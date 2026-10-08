@@ -1,9 +1,10 @@
 # Changelog
 
-## 2.15.1 — MA `limits.message: 0` means unlimited (S8CS-345)
+## 2.15.1 — MA quotas: "unlimited" is an omitted key, defined by the tool schema (S8CS-345)
 
-- `insightark-ma-automation`: when the customer asks for 不限訊息則數, the skill now confirms `limits.message: 0` (no total message cap) and proceeds instead of replying that unlimited is unsupported. `per_customer: 0` stays a hard stop and is never described as unlimited.
-- E2E: `ma-validate-pause` now sends `limits.message: 0` and asserts it on `ma_procedure_validate` / `ma_procedure_create`.
+- `ma_procedure_validate` / `ma_procedure_create`: `payload.limits` meaning is now described in the tool schema. Omit `limits.message` for no total message cap and omit `limits.per_customer` for unlimited journeys per customer (the Console's 不限訊息則數上限 / 不限旅程次數). Both keys are no longer required. `null` is rejected, and `per_customer: 0` is rejected because it blocks every customer. `limits.message: 0` is a cap, not "unlimited".
+- `insightark-ma-automation`: the quota row is now a scenario rule only — customers choose between a limit and 不限, a stated 不限 is taken as the answer instead of asking again, and the skill defers to the tool schema for how to encode it.
+- E2E: `ma-validate-pause` omits `limits.message` and asserts it is absent on `ma_procedure_validate` / `ma_procedure_create`.
 
 ## 2.15.0 — Broadcast pause / resume (`broadcast_update`), `draft` phase, `allowedActions`
 

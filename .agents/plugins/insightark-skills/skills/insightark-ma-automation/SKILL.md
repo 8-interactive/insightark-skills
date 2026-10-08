@@ -103,7 +103,7 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 | Journey name | `name`. |
 | Platform (發送平台) | `platform` — **必填**（如 line、facebook、instagram、whatsapp、livechat）；由客戶指定。 |
 | Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。`startTime` must be **now or later** (do not use a past clock such as “today 00:00” if that instant has already passed). 客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
-| Quotas (訊息則數 / 旅程次數) | `limits.message` 與 `limits.per_customer` **皆必填**；皆須為非負整數，**或** `per_customer` 使用字串 **`onceByDay`** — 須由客戶明確選擇。 Explain what each limit controls before asking. **`limits.message: 0` means no total message cap** (LINE; the server skips the cap check when it is falsy) — when the customer says 不限訊息則數／不設上限, show `不限（送出 limits.message: 0）` in the confirmation table and use it once they confirm; do **not** ask them for another number. **`per_customer: 0` is NOT unlimited** — it blocks every customer (hard stop); there is no unlimited `per_customer` value, so offer a positive integer or `onceByDay`. |
+| Quotas (訊息則數 / 旅程次數) | 兩項都須由客戶明確選擇，且「不限」是合法答案：先用客戶聽得懂的話說明各自控制什麼（訊息則數＝整個旅程可發的付費訊息總量；旅程次數＝同一位顧客可進入旅程幾次），再請客戶在「設定上限」與「不限」之間選擇。選「不限」時，確認表寫「不限（不送此欄位）」，payload 依 `ma_procedure_create` 的 `limits` 說明省略該欄位；客戶已明講不限就直接採用，不要再追問數字。不要用 `0`、`null` 或大數字代表不限。客戶只說「不限」而沒有指明是哪一項時，兩項分開確認。 |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
 | Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則送出完整關閉視窗 `oos: { "enabled": false, "hour": 22, "minute": 0, "duration": 43200 }`（或 `oos: null` 由 server 補同一組預設）。**若 `enabled: true`**，必須與客戶確認並填寫 `hour`（整數 0–23）、`minute`（整數 0–59）、`duration`（秒）。**四個欄位一律同時存在**——`enabled: false` 時也不得省略 `hour`/`minute`/`duration`，殘缺物件會被 validate 擋下且會讓旅程在 console 開不起來。 |
 | Trigger | Full trigger type and rules. |
@@ -360,7 +360,7 @@ Wire with normal `edges` (`source`/`target`). Validate before create.
 | `enabled` | Whether the customer wants it enabled. |
 | `platform` | Channel confirmed by the customer. |
 | `startTime` / `endTime` | Schedule bounds from the customer; encode customer-derived instants per timezone-policy (default Asia/Taipei when timezone omitted). Confirm **customer intent** + **MCP input** before validate/create. |
-| `limits` | Total / per-customer caps; **`message` and `per_customer` must be non-negative integers**, or `per_customer: "onceByDay"`. `message: 0` = no total cap (customer-confirmed 不限); `per_customer: 0` = hard stop, never call it unlimited. |
+| `limits` | Total / per-customer caps. Value meaning and the "unlimited" encoding are defined by the tool schema; follow it and never improvise. |
 | `fbTag` | Meta-related tag policy (customer-confirmed). |
 | `oos` | Off-hours / OOS settings confirmed by the customer. Full window only — `enabled` + `hour` + `minute` + `duration` together (or `null`); never a partial object. |
 | `nodes` / `edges` | Graph shape; business content from the customer; ids/positions may be wiring-only. |
