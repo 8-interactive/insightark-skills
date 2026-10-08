@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.15.1 — MA quotas: "unlimited" is an omitted key, defined by the tool schema (S8CS-345)
+
+- `ma_procedure_validate` / `ma_procedure_create`: `payload.limits` meaning is now described in the tool schema. Omit `limits.message` for no total message cap and omit `limits.per_customer` for unlimited journeys per customer (the Console's 不限訊息則數上限 / 不限旅程次數). Both keys are no longer required. `null` is rejected, and `per_customer: 0` is rejected because it blocks every customer. `limits.message: 0` is a cap, not "unlimited".
+- `insightark-ma-automation`: the quota row is now a scenario rule only — customers choose between a limit and 不限, a stated 不限 is taken as the answer instead of asking again, and the skill defers to the tool schema for how to encode it.
+- `ma_procedure_validate` / `ma_procedure_create`: trigger node `data.type` is now restricted to the types the Console can render and edit (join, rejoin, tag, keyword) and listed in the tool schema; anything else (for example an invented `manual`) is rejected with `error/ma-payload-unsupported-trigger-type`. `ma_procedure_trigger` needs no special trigger node.
+- `insightark-ma-automation`: new Trigger rule — the trigger type comes from the customer's choice or the chosen template, is never invented, and an unsupported scenario is reported as unsupported instead of forcing a payload.
+- E2E: `ma-validate-pause` uses a `join` trigger and omits `limits.message` and asserts it is absent on `ma_procedure_validate` / `ma_procedure_create`.
+
 ## 2.15.0 — Broadcast pause / resume (`broadcast_update`), `draft` phase, `allowedActions`
 
 - New MCP tool `broadcast_update` (write scope): `action: pause | resume` changes broadcast lifecycle state only. Pause turns a far-enough scheduled broadcast into a draft; resume turns a complete draft into a scheduled or immediately started broadcast. Content edits stay in the Super8 Console.
