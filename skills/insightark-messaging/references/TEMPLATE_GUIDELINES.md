@@ -13,7 +13,7 @@ Validate shape against the tables below, then call MCP `messaging_message_previe
 | Wrapper | `{ "platform": "line", "messages": [ ... ], "quickReply": [...] }` |
 | Template message | `contentType: "application/x-template"`, `data.templateType` required |
 | Media URLs | Prefer `https://assets.no8.io/...` from MCP `media_upload_url`; external HTTPS URLs may work but are not guaranteed |
-| Variables | Customer display name in `text/plain` `content` or template `altText`: use EJS `<%= name %>` (same as Super 8 Console). **Do not use `{{name}}`** — it is sent literally. Preview: set `sampleCustomer.displayName` or `originalDisplayName`. Send/broadcast: uses each recipient's `originalDisplayName` (falls back to `displayName`). |
+| Variables | Customer display name in `text/plain` `content` or template `altText`: use `<%= name %>` (same as Super 8 Console; `<%- name %>` also works). `name` is the only variable. Any other expression, such as a default value or a function call, is not evaluated and is sent as empty text. **Do not use `{{name}}`** — it is sent literally. Send/broadcast: LINE / Facebook / Instagram / WhatsApp use the recipient's `originalDisplayName` with no fallback (empty when it is missing or a 10+ digit number); livechat uses `displayName`. Preview: set `sampleCustomer.originalDisplayName`; `displayName` alone previews an empty name unless `sampleCustomer.platform` is `"livechat"`. |
 | LINE-only types | `carousel`, `imagemap` — rejected on facebook / instagram / whatsapp |
 
 ## Supported LINE capability matrix
