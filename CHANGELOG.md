@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.16.0 — BREAKING: MA quotas are explicit; `null` means unlimited (S8N-13258)
+
+- **BREAKING** `ma_procedure_validate` / `ma_procedure_create`: `payload.limits` must carry both `limits.message` and `limits.per_customer`. `limits.message` is an integer >= 1 (total paid-message cap, LINE only) or `null` for no total message cap. `limits.per_customer` is an integer >= 1, `"onceByDay"`, or `null` for unlimited journeys per customer. Omitting either key is rejected with `error/ma-payload-invalid-limits` (the error tells the agent to send `null`), and `0`, negatives, decimals, numeric strings and other non-integer values are rejected for both keys. This replaces the 2.15.1 "omit the key for unlimited" rule; there is no transition period for 2.15.1 agents that omit a key.
+- `ma_procedure_create` stores a `null` quota as an absent key, so the stored shape matches the Console's 不限. `ma_procedure_get` always returns both `limits` keys and shows unlimited as `null` (a legacy stored `0` reads back as `0`).
+- Quota placeholders in `ma_template_get` skeletons, the skill fixtures and the `SKILL.md` payload example are now `<REQUIRED_FROM_CUSTOMER_POSITIVE_INT_OR_NULL>` (`limits.message`) and `<REQUIRED_FROM_CUSTOMER_POSITIVE_INT_ONCEBYDAY_OR_NULL>` (`limits.per_customer`); `NONNEG_INT` is gone. Both still block validation until replaced with a number or `null`.
+- `insightark-ma-automation`: the quota rule now encodes a customer's 不限 as `null`, never omits a quota key, and never uses `0` or a large number for unlimited. For non-LINE journeys the skill sends `limits.message: null` without asking about a paid-message cap, and still asks about `per_customer`.
+- E2E: `ma-validate-pause` sends `limits: { message: null, per_customer: 1 }` and asserts `payload.limits.message` equals `null` on `ma_procedure_validate` / `ma_procedure_create`.
+- Release ordering: this pack is published when the release PR is merged to `main`, while the matching InsightArk MCP server ships with the production tag. Merge to `main` in the same release window as the server tag and deploy the tag right after; until then, 2.16.0 agents sending `null` are rejected by the old server. If the server tag is rolled back, revert this pack change on `main` (or re-publish 2.15.x).
+
 ## 2.15.2 — Customer name placeholder: only `name`, no code execution (S8N-13260)
 
 - `insightark-messaging` TEMPLATE_GUIDELINES: `<%= name %>` / `<%- name %>` is the only supported placeholder. Any other expression (a default value, a function call) is not evaluated and is sent as empty text. The server now substitutes the value only and never executes the text.
