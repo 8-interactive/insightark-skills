@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.15.2 — Customer name placeholder: only `name`, no code execution (S8N-13260)
+
+- `insightark-messaging` TEMPLATE_GUIDELINES: `<%= name %>` / `<%- name %>` is the only supported placeholder. Any other expression (a default value, a function call) is not evaluated and is sent as empty text. The server now substitutes the value only and never executes the text.
+- Correct the name source: LINE / Facebook / Instagram / WhatsApp use the recipient's `originalDisplayName` with no `displayName` fallback (empty when missing or a 10+ digit number); livechat uses `displayName`.
+- Preview: set `sampleCustomer.originalDisplayName`; `displayName` alone previews an empty name unless `sampleCustomer.platform` is `"livechat"`.
+
 ## 2.15.1 — MA quotas: "unlimited" is an omitted key, defined by the tool schema (S8CS-345)
 
 - `ma_procedure_validate` / `ma_procedure_create`: `payload.limits` meaning is now described in the tool schema. Omit `limits.message` for no total message cap and omit `limits.per_customer` for unlimited journeys per customer (the Console's 不限訊息則數上限 / 不限旅程次數). Both keys are no longer required. `null` is rejected, and `per_customer: 0` is rejected because it blocks every customer. `limits.message: 0` is a cap, not "unlimited".
