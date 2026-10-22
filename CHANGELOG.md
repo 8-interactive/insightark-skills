@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — `credits_usage` reports top-up packs and base allowance expiry (S8N-13250)
+
+- `credits_usage` gains additive fields: `topup` (`remaining`, `packs[]` with `amount`, `remaining`, `expiresAt`; usable packs only), `totalRemaining`, `monthlyAllowanceExpiresAt` and `monthlyAllowanceExpired`. `remaining`, `used`, `monthlyAllowance` keep their monthly-bucket meaning; `creditExhausted` is now true only when `totalRemaining` is below 1. The `usage` object and the tool params are unchanged.
+- `insightark-session`: describes the new fields and how to answer "還剩多少" (monthly allowance is charged first, top-up packs only cover the shortfall; an expired base allowance falls back to the free tier).
+- Release ordering: the matching InsightArk MCP server change ships first; until then the new fields are simply absent and the skill falls back to the monthly `remaining`.
+
 ## 2.16.0 — BREAKING: MA quotas are explicit; `null` means unlimited (S8N-13258)
 
 - **BREAKING** `ma_procedure_validate` / `ma_procedure_create`: `payload.limits` must carry both `limits.message` and `limits.per_customer`. `limits.message` is an integer >= 1 (total paid-message cap, LINE only) or `null` for no total message cap. `limits.per_customer` is an integer >= 1, `"onceByDay"`, or `null` for unlimited journeys per customer. Omitting either key is rejected with `error/ma-payload-invalid-limits` (the error tells the agent to send `null`), and `0`, negatives, decimals, numeric strings and other non-integer values are rejected for both keys. This replaces the 2.15.1 "omit the key for unlimited" rule; there is no transition period for 2.15.1 agents that omit a key.
