@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — `credits_usage` reports top-up packs and base allowance expiry (S8N-13250)
+## 2.17.0 — `credits_usage` reports top-up packs and base allowance expiry (S8N-13250)
 
 - `credits_usage` gains additive fields: `topup` (`remaining`, `packs[]` with `amount`, `remaining`, `expiresAt`; usable packs only), `totalRemaining`, `monthlyAllowanceExpiresAt` and `monthlyAllowanceExpired`. `remaining`, `used`, `monthlyAllowance` keep their monthly-bucket meaning; `creditExhausted` is now true only when `totalRemaining` is below 1. The `usage` object and the tool params are unchanged.
 - `insightark-session`: describes the new fields and how to answer "還剩多少" (monthly allowance is charged first, top-up packs only cover the shortfall; an expired base allowance falls back to the free tier).
