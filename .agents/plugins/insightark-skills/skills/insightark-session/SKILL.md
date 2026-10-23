@@ -15,7 +15,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
 
 - `auth_me` — authenticated developer identity and manageable organizations (no `orgId` required)
 - `auth_organizations` — list organizations the session can manage (no `orgId` required)
-- `credits_usage` — peek InsightArk MCP monthly remaining **and** this user’s `usage` for a selected window (requires `orgId`; this lookup does not debit). Params: `orgId`, `from`, `to`, `client`, `aggregate` (default true), `includeTools` (default false). No `date` or user identity argument. Omit `from`/`to` for this client today plus monthly peek. Call only when the user explicitly asks about usage.
+- `credits_usage` — peek InsightArk MCP monthly remaining, purchased top-up packs **and** this user’s `usage` for a selected window (requires `orgId`; this lookup does not debit). Besides the monthly `remaining` / `used` / `monthlyAllowance`, it returns `topup` (`remaining` and usable `packs`, each with `amount`, `remaining`, `expiresAt`), `totalRemaining` (monthly remaining plus top-up remaining), `monthlyAllowanceExpiresAt` / `monthlyAllowanceExpired` (an expired base allowance falls back to the free tier), and `creditExhausted` (true only when `totalRemaining` is below 1). Params: `orgId`, `from`, `to`, `client`, `aggregate` (default true), `includeTools` (default false). No `date` or user identity argument. Omit `from`/`to` for this client today plus monthly peek. Call only when the user explicitly asks about usage.
 
 ## Workflow
 
@@ -26,7 +26,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by the agen
    Argument mapping:
 
    - Omit `from`/`to` whenever the question is remaining, “剛剛”, or “今天” on this host. That default is this client today **and** monthly peek in one payload.
-   - “這個月還剩多少” → omit optional args; report monthly `remaining` / `used`. MUST NOT present `usage.total` as remaining.
+   - “這個月還剩多少” → omit optional args; report monthly `remaining` / `used`, and `topup.remaining` / `totalRemaining` when the org has top-up packs (月額度先扣，不足才用加購包). Mention `monthlyAllowanceExpired: true` as an expired base allowance. MUST NOT present `usage.total` as remaining.
    - “剛剛 / 剛才操作用了多少” → omit optional args; report `usage.total`. Explain the smallest unit is a **calendar day** (this client today so far), not the last tool call. Do not treat other tool JSON as a receipt.
    - “我今天用了多少” → omit optional args; report `usage.total`.
    - “今天哪些 tool” → omit `from`/`to` + `includeTools: true`; report `usage.tools`.
