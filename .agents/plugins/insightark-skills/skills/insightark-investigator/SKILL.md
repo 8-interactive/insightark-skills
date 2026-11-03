@@ -1,7 +1,7 @@
 ---
 name: insightark-investigator
-description: Investigate conversations and messages through InsightArk MCP using read-only tools.
-when_to_use: When a user asks a natural language investigation question that may require session validation, organization scoping, conversation discovery, conversation inspection, message search, or compiling an FAQ / 常見問題 from customer conversations.
+description: Investigate conversations, messages, and customer-service data (客服數據) through InsightArk MCP using read-only tools.
+when_to_use: When a user asks a natural language investigation question that may require session validation, organization scoping, conversation discovery, conversation inspection, message search, compiling an FAQ / 常見問題 from customer conversations, or customer-service case numbers (客服數據: 案件統計, 服務成效, 成員績效, 案件趨勢, 時段分布).
 allowed-mcp: true
 ---
 
@@ -20,6 +20,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `messaging_conversation_get` — get one conversation summary
 - `messaging_conversation_messages` — read the recent timeline (not a period corpus)
 - `messaging_message_search` — search by period／keyword／tag／`contentKinds`／`referralSource`
+- 客服數據 (load `references/CS_DATA.md` first): `cs_case_statistics_get`, `cs_service_effect_get`, `cs_member_performance_list`, `cs_member_case_list`, `cs_case_trend_get`, `cs_case_heatmap_get`
 
 ## Workflow
 
@@ -28,6 +29,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
    - Inbox／who was active recently → `messaging_conversation_list`
    - One thread → `messaging_conversation_get` + `messaging_conversation_messages`
    - Period／keyword／theme evidence → `messaging_message_search` (prefer this for qualitative stats)
+   - Case counts, CS KPIs, member performance, case trends, busy hours (客服數據) → the `cs_*` tools via `references/CS_DATA.md`. A case (案件) is an inbox-generated CSCase, not a Jira ticket.
 3. While `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, set next `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
 4. Answer from returned public fields only — keep it concise, and do not invent internal fields.
 
@@ -41,6 +43,7 @@ For batch intent／sentiment／complaint reading, load `references/QUALITATIVE_D
 | Opportunities／recurring asks／purchase intent | `references/OPPORTUNITY_DISCOVERY.md` (run as a separate pass from complaints) |
 | Per-agent CS reply quality | `references/CS_QUALITY_REVIEW.md` (needs `messaging_message_search` for `_User` identity) |
 | FAQ／常見問題 from conversations | `references/FAQ_GENERATION.md` (`senderTypes: ["Customer","_User"]`, `groupBy: "conversation"`) |
+| 客服數據: case statistics／service KPIs／member performance／trends／heatmap | `references/CS_DATA.md` (periods in the organization timezone, 3-calendar-month custom cap, metric definitions, ask before drawing charts) |
 
 ## Guardrails
 
