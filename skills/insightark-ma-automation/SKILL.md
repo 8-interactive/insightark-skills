@@ -24,6 +24,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `ma_procedure_publish` — **publish** a draft (leaves editing; requires `orgId`, `procedureId`). May become `progress`, `scheduled`, or `pausing`. Does **not** wait for `startTime`.
 - `ma_procedure_pause` — pause or resume a procedure (requires `orgId`, `procedureId`; optional `action`: `pause` | `resume`)
 - `ma_procedure_trigger` — manually trigger a procedure for a customer (requires `orgId`, `procedureId`, `customerId`)
+- `crm_custom_field_list` — check whether the organization's custom customer fields (自訂欄位) are enabled and list each field's `id`, `name`, `type` (requires `orgId`). Read-only; needed before a `customFieldDate` trigger.
 
 ### Procedure lifecycle (create vs publish vs time)
 
@@ -101,18 +102,65 @@ If the customer says "dormancy" or "sleep," clarify whether they mean **OOS / of
 |------|------------------------|
 | Organization | Target `orgId` (must be manageable by the current session). |
 | Journey name | `name`. |
-| Platform (發送平台) | `platform` — **必填**（如 line、facebook、instagram、whatsapp、livechat）；由客戶指定。 |
+| Platform (發送平台) | `platform` — **必填**，只能是全小寫的 `line`、`facebook`、`instagram`、`whatsapp`、`livechat` 其中之一（`all`、`messenger`、`LINE` 都會被拒）；由客戶指定。LiveChat 旅程只支援生日與自訂日期欄位兩種觸發。 |
 | Schedule (旅程期間) | `startTime`, `endTime` — **必填**；ISO 8601 **含時區**。`startTime` must be **now or later** (do not use a past clock such as “today 00:00” if that instant has already passed). 客戶時間語言成為旅程邊界 instant 時，依 `skills/insightark-universal-workflow/references/timezone-policy.md`：未指定時區 → Asia/Taipei（`+08:00`）；客戶有指定時區／`Z`／offset → 照客戶。**日期-only**（如「7/1～7/31」）不得自動補起訖時分 — 必須先問並確認邊界（例如台北時間 `07/01 00:00:00+08:00` 至 `07/31 23:59:59+08:00`）後才能 validate/create。不得用「預設區間」臆測客戶未給的日期或時分。確認表須含 **客戶意圖** 與 **MCP 輸入**（並可註明系統可能保存的等價 UTC）。 |
 | Quotas (訊息則數 / 旅程次數) | 兩項都須由客戶明確選擇，且「不限」是合法答案：先用客戶聽得懂的話說明各自控制什麼（訊息則數＝整個旅程可發的付費訊息總量，只適用 LINE；旅程次數＝同一位顧客可進入旅程幾次），再請客戶在「設定上限」與「不限」之間選擇。設定上限時送 1 以上的整數（旅程次數也可選每天一次 `onceByDay`）；選「不限」時送 `null`，確認表寫「不限」。`limits.message` 與 `limits.per_customer` 兩項都必須送出，不可省略欄位；不要用 `0` 或大數字代表不限。客戶已明講不限就直接採用，不要再追問數字。客戶只說「不限」而沒有指明是哪一項時，兩項分開確認。非 LINE 旅程的 limits.message 一律送 `null`，不要詢問付費訊息上限，但仍須請客戶決定旅程次數（`per_customer`）。 |
 | Messenger tag | For Meta channels, confirm `fbTag`; **do not** assume `NO_TAG` without asking. |
 | Off-hours / OOS (休眠) | **預設關閉**：除非客戶明確要開啟，否則送出完整關閉視窗 `oos: { "enabled": false, "hour": 22, "minute": 0, "duration": 43200 }`（或 `oos: null` 由 server 補同一組預設）。**若 `enabled: true`**，必須與客戶確認並填寫 `hour`（整數 0–23）、`minute`（整數 0–59）、`duration`（秒）。**四個欄位一律同時存在**——`enabled: false` 時也不得省略 `hour`/`minute`/`duration`，殘缺物件會被 validate 擋下且會讓旅程在 console 開不起來。 |
-| Trigger | 客戶描述的是「什麼情況下旅程要開始」（例如加入好友、被貼標籤、說出關鍵字）。觸發類型必須來自客戶明確選擇，或所選範本已帶的類型，不得自創、不得用相近但沒有出現在 `ma_procedure_validate` 說明裡的值。客戶要的情境目前沒有對應類型時，直接說明目前還不支援，並提出可行的替代方案，不要硬湊 payload。這與 `ma_procedure_trigger` 無關：後者只是對進行中的旅程補觸發一位顧客，不需要特別的觸發節點。完整規則（類型內容、tag／keyword 的條件）照所選類型確認。 |
+| Trigger | 客戶描述的是「什麼情況下旅程要開始」（例如加入好友、被貼標籤、說出關鍵字）。觸發類型必須來自客戶明確選擇，或所選範本已帶的類型，不得自創、不得用相近但沒有出現在 `ma_procedure_validate` 說明裡的值。客戶要的情境目前沒有對應類型時，直接說明目前還不支援，並提出可行的替代方案，不要硬湊 payload。這與 `ma_procedure_trigger` 無關：後者只是對進行中的旅程補觸發一位顧客，不需要特別的觸發節點。完整規則（類型內容、tag／keyword 的條件）照所選類型確認。觸發類型與平台必須是支援的組合（見下方 **Trigger × platform**）；生日與自訂日期欄位另見 **Date triggers**。 |
 | Content and steps | Copy or template shape per message node; multi-step journeys need step-by-step customer confirmation. **Fixed clock schedules** (e.g. daily HH:MM): confirmation MUST disclose the **next fire** relative to now (if today’s slot already passed → next calendar occurrence, usually tomorrow). Prefer relative short windows when the goal is near-term verification. |
 | Message step `skipOOS` | Add **only** if the customer explicitly wants that message node to bypass OOS; otherwise **omit** the field. |
 | Switches | `enabled` and whether to publish immediately after create (publish only after explicit customer approval via `ma_procedure_publish`). |
 | Final sign-off | Show final payload table and receive explicit customer approval before API calls. |
 
 Phrases like "same as before" or "you decide" are **not** literal values. Keep asking until every item has a **literal, actionable** answer.
+
+### Trigger × platform
+
+Only these combinations can be created (the Console offers them and the runtime can fire them). Anything else is rejected with `error/ma-payload-trigger-platform-unsupported`.
+
+| Trigger | line | facebook | instagram | whatsapp | livechat |
+|---|---|---|---|---|---|
+| `join` | ✓ | ✓ | ✓ | ✓ | — |
+| `rejoin` | ✓ | — | — | — | — |
+| `tag` | ✓ | ✓ | ✓ | ✓ | — |
+| `keyword` | ✓ | ✓ | ✓ | ✓ | — |
+| `birthday` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `customFieldDate` | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+If the customer wants a combination that is not listed (e.g. a LiveChat keyword journey), say it is not supported in customer language and offer a supported alternative; do not build the payload anyway.
+
+### Date triggers (birthday / customFieldDate)
+
+**When to offer:** `birthday` when the journey is driven by each customer's birthday; `customFieldDate` when it is driven by another date stored in a custom customer field (自訂欄位), such as a membership expiry or anniversary.
+
+**`birthday`** — ask which period the customer means, confirm it in customer language, then set `data.conditions` to exactly one string:
+
+| Customer says | `data.conditions` | When it runs |
+|---|---|---|
+| 生日當天 | `day` | Every day, for customers whose birthday is that day |
+| 生日當月（例如「生日月禮券」） | `month` | Only on the 1st of each month, for that month's birthdays |
+| 下個月生日（提前一個月） | `nextMonth` | Every day, for customers whose birthday is next month |
+
+**`customFieldDate`** — two steps, in order:
+
+1. Call `crm_custom_field_list`. If `enabled` is `false`, or no field has `type: "date"`, tell the customer the journey cannot be built yet: custom fields must be enabled and a date field created in Console first. **Stop** — do not call `ma_procedure_validate` / `ma_procedure_create`, and never invent a `fieldId`.
+2. Otherwise show the `date` fields **by name**, let the customer pick one (e.g. 「會員到期日」), and ask how many days before that date the journey should start (a positive integer; 0 is not allowed). Set `data.conditions` to `{ "fieldId": "<id of the chosen field>", "daysBefore": <days> }`.
+
+**LiveChat:** LiveChat journeys support only `birthday` and `customFieldDate`.
+
+**Repeat entry (`nextMonth` especially):** a `nextMonth` journey is evaluated every day for a whole month. A customer who has finished the journey enters it again on the next day's scan unless `limits.per_customer` caps it; `onceByDay` only blocks the same day. Before `ma_procedure_publish`, confirm the per-customer entry limit (旅程次數) with the customer in these terms — typically 1 for "send once" — even if it was already filled in the checklist.
+
+**Create is a draft:** a created date journey does nothing until `ma_procedure_publish`. Say so when reporting the create result.
+
+**First run after publish — always tell the customer (customer language):**
+
+- Date triggers are evaluated by one scan per day at **00:00 Asia/Taipei time** — not the organization's own timezone.
+- `day` and `customFieldDate` journeys published after today's 00:00 scan first run at **tomorrow's 00:00** scan.
+- `month` runs only on the **1st of each month** — a journey published on the 5th first runs on the 1st of next month.
+- `customFieldDate` picks customers whose field date is `daysBefore` days after the scan date (e.g. `daysBefore: 3` on the 10th → field date the 13th).
+- `nextMonth` is evaluated every day (see Repeat entry above).
+- The scan also requires the journey to be within `startTime`/`endTime`; a later `startTime` means the first run is the first 00:00 scan on or after it.
 
 ## Mandatory agent workflow
 
@@ -137,6 +185,7 @@ Phrases like "same as before" or "you decide" are **not** literal values. Keep a
    - `editing` — still a draft (publish did not leave editing); not live
    - other — do not claim the journey is live
    Never auto-resume without confirmation.
+   For `birthday` / `customFieldDate` journeys, also tell the customer when the first run happens (see **Date triggers → First run after publish**).
 
 **Trigger guardrail:** call `ma_procedure_get` first to verify `status` is `progress` before `ma_procedure_trigger`. Drafts, paused, before start window, ended, or disabled procedures return HTTP 400 `error/ma-trigger-not-allowed`.
 
@@ -268,6 +317,11 @@ Group related codes; fix **wiring**, not copy, unless the code is clearly about 
 |------|------------|
 | `error/ma-payload-unsupported-condition-shape` | Remove `event` / `branches` / `sourceMessageNodeId`; clone Studio fixture |
 | `error/ma-payload-unsupported-condition-type` | Use allowlisted `data.type` (`click` / `n-click` / keyword / sticker variants) |
+| `error/ma-payload-invalid-platform` | `platform` must be exactly one of `line`, `facebook`, `instagram`, `whatsapp`, `livechat` (lowercase). Confirm the channel with the customer; never send `all` / `messenger`. |
+| `error/ma-payload-unsupported-trigger-type` | Trigger `data.type` is not one of the six supported types. Explain the scenario is not supported; do not substitute a look-alike value. |
+| `error/ma-payload-trigger-platform-unsupported` | The trigger is not available on this platform (see **Trigger × platform**). Ask the customer to change trigger or channel. |
+| `error/ma-payload-invalid-trigger-conditions` | `birthday` needs `day` / `month` / `nextMonth`; `customFieldDate` needs `{ fieldId, daysBefore }` with a positive integer. Re-confirm with the customer. |
+| `error/ma-custom-field-date-field-unavailable` | Custom fields are disabled, the field no longer exists, or it is not a date field. Re-run `crm_custom_field_list` and follow **Date triggers** step 1–2. Also returned by `ma_procedure_publish` if the field was deleted or changed after create; the journey stays a draft. |
 
 ### Group + timing
 
@@ -341,7 +395,9 @@ Align with Super8 Studio / `marketing-automation-front-end` editor nodes. Do not
 |--------|-------------|
 | Tag trigger | `trigger` with `data.type: "tag"`, `match` (`any`\|`all`), `tags: [...]` — no tag `event` |
 | Keyword trigger | `trigger` with `data.type: "keyword"`, `conditions: [{ type: "keyword", value: ["…"] }]` (non-empty `value` list from customer) |
-| Rejoin trigger | `trigger` with `data.type: "rejoin"` (confirm platform/rejoin semantics with customer) |
+| Rejoin trigger | `trigger` with `data.type: "rejoin"` (LINE only; confirm rejoin semantics with customer) |
+| Birthday trigger | `trigger` with `data.type: "birthday"`, `conditions: "day"` \| `"month"` \| `"nextMonth"` (period confirmed with customer; see **Date triggers**) |
+| Custom-date trigger | `trigger` with `data.type: "customFieldDate"`, `conditions: { fieldId: "<id from crm_custom_field_list>", daysBefore: <positive integer> }` |
 | Tagging action | Top-level node `type: "tagging"` with `data.tags: [...]` (and usually `data.type: "tagging"`). **Not** an `action` wrapper node. |
 | Wait | Top-level `wait` with `data.waitTime` = non-negative integer **seconds** (Studio default often `300`; `0` means no delay). Prefer message-node `waitTime` only when delaying that message step (same seconds rule; `null` = off on messages). |
 | Schedule | Top-level `schedule` with Studio clock fields (Asia/Taipei wall clock for `time`). Required: `data.type` ∈ `day` \| `week` \| `month`, and `data.time` as `"HH:mm"` (e.g. `"18:10"`). **day:** only `type` + `time`. **week:** also `data.week: number[]` weekday ints `0`–`6` (Sunday=`0`). **month:** also `data.month: number[]` day-of-month `1`–`31`, plus `data.hasLastDay: boolean`. Disclose **next fire** in the confirmation table (if today’s slot already passed → next occurrence). |
