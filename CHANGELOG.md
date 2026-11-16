@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.18.0 — Read-only customer-service data tools (客服數據, S8N-12991)
+
+- Six new read-only InsightArk MCP tools mirror Console 數據總覽 → 客服數據: `cs_case_statistics_get` (案件統計), `cs_service_effect_get` (服務成效, optional `trendMetric` daily trend), `cs_member_performance_list` (成員績效), `cs_member_case_list` (one member's 案件處理紀錄), `cs_case_trend_get` (案件量趨勢 by creation and finish day), and `cs_case_heatmap_get` (7×24 時段分布). A case (案件) is an inbox-generated CSCase record, not a Jira ticket.
+- Periods are resolved in the organization timezone and echoed in every response (`period.timezone`, start / end, previous window). Custom ranges follow the Console limits (3 calendar months, from 2015-01-01, up to this week's Sunday) and fail before any credit is used.
+- `insightark-investigator`: new `references/CS_DATA.md` with the question → tool map, period limits and how to split an over-long range, metric definitions (seconds, 0–1 rates, `change.rate` is null when the previous period is 0), and the chart rule: present the figures first and ask the user before drawing (current agent or another charting tool); Copilot v2 `drawChart` does not cover heatmaps.
+- Release ordering: the matching InsightArk MCP server change must be deployed first; until then the `cs_*` tools are absent and the skill has nothing to route to.
+
 ## 2.17.0 — `credits_usage` reports top-up packs and base allowance expiry (S8N-13250)
 
 - `credits_usage` gains additive fields: `topup` (`remaining`, `packs[]` with `amount`, `remaining`, `expiresAt`; usable packs only), `totalRemaining`, `monthlyAllowanceExpiresAt` and `monthlyAllowanceExpired`. `remaining`, `used`, `monthlyAllowance` keep their monthly-bucket meaning; `creditExhausted` is now true only when `totalRemaining` is below 1. The `usage` object and the tool params are unchanged.
