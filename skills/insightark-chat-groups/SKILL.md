@@ -1,7 +1,7 @@
 ---
 name: insightark-chat-groups
-description: Discover LINE ChatGroups by name and analyze group conversation messages via InsightArk MCP.
-when_to_use: When a user asks to find a LINE group by name, open a group room, or analyze／search messages inside ChatGroups (single room or organization-wide — not 1:1 Customer inbox).
+description: Discover LINE ChatGroups by name, analyze group conversation messages, and send messages into a LINE ChatGroup via InsightArk MCP.
+when_to_use: When a user asks to find a LINE group by name, open a group room, analyze／search messages inside ChatGroups (single room or organization-wide — not 1:1 Customer inbox), or send／write back a message into a LINE group (群組對話).
 allowed-mcp: true
 ---
 
@@ -11,7 +11,7 @@ allowed-mcp: true
 
 **Prerequisite:** Read `skills/insightark-universal-workflow/SKILL.md` before operational work or domain references.
 
-This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. This skill is read-only — no write MCP tools.
+This skill uses the InsightArk MCP server. Authentication is managed by your host through MCP OAuth (Connect / Authenticate). Every org-scoped tool requires an `orgId` argument. The only write tool is `messaging_chat_group_send_message`; every other tool here is read-only.
 
 ## MCP Tools
 
@@ -21,6 +21,7 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 - `messaging_chat_group_get` — lock a ChatGroup by `chatGroupId` (Mongo `_id`) and read `conversationId`
 - `messaging_conversation_messages` — read **recent** messages once you have a group `conversationId` (no year／period filter)
 - `messaging_chat_group_message_search` — keyword／time／senderTypes／contentKinds search over ChatGroup messages (**organization-wide by default**; optionally narrow with exactly one of `conversationId` or `chatGroupId`)
+- `messaging_chat_group_send_message` — **write**: send one to five LINE messages into one ChatGroup by `chatGroupId`
 
 ## Tool usage scenarios
 
@@ -30,8 +31,9 @@ This skill uses the InsightArk MCP server. Authentication is managed by your hos
 | `messaging_chat_group_get` | You already have `chatGroupId` |
 | `messaging_conversation_messages` | Quick recent-thread peek after id lock |
 | `messaging_chat_group_message_search` | Org-wide／cross-group period／keyword／content analysis, or single-room analysis after id lock |
+| `messaging_chat_group_send_message` | User confirmed a message to post into one named group (e.g. write back missing items after analysis) |
 
-For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `messaging_message_search` cover Customer 1:1 conversations.
+For LINE ChatGroups, use the routes above. `messaging_conversation_list`, `messaging_message_search` and `messaging_customer_send_message` cover Customer 1:1 conversations — never pass a group id to the 1:1 send tool.
 
 ## Analysis rules (important)
 
@@ -54,6 +56,17 @@ For LINE ChatGroups, use the routes above. `messaging_conversation_list` and `me
 5. For a recent peek, use `messaging_conversation_messages`. For period／keyword／sender／content analysis, call `messaging_chat_group_message_search` with that one scope id.
 6. Default search senders are `Group`, `_User`, `AddOn`; add `ForeignBot` only when needed (Messenger／IG third-party; not LINE inbound).
 7. While `page.hasMore` is true: if `truncated === true` and `keptCount < returnedCount`, set `skip = page.skip + keptCount`; otherwise `skip = page.skip + page.limit`.
+
+## Sending into a group (write)
+
+Follow `skills/insightark-universal-workflow/references/write-lifecycle.md`.
+
+1. Lock exactly one `chatGroupId` via `messaging_chat_group_list`／`messaging_chat_group_get`. Never guess or reuse a 1:1 `customerId`. If several groups match the name, ask the user which one.
+2. Build the payload with the same LINE message schema as 1:1 send (`insightark-messaging`, `references/TEMPLATE_GUIDELINES.md` for rich content). Apply the universal **Rich Preview Gate**: non-`text/plain` or quick replies → `messaging_message_preview` → approval; text-only → confirmation only.
+3. Before sending, state in business language: the group name, the exact text everyone in the group will see, and that it is a group-visible message (all members, not one customer).
+4. Call `messaging_chat_group_send_message` once per confirmed group. For several groups, confirm the list first and send serially; do not fan out in parallel.
+5. Report `deliveryMode`: `reply` used a still-valid group reply token; `push` counts toward the LINE OA monthly message quota.
+6. `error/group-leave-lineOA` means the LINE OA is no longer in that group — tell the user; do not retry. Group sends skip placeholder rendering, so `<%= name %>` would reach the group as literal text; do not use it.
 
 ## Fields, limit, and gates
 

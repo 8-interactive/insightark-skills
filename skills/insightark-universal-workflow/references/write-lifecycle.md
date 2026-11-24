@@ -2,7 +2,7 @@
 
 ## Confirmation
 
-Before any write tool (`messaging_customer_send_message`, `broadcast_create`, CRM updates/tags, `ma_procedure_create` / `start` / `pause` / `trigger`, …):
+Before any write tool (`messaging_customer_send_message`, `messaging_chat_group_send_message`, `broadcast_create`, CRM updates/tags, `ma_procedure_create` / `start` / `pause` / `trigger`, …):
 
 1. Summarize the customer-visible outcome in business language.
 2. Obtain explicit confirmation for that outcome.

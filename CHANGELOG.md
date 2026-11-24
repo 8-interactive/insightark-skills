@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.19.0 — Send messages into LINE group conversations (群組對話, ORRAF-477)
+
+- New write tool `messaging_chat_group_send_message`: send one to five LINE messages into one ChatGroup by `chatGroupId`. Same message／quickReply schema, preview gate and credit cost (10) as `messaging_customer_send_message`. The response carries `messages[].messageId` and `deliveryMode` (`reply` when a still-valid group reply token exists, otherwise `push`, which counts toward the LINE OA monthly quota). A group the LINE OA has left fails with `error/group-leave-lineOA` before anything is sent. Sent messages show in the Console 群組對話 room.
+- `insightark-chat-groups`: no longer read-only; adds the send workflow (lock one `chatGroupId`, confirm group name and group-visible text, send serially per group, report `deliveryMode`, do not use `<%= name %>`). `write-lifecycle` lists the new write tool.
+- Release ordering: the matching InsightArk MCP server change must be deployed first; until then the tool is absent and the skill has nothing to route to.
+
 ## 2.18.0 — Read-only customer-service data tools (客服數據, S8N-12991)
 
 - Six new read-only InsightArk MCP tools mirror Console 數據總覽 → 客服數據: `cs_case_statistics_get` (案件統計), `cs_service_effect_get` (服務成效, optional `trendMetric` daily trend), `cs_member_performance_list` (成員績效), `cs_member_case_list` (one member's 案件處理紀錄), `cs_case_trend_get` (案件量趨勢 by creation and finish day), and `cs_case_heatmap_get` (7×24 時段分布). A case (案件) is an inbox-generated CSCase record, not a Jira ticket.
