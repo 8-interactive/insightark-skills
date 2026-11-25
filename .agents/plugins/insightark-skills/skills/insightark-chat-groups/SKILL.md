@@ -66,7 +66,7 @@ Follow `skills/insightark-universal-workflow/references/write-lifecycle.md`.
 3. Before sending, state in business language: the group name, the exact text everyone in the group will see, and that it is a group-visible message (all members, not one customer).
 4. Call `messaging_chat_group_send_message` once per confirmed group. For several groups, confirm the list first and send serially; do not fan out in parallel.
 5. Report `deliveryMode`: `reply` used a still-valid group reply token; `push` counts toward the LINE OA monthly message quota.
-6. `error/group-leave-lineOA` means the LINE OA is no longer in that group — tell the user; do not retry. Group sends skip placeholder rendering, so `<%= name %>` would reach the group as literal text; do not use it.
+6. `error/group-leave-lineoa` means the LINE OA is no longer in that group — tell the user; do not retry. A group has no single customer, so personalization placeholders such as `<%= name %>` would render blank; the server rejects them with `error/group-placeholder-unsupported` before any credit is used. Do not use them — write the group-visible text in full.
 
 ## Fields, limit, and gates
 
