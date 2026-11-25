@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.20.0 — Custom 群發訊息 name on `broadcast_create` (S8N-13239)
+
+- `broadcast_create` accepts an optional `name`: the 群發訊息 name shown in the Console list. Leading and trailing whitespace is removed; a blank, whitespace-only, over-long or non-string `name` is rejected before any credit is used. Calls without `name` keep working.
+- When `name` is omitted, the server writes a default name that includes the creation time in the organization timezone (the exact format lives in the `name` parameter description). Scheduled 群發訊息 use the creation time, not `scheduleAt`.
+- Responses gain a `name` field: the `broadcast_create` acceptance response returns the name actually written, and every `broadcast_list` item and the `broadcast_get` `broadcast` return the stored name (`null` when none is stored). `broadcast_get` `options.name` is unchanged.
+- `insightark-broadcast-manager`: the pre-create confirmation now includes the 群發訊息名稱 (the customer's, or one the agent proposes and the customer confirms). When the customer declines to name it, the agent omits `name` and says a default name with the creation time will be used; after creation it reports the response `name` with the `taskId`.
+- Release ordering: the matching InsightArk MCP server change should be deployed first or in the same release window. The skill passes `name` only when the connected `broadcast_create` declaration offers it; against an older server it omits `name` and points the customer to the Console to rename.
+
 ## 2.19.0 — Send messages into LINE group conversations (群組對話, ORRAF-477)
 
 - New write tool `messaging_chat_group_send_message`: send one to five LINE messages into one ChatGroup by `chatGroupId`. Same message／quickReply schema, preview gate and credit cost (10) as `messaging_customer_send_message`. The response carries `messages[].messageId` and `deliveryMode` (`reply` when a still-valid group reply token exists, otherwise `push`, which counts toward the LINE OA monthly quota). A group the LINE OA has left fails with `error/group-leave-lineOA` before anything is sent. Sent messages show in the Console 群組對話 room.

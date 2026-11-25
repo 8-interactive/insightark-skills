@@ -66,6 +66,19 @@ This section covers when and why to follow up after `broadcast_create`; the chec
 - **Terminal failures** keep the stop-and-ask behaviour of the status section below.
 <!-- schema-separation:end -->
 
+<!-- schema-separation:start -->
+## Naming a 群發訊息
+
+This section covers when and why to set the 群發訊息名稱. Which values are accepted and what the system uses when no name is given are defined by the `broadcast_create` tool itself, so follow the tool and do not restate them here.
+
+- **The name is part of the confirmation.** The write confirmation before every `broadcast_create` shows the 群發訊息名稱 together with the platform, recipients, content, and send time. The customer later finds this 群發訊息 by that name in the Console list, so it should tell this one apart from the others.
+- **Customer gave a name.** Show it in the confirmation and pass it as `name` to `broadcast_create`.
+- **Customer gave no name.** Propose a short descriptive 群發訊息名稱 based on its purpose or content (for example the campaign and audience) and ask the customer to confirm or change it; then pass the confirmed name as `name` to `broadcast_create`.
+- **Customer declines to name it.** Omit `name` and tell the customer the system will give the 群發訊息名稱 a default that includes its creation time.
+- **After creation.** Report the 群發訊息名稱 from the `name` in the acceptance response together with the `taskId`.
+- **Server without the parameter.** Pass `name` only when the connected `broadcast_create` declaration offers it. When it does not, omit `name` and tell the customer the 群發訊息名稱 can be changed in the Console afterwards.
+<!-- schema-separation:end -->
+
 ## Message envelope
 
 For a plain-text message, use the canonical envelope:
